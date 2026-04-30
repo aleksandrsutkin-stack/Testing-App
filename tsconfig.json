@@ -6,5 +6,11 @@
     "noFallthroughCasesInSwitch": true,
     "skipLibCheck": true
   },
-  "include": ["app", "src", "scripts"]
+  "include": [
+    "colors.ts",
+    "spacing.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }
