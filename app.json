@@ -1,0 +1,15 @@
+{
+  "expo": {
+    "name": "QuestionLiftIQ",
+    "slug": "questionliftiq",
+    "version": "0.3.0",
+    "orientation": "portrait",
+    "scheme": "questionliftiq",
+    "userInterfaceStyle": "automatic",
+    "assetBundlePatterns": ["**/*"],
+    "ios": { "supportsTablet": true, "bundleIdentifier": "com.example.questionliftiq" },
+    "android": { "package": "com.example.questionliftiq" },
+    "plugins": ["expo-router"],
+    "experiments": { "typedRoutes": true }
+  }
+}

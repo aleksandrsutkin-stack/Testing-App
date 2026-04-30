@@ -1,0 +1,36 @@
+{
+  "name": "questionliftiq-mobile-app",
+  "version": "0.5.0",
+  "private": true,
+  "main": "expo-router/entry",
+  "scripts": {
+    "start": "expo start",
+    "ios": "expo start --ios",
+    "android": "expo start --android",
+    "web": "expo start --web",
+    "typecheck": "tsc --noEmit",
+    "smoke:test-content": "node scripts/smoke-test-content.js"
+  },
+  "dependencies": {
+    "@react-native-async-storage/async-storage": "latest",
+    "@react-native-picker/picker": "latest",
+    "expo": "latest",
+    "expo-file-system": "latest",
+    "expo-notifications": "latest",
+    "expo-print": "latest",
+    "expo-router": "latest",
+    "expo-sharing": "latest",
+    "expo-speech": "latest",
+    "expo-status-bar": "latest",
+    "lucide-react-native": "latest",
+    "react": "latest",
+    "react-native": "latest",
+    "react-native-safe-area-context": "latest",
+    "react-native-screens": "latest",
+    "react-native-svg": "latest"
+  },
+  "devDependencies": {
+    "@types/react": "latest",
+    "typescript": "latest"
+  }
+}
