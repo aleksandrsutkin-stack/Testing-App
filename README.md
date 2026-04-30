@@ -1,10 +1,23 @@
-# QuestionLiftIQ — v0.5
+# QuestionLiftIQ — v0.5.1
 
 > Turn every missed question into a score-lift plan.
 
 Privacy-first iOS/iPad educational test-improvement app. Short diagnostics → percent score + estimated percentile → Mistake Map with step-by-step solutions → 7-day practice plan → Retake Sprint that **shows the lift**.
 
 ---
+
+## What's fixed in v0.5.1
+
+This package keeps the v0.5 feature set and adds these fixes:
+
+- Fixed a TypeScript syntax error in the elapsed-time question template.
+- Updated package/app versions and smoke-test expectations to `0.5.1`.
+- Restored GitHub-ready docs, `.gitignore`, and push instructions.
+- Removed malformed brace-expansion folders from the previous ZIP.
+- Prevented PDF score-lift from comparing a result against itself after local history append.
+- Restored privacy-strict behavior: after PDF sharing returns and the temp file is deleted, the app leaves the results route.
+- Made Quick Start sample questions balanced across domains instead of slicing the first section-heavy questions.
+- Made blueprint target difficulty and age-band checks influence generated question selection.
 
 ## What's new in v0.5
 
@@ -154,7 +167,7 @@ questionliftiq/
 npx create-expo-app@latest questionliftiq --template blank-typescript
 cd questionliftiq
 
-# v0.5 dependencies
+# v0.5.1 dependencies
 npx expo install \
   expo-router expo-print expo-sharing expo-file-system \
   expo-speech expo-notifications \
@@ -162,7 +175,7 @@ npx expo install \
   @react-native-picker/picker \
   lucide-react-native react-native-svg
 
-# Drop the v0.5 zip contents into the project root
+# Drop the v0.5.1 zip contents into the project root
 node scripts/smoke-test-content.js   # → ALL CHECKS PASSED
 npx expo start --ios
 ```
