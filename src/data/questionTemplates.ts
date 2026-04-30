@@ -369,7 +369,7 @@ export const questionTemplates: QuestionTemplate[] = [
       ];
       const p = ctx.rng.pick(passages);
       const { options, correctOptionId } = makeOptions(p.answer, p.distractors, ctx.rng);
-      return baseQ(ctx, t, { prompt: `Read the passage:\n\n"${p.text}"\n\nWhat is the main idea?`, options, correctOptionId, correctAnswerLabel: p.answer, explanationSteps: ['The main idea is what the whole passage is mainly about.', 'Details support the main idea but are not the main idea themselves.', `Here, every sentence supports: ${p.answer}`], commonTrap: 'A specific detail mentioned in the passage is often used as a distractor.', mistakeTags: ['multi-step-reasoning'], ageMin: 8 });
+      return baseQ(ctx, t, { prompt: `Read the passage:\n\n"${p.text}"\n\nWhat is the main idea?`, options, correctOptionId, correctAnswerLabel: p.answer, explanationSteps: ['The main idea is what the whole passage is mainly about.', 'Details support the main idea but are not the main idea themselves.', `Here, every sentence supports: ${p.answer}`], commonTrap: 'A specific detail mentioned in the passage is often used as a distractor.', mistakeTags: ['reading-comprehension'], ageMin: 8 });
     }),
 
   ct({ id: 'reading-inference', testIds: READ, domain: 'reading-comprehension', skillId: 'reading-comprehension', difficulty: 3 },
@@ -380,7 +380,7 @@ export const questionTemplates: QuestionTemplate[] = [
       ];
       const p = ctx.rng.pick(passages);
       const { options, correctOptionId } = makeOptions(p.answer, p.distractors, ctx.rng);
-      return baseQ(ctx, t, { prompt: `"${p.text}"\n\n${p.question}`, helperText: 'The answer is not stated directly — read between the lines.', options, correctOptionId, correctAnswerLabel: p.answer, explanationSteps: ['An inference is a conclusion drawn from clues in the text.', p.explanation], commonTrap: 'Inferences must be supported by the text. Avoid answers that go beyond what the clues suggest.', mistakeTags: ['multi-step-reasoning'], ageMin: 9 });
+      return baseQ(ctx, t, { prompt: `"${p.text}"\n\n${p.question}`, helperText: 'The answer is not stated directly — read between the lines.', options, correctOptionId, correctAnswerLabel: p.answer, explanationSteps: ['An inference is a conclusion drawn from clues in the text.', p.explanation], commonTrap: 'Inferences must be supported by the text. Avoid answers that go beyond what the clues suggest.', mistakeTags: ['reading-comprehension'], ageMin: 9 });
     }),
 
   ct({ id: 'reading-cause-effect', testIds: READ, domain: 'reading-comprehension', skillId: 'reading-comprehension', difficulty: 2 },
@@ -391,7 +391,7 @@ export const questionTemplates: QuestionTemplate[] = [
       ];
       const item = ctx.rng.pick(items);
       const { options, correctOptionId } = makeOptions(item.effect, [item.cause, item.decoy1, item.decoy2], ctx.rng);
-      return baseQ(ctx, t, { prompt: item.question, helperText: `Cause: ${item.cause}`, options, correctOptionId, correctAnswerLabel: item.effect, explanationSteps: ['A cause is what makes something happen. An effect is what happens as a result.', `Cause: ${item.cause}`, `Effect: ${item.effect}`], commonTrap: 'Students often confuse cause and effect. Ask: which event happened first and made the other happen?', mistakeTags: ['multi-step-reasoning'], ageMin: 7 });
+      return baseQ(ctx, t, { prompt: item.question, helperText: `Cause: ${item.cause}`, options, correctOptionId, correctAnswerLabel: item.effect, explanationSteps: ['A cause is what makes something happen. An effect is what happens as a result.', `Cause: ${item.cause}`, `Effect: ${item.effect}`], commonTrap: 'Students often confuse cause and effect. Ask: which event happened first and made the other happen?', mistakeTags: ['reading-comprehension'], ageMin: 7 });
     }),
 
   ct({ id: 'reading-author-purpose', testIds: READ, domain: 'reading-comprehension', skillId: 'reading-comprehension', difficulty: 3 },
@@ -403,7 +403,7 @@ export const questionTemplates: QuestionTemplate[] = [
       ];
       const item = ctx.rng.pick(items);
       const { options, correctOptionId } = makeOptions(item.answer, item.distractors, ctx.rng);
-      return baseQ(ctx, t, { prompt: `Consider this type of text:\n"${item.passage}"\n\nWhat is the author's most likely purpose?`, helperText: 'Authors write to inform, entertain, or persuade.', options, correctOptionId, correctAnswerLabel: item.answer, explanationSteps: ['The three main author purposes: to inform (share facts), to entertain (tell a story), to persuade (change behaviour).', `This text is most likely meant: ${item.answer}`], commonTrap: 'A text can contain facts but still be primarily persuasive if its goal is to change behaviour.', mistakeTags: ['multi-step-reasoning'], ageMin: 9 });
+      return baseQ(ctx, t, { prompt: `Consider this type of text:\n"${item.passage}"\n\nWhat is the author's most likely purpose?`, helperText: 'Authors write to inform, entertain, or persuade.', options, correctOptionId, correctAnswerLabel: item.answer, explanationSteps: ['The three main author purposes: to inform (share facts), to entertain (tell a story), to persuade (change behaviour).', `This text is most likely meant: ${item.answer}`], commonTrap: 'A text can contain facts but still be primarily persuasive if its goal is to change behaviour.', mistakeTags: ['reading-comprehension'], ageMin: 9 });
     }),
 
   // ── 31-35. STEM + Spatial ────────────────────────────────────────────────
@@ -415,14 +415,14 @@ export const questionTemplates: QuestionTemplate[] = [
       ];
       const s = ctx.rng.pick(scenarios);
       const { options, correctOptionId } = makeOptions(s.answer, s.distractors, ctx.rng);
-      return baseQ(ctx, t, { prompt: s.q, helperText: 'Imagine holding the cube in your hands.', options, correctOptionId, correctAnswerLabel: s.answer, explanationSteps: ['Track where each face starts.', 'Rotate step by step in your mind.', `After the rotation: ${s.answer}`], commonTrap: 'Label the 6 faces before rotating: Front, Back, Top, Bottom, Left, Right.', mistakeTags: ['spatial-visualization'], ageMin: 9 });
+      return baseQ(ctx, t, { prompt: s.q, helperText: 'Imagine holding the cube in your hands.', options, correctOptionId, correctAnswerLabel: s.answer, explanationSteps: ['Track where each face starts.', 'Rotate step by step in your mind.', `After the rotation: ${s.answer}`], commonTrap: 'Label the 6 faces before rotating: Front, Back, Top, Bottom, Left, Right.', mistakeTags: ['spatial-reasoning'], ageMin: 9 });
     }),
 
   ct({ id: 'spatial-count-shapes', testIds: STEM, domain: 'visual-spatial', skillId: 'spatial-reasoning', difficulty: 2 },
     (ctx, t) => {
       const grid = ctx.rng.int(2,4), small = grid*grid, large = (grid-1)*(grid-1), total = small+large;
       const { options, correctOptionId } = makeOptions(String(total), [String(small), String(large), String(total+grid)], ctx.rng, { [String(small)]: 'This only counts the smallest squares.', [String(large)]: 'This only counts the larger squares.' });
-      return baseQ(ctx, t, { prompt: `A ${grid}×${grid} grid of equal squares is drawn. How many squares of ANY size can you count in total?`, helperText: 'Count squares made of 1 cell, 4 cells, etc.', options, correctOptionId, correctAnswerLabel: String(total), explanationSteps: [`A ${grid}×${grid} grid has ${small} individual squares.`, `It also has ${large} larger (${grid-1}×${grid-1}) squares.`, `Total: ${small} + ${large} = ${total}.`], commonTrap: 'Remember to count all possible sizes, not just the smallest cells.', mistakeTags: ['spatial-visualization'], ageMin: 8, visualType: grid <= 3 ? 'grid-3' : 'grid-4' });
+      return baseQ(ctx, t, { prompt: `A ${grid}×${grid} grid of equal squares is drawn. How many squares of ANY size can you count in total?`, helperText: 'Count squares made of 1 cell, 4 cells, etc.', options, correctOptionId, correctAnswerLabel: String(total), explanationSteps: [`A ${grid}×${grid} grid has ${small} individual squares.`, `It also has ${large} larger (${grid-1}×${grid-1}) squares.`, `Total: ${small} + ${large} = ${total}.`], commonTrap: 'Remember to count all possible sizes, not just the smallest cells.', mistakeTags: ['spatial-reasoning'], ageMin: 8, visualType: grid <= 3 ? 'grid-3' : 'grid-4' });
     }),
 
   ct({ id: 'science-cause-effect', testIds: [...STEM, ...MIL], domain: 'science-reasoning', skillId: 'science-reasoning', difficulty: 2 },
@@ -435,7 +435,7 @@ export const questionTemplates: QuestionTemplate[] = [
       ];
       const s = ctx.rng.pick(scenarios);
       const { options, correctOptionId } = makeOptions(s.effect, s.wrong, ctx.rng);
-      return baseQ(ctx, t, { prompt: `What is the most likely result?\n\n"${s.cause}"`, options, correctOptionId, correctAnswerLabel: s.effect, explanationSteps: [s.principle, `Therefore, the result is: ${s.effect}`], commonTrap: 'Choose the result that follows directly from the cause.', mistakeTags: ['concept-gap'], ageMin: 9 });
+      return baseQ(ctx, t, { prompt: `What is the most likely result?\n\n"${s.cause}"`, options, correctOptionId, correctAnswerLabel: s.effect, explanationSteps: [s.principle, `Therefore, the result is: ${s.effect}`], commonTrap: 'Choose the result that follows directly from the cause.', mistakeTags: ['science-reasoning'], ageMin: 9 });
     }),
 
   ct({ id: 'science-classify', testIds: STEM, domain: 'science-reasoning', skillId: 'science-reasoning', difficulty: 2 },
@@ -448,7 +448,7 @@ export const questionTemplates: QuestionTemplate[] = [
       ];
       const q = ctx.rng.pick(questions);
       const { options, correctOptionId } = makeOptions(q.answer, q.wrong, ctx.rng);
-      return baseQ(ctx, t, { prompt: q.question, options, correctOptionId, correctAnswerLabel: q.answer, explanationSteps: [q.fact], commonTrap: 'Read carefully whether the question asks for what IS or what is NOT in a category.', mistakeTags: ['concept-gap'], ageMin: 9 });
+      return baseQ(ctx, t, { prompt: q.question, options, correctOptionId, correctAnswerLabel: q.answer, explanationSteps: [q.fact], commonTrap: 'Read carefully whether the question asks for what IS or what is NOT in a category.', mistakeTags: ['science-reasoning'], ageMin: 9 });
     }),
 
   ct({ id: 'stem-pattern-visual', testIds: [...STEM, ...APT], domain: 'fluid-reasoning', skillId: 'pattern-reasoning', difficulty: 2 },
@@ -521,7 +521,7 @@ export const questionTemplates: QuestionTemplate[] = [
       ];
       const p = ctx.rng.pick(passages);
       const { options, correctOptionId } = makeOptions(p.answer, p.distractors, ctx.rng);
-      return baseQ(ctx, t, { prompt: `Read the passage:\n\n"${p.text}"\n\n${p.question}`, helperText: 'Answer based only on what the passage states.', options, correctOptionId, correctAnswerLabel: p.answer, explanationSteps: ['Find the sentence that directly answers the question.', `The passage states: ${p.answer}`], commonTrap: 'Choose only what the passage says, not what you might believe is true generally.', mistakeTags: ['multi-step-reasoning'], ageMin: 14 });
+      return baseQ(ctx, t, { prompt: `Read the passage:\n\n"${p.text}"\n\n${p.question}`, helperText: 'Answer based only on what the passage states.', options, correctOptionId, correctAnswerLabel: p.answer, explanationSteps: ['Find the sentence that directly answers the question.', `The passage states: ${p.answer}`], commonTrap: 'Choose only what the passage says, not what you might believe is true generally.', mistakeTags: ['reading-comprehension'], ageMin: 14 });
     }),
 
   ct({ id: 'military-arithmetic-rate', testIds: MIL, domain: 'quantitative', skillId: 'arithmetic-operations', difficulty: 3 },
@@ -541,7 +541,7 @@ export const questionTemplates: QuestionTemplate[] = [
       ];
       const s = ctx.rng.pick(scenarios);
       const { options, correctOptionId } = makeOptions(s.answer, s.distractors, ctx.rng);
-      return baseQ(ctx, t, { prompt: s.q, options, correctOptionId, correctAnswerLabel: s.answer, explanationSteps: [s.answer], commonTrap: 'Mechanical advantage involves trade-offs: less force usually means more distance or time.', mistakeTags: ['concept-gap'], ageMin: 14 });
+      return baseQ(ctx, t, { prompt: s.q, options, correctOptionId, correctAnswerLabel: s.answer, explanationSteps: [s.answer], commonTrap: 'Mechanical advantage involves trade-offs: less force usually means more distance or time.', mistakeTags: ['science-reasoning'], ageMin: 14 });
     }),
 
   ct({ id: 'military-science-basic', testIds: [...MIL, ...STEM], domain: 'science-reasoning', skillId: 'science-reasoning', difficulty: 3 },
@@ -554,7 +554,7 @@ export const questionTemplates: QuestionTemplate[] = [
       ];
       const q = ctx.rng.pick(questions);
       const { options, correctOptionId } = makeOptions(q.answer, q.wrong, ctx.rng);
-      return baseQ(ctx, t, { prompt: q.q, options, correctOptionId, correctAnswerLabel: q.answer, explanationSteps: [`The correct answer is: ${q.answer}`], commonTrap: 'Physical changes are reversible and do not create new substances. Chemical changes create new substances.', mistakeTags: ['concept-gap'], ageMin: 14 });
+      return baseQ(ctx, t, { prompt: q.q, options, correctOptionId, correctAnswerLabel: q.answer, explanationSteps: [`The correct answer is: ${q.answer}`], commonTrap: 'Physical changes are reversible and do not create new substances. Chemical changes create new substances.', mistakeTags: ['science-reasoning'], ageMin: 14 });
     }),
 
   ct({ id: 'military-math-percentage', testIds: MIL, domain: 'quantitative', skillId: 'arithmetic-operations', difficulty: 3 },
@@ -707,7 +707,7 @@ export const questionTemplates: QuestionTemplate[] = [
       else if (s.q.startsWith('The number "6"')) { visualType = 'mirror-letter'; visualParams = { letter: '6', axis: 'vertical' }; }
       else if (s.q.startsWith('An arrow')) { visualType = 'mirror-arrow'; visualParams = { direction: 'right' }; }
       else if (s.q.startsWith('The word')) { visualType = 'mirror-letter'; visualParams = { letter: 'M', axis: 'horizontal' }; }
-      return baseQ(ctx, t, { prompt: s.q, helperText: 'Imagine holding a mirror along the axis of reflection.', options, correctOptionId, correctAnswerLabel: s.answer, explanationSteps: ['A horizontal reflection swaps left and right.', 'A vertical reflection swaps top and bottom.', `Result: ${s.answer}`], commonTrap: 'Horizontal vs. vertical reflection are opposites of what you might expect.', mistakeTags: ['spatial-visualization'], ageMin: 9, visualType, visualParams });
+      return baseQ(ctx, t, { prompt: s.q, helperText: 'Imagine holding a mirror along the axis of reflection.', options, correctOptionId, correctAnswerLabel: s.answer, explanationSteps: ['A horizontal reflection swaps left and right.', 'A vertical reflection swaps top and bottom.', `Result: ${s.answer}`], commonTrap: 'Horizontal vs. vertical reflection are opposites of what you might expect.', mistakeTags: ['spatial-reasoning'], ageMin: 9, visualType, visualParams });
     }),
 
   ct({ id: 'quant-ratio-simplify', testIds: [...APT,...MATH_ALL], domain: 'quantitative', skillId: 'fractions-ratios', difficulty: 3 },
@@ -783,7 +783,7 @@ export const questionTemplates: QuestionTemplate[] = [
       ];
       const s = ctx.rng.pick(structures);
       const { options, correctOptionId } = makeOptions(s.answer, s.wrong, ctx.rng);
-      return baseQ(ctx, t, { prompt: `Which text structure does this passage use?\n\n"${s.example}"`, helperText: 'Look at how the ideas are organised.', options, correctOptionId, correctAnswerLabel: s.answer, explanationSteps: ['Text structures: sequence, compare/contrast, cause/effect, problem/solution.', `This passage uses: ${s.answer}.`], commonTrap: 'Signal words help: "first/then/finally" = sequence; "however/both" = compare; "as a result" = cause/effect.', mistakeTags: ['multi-step-reasoning'], ageMin: 10 });
+      return baseQ(ctx, t, { prompt: `Which text structure does this passage use?\n\n"${s.example}"`, helperText: 'Look at how the ideas are organised.', options, correctOptionId, correctAnswerLabel: s.answer, explanationSteps: ['Text structures: sequence, compare/contrast, cause/effect, problem/solution.', `This passage uses: ${s.answer}.`], commonTrap: 'Signal words help: "first/then/finally" = sequence; "however/both" = compare; "as a result" = cause/effect.', mistakeTags: ['reading-comprehension'], ageMin: 10 });
     }),
 
   ct({ id: 'reading-figurative-language', testIds: READ, domain: 'vocabulary', skillId: 'vocabulary', difficulty: 3 },
@@ -807,7 +807,7 @@ export const questionTemplates: QuestionTemplate[] = [
       ];
       const p = ctx.rng.pick(passages);
       const { options, correctOptionId } = makeOptions(p.answer, p.wrong, ctx.rng);
-      return baseQ(ctx, t, { prompt: `Identify the point of view:\n\n"${p.excerpt}"`, options, correctOptionId, correctAnswerLabel: p.answer, explanationSteps: ['First person uses "I/me/we." Second uses "you." Third uses "he/she/they."', `This passage uses: ${p.answer}`], commonTrap: 'Third person limited knows ONE character\'s thoughts. Third person omniscient knows ALL.', mistakeTags: ['multi-step-reasoning'], ageMin: 10 });
+      return baseQ(ctx, t, { prompt: `Identify the point of view:\n\n"${p.excerpt}"`, options, correctOptionId, correctAnswerLabel: p.answer, explanationSteps: ['First person uses "I/me/we." Second uses "you." Third uses "he/she/they."', `This passage uses: ${p.answer}`], commonTrap: 'Third person limited knows ONE character\'s thoughts. Third person omniscient knows ALL.', mistakeTags: ['reading-comprehension'], ageMin: 10 });
     }),
 
   ct({ id: 'vocab-prefix-suffix', testIds: [...READ,...APT], domain: 'vocabulary', skillId: 'vocabulary', difficulty: 2 },
@@ -832,7 +832,7 @@ export const questionTemplates: QuestionTemplate[] = [
       ];
       const p = ctx.rng.pick(passages);
       const { options, correctOptionId } = makeOptions(p.best, p.wrong, ctx.rng);
-      return baseQ(ctx, t, { prompt: `"${p.text}"\n\nWhich sentence BEST summarises the passage?`, options, correctOptionId, correctAnswerLabel: p.best, explanationSteps: ['A good summary captures the main idea without focusing only on one detail.', `Best summary: "${p.best}"`], commonTrap: 'A summary covers the WHOLE passage, not just an interesting detail.', mistakeTags: ['multi-step-reasoning'], ageMin: 9 });
+      return baseQ(ctx, t, { prompt: `"${p.text}"\n\nWhich sentence BEST summarises the passage?`, options, correctOptionId, correctAnswerLabel: p.best, explanationSteps: ['A good summary captures the main idea without focusing only on one detail.', `Best summary: "${p.best}"`], commonTrap: 'A summary covers the WHOLE passage, not just an interesting detail.', mistakeTags: ['reading-comprehension'], ageMin: 9 });
     }),
 
   // ── 70-74. STEM expansion 2 ──────────────────────────────────────────────
@@ -843,7 +843,7 @@ export const questionTemplates: QuestionTemplate[] = [
       if (em >= 60) { eh++; em -= 60; }
       const fmt = (h: number, m: number) => `${h}:${m.toString().padStart(2,'0')}`, ans = fmt(eh, em);
       const { options, correctOptionId } = makeOptions(ans, [fmt(eh+1,em), fmt(eh-1,em), fmt(sh+dh+1,sm)], ctx.rng);
-      return baseQ(ctx, t, { prompt: `An experiment starts at ${fmt(sh,sm)} and takes ${dh} hour${dh>1?'s':''}${dm > 0 ? ` and ${dm} minutes` : ''}. What time does it end?`, options, correctOptionId, correctAnswerLabel: ans, explanationSteps: [`Add hours: ${sh} + ${dh} = ${sh+dh}.`, dm>0?`Add minutes: ${sm} + ${dm} = ${sm+dm} (carry if ≥60).`:'No extra minutes.', `End time: ${ans}.`], commonTrap: 'Carry over to hours when minutes reach 60 or more.', mistakeTags: ['calculation-error'], ageMin: 8 });
+      return baseQ(ctx, t, { prompt: `An experiment starts at ${fmt(sh,sm)} and takes ${dh} hour${dh>1?'s':''}${dm>0?` and ${dm} minutes`:'''}. What time does it end?`, options, correctOptionId, correctAnswerLabel: ans, explanationSteps: [`Add hours: ${sh} + ${dh} = ${sh+dh}.`, dm>0?`Add minutes: ${sm} + ${dm} = ${sm+dm} (carry if ≥60).`:'No extra minutes.', `End time: ${ans}.`], commonTrap: 'Carry over to hours when minutes reach 60 or more.', mistakeTags: ['calculation-error'], ageMin: 8 });
     }),
 
   ct({ id: 'stem-force-motion', testIds: [...STEM,...MIL], domain: 'science-reasoning', skillId: 'science-reasoning', difficulty: 3 },
@@ -856,7 +856,7 @@ export const questionTemplates: QuestionTemplate[] = [
       ];
       const q = ctx.rng.pick(questions);
       const { options, correctOptionId } = makeOptions(q.answer, q.wrong, ctx.rng);
-      return baseQ(ctx, t, { prompt: q.q, options, correctOptionId, correctAnswerLabel: q.answer, explanationSteps: [`The answer is: ${q.answer}`], commonTrap: 'Mass (amount of matter) stays constant everywhere. Weight (force of gravity) changes with gravity.', mistakeTags: ['concept-gap'], ageMin: 10 });
+      return baseQ(ctx, t, { prompt: q.q, options, correctOptionId, correctAnswerLabel: q.answer, explanationSteps: [`The answer is: ${q.answer}`], commonTrap: 'Mass (amount of matter) stays constant everywhere. Weight (force of gravity) changes with gravity.', mistakeTags: ['science-reasoning'], ageMin: 10 });
     }),
 
   ct({ id: 'stem-data-read', testIds: STEM, domain: 'science-reasoning', skillId: 'data-statistics', difficulty: 2 },
@@ -876,7 +876,7 @@ export const questionTemplates: QuestionTemplate[] = [
       ];
       const s = ctx.rng.pick(scenarios);
       const { options, correctOptionId } = makeOptions(s.answer, s.wrong, ctx.rng);
-      return baseQ(ctx, t, { prompt: s.q, options, correctOptionId, correctAnswerLabel: s.answer, explanationSteps: [s.answer], commonTrap: 'System diagrams require tracing the effect through each component in sequence.', mistakeTags: ['concept-gap', 'spatial-visualization'], ageMin: 11 });
+      return baseQ(ctx, t, { prompt: s.q, options, correctOptionId, correctAnswerLabel: s.answer, explanationSteps: [s.answer], commonTrap: 'System diagrams require tracing the effect through each component in sequence.', mistakeTags: ['science-reasoning', 'spatial-reasoning'], ageMin: 11 });
     }),
 
   ct({ id: 'stem-classify-life-science', testIds: STEM, domain: 'science-reasoning', skillId: 'science-reasoning', difficulty: 2 },
@@ -889,7 +889,7 @@ export const questionTemplates: QuestionTemplate[] = [
       ];
       const q = ctx.rng.pick(questions);
       const { options, correctOptionId } = makeOptions(q.answer, q.wrong, ctx.rng);
-      return baseQ(ctx, t, { prompt: q.q, options, correctOptionId, correctAnswerLabel: q.answer, explanationSteps: [`${q.answer}`], commonTrap: 'Producers make their own energy from sunlight; consumers eat other organisms.', mistakeTags: ['concept-gap'], ageMin: 9 });
+      return baseQ(ctx, t, { prompt: q.q, options, correctOptionId, correctAnswerLabel: q.answer, explanationSteps: [`${q.answer}`], commonTrap: 'Producers make their own energy from sunlight; consumers eat other organisms.', mistakeTags: ['science-reasoning'], ageMin: 9 });
     }),
 
   // ── 75-78. Coding expansion 2 ────────────────────────────────────────────
@@ -959,7 +959,7 @@ export const questionTemplates: QuestionTemplate[] = [
       ];
       const q = ctx.rng.pick(questions);
       const { options, correctOptionId } = makeOptions(q.answer, q.wrong, ctx.rng);
-      return baseQ(ctx, t, { prompt: q.q, options, correctOptionId, correctAnswerLabel: q.answer, explanationSteps: [q.answer], commonTrap: 'Ohm\'s Law: V = I × R. Rearranging: I = V/R. If R doubles, I is halved (V constant).', mistakeTags: ['concept-gap'], ageMin: 14 });
+      return baseQ(ctx, t, { prompt: q.q, options, correctOptionId, correctAnswerLabel: q.answer, explanationSteps: [q.answer], commonTrap: 'Ohm\'s Law: V = I × R. Rearranging: I = V/R. If R doubles, I is halved (V constant).', mistakeTags: ['science-reasoning'], ageMin: 14 });
     }),
 
   ct({ id: 'military-map-grid', testIds: MIL, domain: 'visual-spatial', skillId: 'spatial-reasoning', difficulty: 3 },
@@ -1011,6 +1011,799 @@ export const questionTemplates: QuestionTemplate[] = [
     }),
 
 ]; // end questionTemplates array
+
+// ════════════════════════════════════════════════════════════════════════════
+// SECTION 4 — v0.6 EXPANSION
+//
+// Goals for v0.6:
+//   - Triple effective question variety. Each new template uses the phrase()
+//     helper for 2–3 deterministic surface phrasings.
+//   - Focus on weak areas surfaced by the v0.5 content review:
+//     real reading-comprehension passages, multi-step word problems, spatial
+//     items with visuals, science with experimental design, coding logic
+//     including negative indexing, mechanical reasoning, working memory,
+//     algebra, and K readiness with visuals.
+// ════════════════════════════════════════════════════════════════════════════
+
+// Pick one of N phrasings deterministically using the seeded RNG. Same seed
+// always produces the same wording, so retake stays reproducible.
+function phrase(rng: SeededRandom, options: string[]): string {
+  if (options.length === 0) return '';
+  return options[rng.int(0, options.length - 1)];
+}
+
+const v6Templates: QuestionTemplate[] = [
+
+  // ── Reading comprehension: real passages (3 templates) ──────────────────
+
+  ct({ id: 'rc-passage-main-idea-v6', testIds: [...READ, ...APT], domain: 'reading-comprehension', skillId: 'reading-comprehension', difficulty: 3 },
+    (ctx, t) => {
+      const passages = [
+        { passage: 'Honeybees are some of the most important animals on the planet. They visit flowers to collect nectar, which they turn into honey. As they move from flower to flower, pollen sticks to their bodies. When the bees brush against the next flower, the pollen is transferred. This process, called pollination, helps plants make seeds and fruit. Without honeybees, many fruits and vegetables we eat every day would be much harder to grow.',
+          mainIdea: 'Honeybees help plants reproduce by pollinating them.',
+          wrong: ['Honeybees only make honey for humans to eat.', 'Honeybees are dangerous insects.', 'Bees prefer some flowers over others.'] },
+        { passage: 'Giant sequoia trees are among the largest living things on Earth. They grow only in a small region of California, where the cool, moist air and deep soil help them thrive. Some sequoias have lived for over two thousand years. Their thick bark protects them from forest fires, and their seeds actually need fire to open and grow. This means that what looks destructive can sometimes be what gives life.',
+          mainIdea: 'Giant sequoias depend on fire as part of their natural life cycle.',
+          wrong: ['Sequoias grow all over North America.', 'Sequoia trees are protected by zoo keepers.', 'Sequoias produce most of California\'s lumber.'] },
+        { passage: 'In December 1903, two brothers named Wilbur and Orville Wright made history. They flew the first powered airplane near Kitty Hawk, North Carolina. The flight lasted only twelve seconds and went about a hundred and twenty feet. It does not sound like much today, but at the time it was a huge breakthrough. Their invention launched a century of aviation that would change how people travel, work, and connect with each other.',
+          mainIdea: 'A short flight by the Wright brothers led to an entire age of aviation.',
+          wrong: ['The Wright brothers built the first hot-air balloon.', 'The first flight lasted several hours.', 'Wilbur and Orville competed against each other.'] },
+      ];
+      const item = ctx.rng.pick(passages);
+      const lead = phrase(ctx.rng, [
+        'What is the main idea of the passage?',
+        'Which sentence best states the main idea?',
+        'The passage is mostly about —',
+      ]);
+      const { options, correctOptionId } = makeOptions(item.mainIdea, item.wrong, ctx.rng);
+      return baseQ(ctx, t, {
+        prompt: `${item.passage}\n\n${lead}`,
+        helperText: 'Read the whole passage carefully before choosing.',
+        options, correctOptionId, correctAnswerLabel: item.mainIdea,
+        explanationSteps: [
+          'The main idea is the single biggest point the passage makes — not just one detail.',
+          `In this passage, every sentence supports one larger idea.`,
+          `The best summary is: "${item.mainIdea}"`,
+        ],
+        commonTrap: 'A true detail from the passage is not necessarily the main idea.',
+        mistakeTags: ['concept-gap', 'misread-question'], ageMin: 9, ageMax: 16,
+      });
+    }),
+
+  ct({ id: 'rc-passage-inference-v6', testIds: [...READ, ...APT], domain: 'reading-comprehension', skillId: 'reading-comprehension', difficulty: 4 },
+    (ctx, t) => {
+      const items = [
+        { passage: 'Maya checked the recipe one more time. She had everything except the eggs. The grocery store closed in twenty minutes, and the rain was coming down hard. She looked out the window, then back at the half-mixed bowl of dry ingredients on the counter. With a sigh, she grabbed her raincoat and her keys.',
+          inference: 'Maya decided to go to the store despite the rain.',
+          wrong: ['Maya gave up on baking.', 'The grocery store had closed early.', 'Maya already had the eggs.'] },
+        { passage: 'When Sam saw the dog\'s tail droop and its ears flatten, he knew something was wrong. He kneeled down slowly and held out his hand, palm up. The dog sniffed once, then took a careful step closer. Sam smiled and waited.',
+          inference: 'Sam was being patient to help the dog feel safe.',
+          wrong: ['Sam was scared of the dog.', 'The dog ran away.', 'Sam wanted to give the dog food right away.'] },
+      ];
+      const item = ctx.rng.pick(items);
+      const lead = phrase(ctx.rng, [
+        'Which statement is best supported by the passage?',
+        'What can the reader most likely conclude?',
+        'Which is most likely true based on the passage?',
+      ]);
+      const { options, correctOptionId } = makeOptions(item.inference, item.wrong, ctx.rng);
+      return baseQ(ctx, t, {
+        prompt: `${item.passage}\n\n${lead}`,
+        options, correctOptionId, correctAnswerLabel: item.inference,
+        explanationSteps: [
+          'An inference is a conclusion supported by clues in the text — not directly stated.',
+          'Look for clues in the actions and details.',
+          `The clues add up to: "${item.inference}"`,
+        ],
+        commonTrap: 'Inferences must be supported by the passage. Avoid choices that contradict it.',
+        mistakeTags: ['multi-step-reasoning', 'concept-gap'], ageMin: 10, ageMax: 16,
+      });
+    }),
+
+  ct({ id: 'rc-passage-detail-v6', testIds: [...READ], domain: 'reading-comprehension', skillId: 'reading-comprehension', difficulty: 2 },
+    (ctx, t) => {
+      const items = [
+        { passage: 'The Pacific octopus is a master of disguise. It can change both the color and the texture of its skin in less than a second. Special cells called chromatophores let it match the rocks and seaweed around it. This camouflage helps it hide from predators like sharks and seals.',
+          q: 'According to the passage, what helps the Pacific octopus change its appearance?',
+          answer: 'Special cells called chromatophores',
+          wrong: ['Its eight arms', 'A sticky ink', 'Cold ocean water'] },
+        { passage: 'Mount Everest stands at the border of Nepal and China. At about 8,849 meters tall, it is the highest point above sea level on Earth. Climbing it is dangerous because of the thin air and freezing temperatures, and very few people reach the summit each year.',
+          q: 'About how tall is Mount Everest?',
+          answer: '8,849 meters',
+          wrong: ['Exactly 5,000 meters', 'Around 12,000 meters', 'Less than 2,000 meters'] },
+      ];
+      const item = ctx.rng.pick(items);
+      const { options, correctOptionId } = makeOptions(item.answer, item.wrong, ctx.rng);
+      return baseQ(ctx, t, {
+        prompt: `${item.passage}\n\n${item.q}`,
+        options, correctOptionId, correctAnswerLabel: item.answer,
+        explanationSteps: [
+          'Detail questions ask about something stated directly.',
+          'Re-read the relevant sentence in the passage.',
+          `The passage states: "${item.answer}".`,
+        ],
+        mistakeTags: ['attention-to-detail', 'misread-question'], ageMin: 8, ageMax: 14,
+      });
+    }),
+
+  // ── Vocabulary in context ──────────────────────────────────────────────
+
+  ct({ id: 'vocab-in-context-v6', testIds: [...READ, ...APT], domain: 'vocabulary', skillId: 'vocabulary', difficulty: 3 },
+    (ctx, t) => {
+      const items = [
+        { sentence: 'The detective remained vigilant throughout the long night.', word: 'vigilant', meaning: 'watchful', wrong: ['sleepy', 'angry', 'cheerful'] },
+        { sentence: 'Her response was concise — only two short sentences.', word: 'concise', meaning: 'brief', wrong: ['confusing', 'rude', 'detailed'] },
+        { sentence: 'The crowd grew restless as the band took longer than expected to start.', word: 'restless', meaning: 'unable to stay still', wrong: ['quiet', 'asleep', 'patient'] },
+        { sentence: 'The professor\'s ambiguous answer left everyone confused.', word: 'ambiguous', meaning: 'unclear', wrong: ['loud', 'simple', 'kind'] },
+      ];
+      const item = ctx.rng.pick(items);
+      const lead = phrase(ctx.rng, [
+        `In the sentence above, what does "${item.word}" mean?`,
+        `Which word is closest in meaning to "${item.word}" as it is used here?`,
+      ]);
+      const { options, correctOptionId } = makeOptions(item.meaning, item.wrong, ctx.rng);
+      return baseQ(ctx, t, {
+        prompt: `${item.sentence}\n\n${lead}`,
+        options, correctOptionId, correctAnswerLabel: item.meaning,
+        explanationSteps: [
+          'Use the rest of the sentence as context.',
+          `Here, "${item.word}" makes sense as "${item.meaning}".`,
+        ],
+        commonTrap: 'A word can mean different things in different sentences. Use the surrounding context.',
+        mistakeTags: ['vocabulary-confusion'], ageMin: 9, ageMax: 16,
+      });
+    }),
+
+  // ── Multi-step word problems (5 templates) ─────────────────────────────
+
+  ct({ id: 'word-two-step-arith-v6', testIds: [...MATH_ALL, ...APT], domain: 'quantitative', skillId: 'arithmetic-operations', difficulty: 3 },
+    (ctx, t) => {
+      const start = ctx.rng.int(20, 60);
+      const give = ctx.rng.int(3, 9);
+      const groups = ctx.rng.int(2, 4);
+      const remaining = start - give * groups;
+      const lead = phrase(ctx.rng, [
+        `A class has ${start} pencils. The teacher gives ${give} pencils to each of ${groups} students. How many pencils are left?`,
+        `Sara had ${start} stickers. She gave ${give} stickers each to ${groups} friends. How many stickers does she have now?`,
+      ]);
+      const { options, correctOptionId } = makeOptions(String(remaining), [
+        String(start - give), String(start + give), String(give * groups)
+      ], ctx.rng, {
+        [String(give * groups)]: 'That counts only the pencils given away, not the ones left.',
+        [String(start - give)]: 'That subtracts the gift to one student, not all students.',
+      });
+      return baseQ(ctx, t, {
+        prompt: lead,
+        options, correctOptionId, correctAnswerLabel: String(remaining),
+        explanationSteps: [
+          `Step 1: total given away = ${give} × ${groups} = ${give * groups}.`,
+          `Step 2: pencils left = ${start} − ${give * groups} = ${remaining}.`,
+        ],
+        commonTrap: 'Two-step word problems need two operations in order. Don\'t stop after one.',
+        mistakeTags: ['multi-step-reasoning', 'calculation-error'], ageMin: 9, ageMax: 14,
+      });
+    }),
+
+  ct({ id: 'word-rate-distance-v6', testIds: [...MATH_ALL], domain: 'quantitative', skillId: 'arithmetic-operations', difficulty: 4 },
+    (ctx, t) => {
+      const speed = ctx.rng.pick([15, 20, 25, 30]);
+      const hours = ctx.rng.int(2, 5);
+      const distance = speed * hours;
+      const lead = phrase(ctx.rng, [
+        `A bicycle travels at ${speed} km per hour. How far will it go in ${hours} hours?`,
+        `If you ride at a steady ${speed} km/h for ${hours} hours, how many kilometres do you cover?`,
+      ]);
+      const { options, correctOptionId } = makeOptions(`${distance} km`, [
+        `${speed + hours} km`, `${distance + speed} km`, `${distance - speed} km`
+      ], ctx.rng);
+      return baseQ(ctx, t, {
+        prompt: lead,
+        options, correctOptionId, correctAnswerLabel: `${distance} km`,
+        explanationSteps: [
+          'Distance = speed × time.',
+          `${speed} × ${hours} = ${distance} km.`,
+        ],
+        mistakeTags: ['multi-step-reasoning', 'concept-gap'], ageMin: 10, ageMax: 16,
+      });
+    }),
+
+  ct({ id: 'word-percent-of-v6', testIds: [...MATH_ALL], domain: 'quantitative', skillId: 'fractions-ratios', difficulty: 3 },
+    (ctx, t) => {
+      const pcts = [10, 15, 20, 25, 50];
+      const pct = ctx.rng.pick(pcts);
+      const base = ctx.rng.pick([40, 60, 80, 100, 120]);
+      const ans = (pct * base) / 100;
+      const lead = phrase(ctx.rng, [
+        `What is ${pct}% of ${base}?`,
+        `A jacket costs $${base}. It is ${pct}% off. How much is the discount?`,
+      ]);
+      const { options, correctOptionId } = makeOptions(String(ans), [
+        String(ans * 2), String(ans / 2), String(base - ans)
+      ], ctx.rng);
+      return baseQ(ctx, t, {
+        prompt: lead,
+        options, correctOptionId, correctAnswerLabel: String(ans),
+        explanationSteps: [
+          `${pct}% means ${pct}/100 = ${pct/100}.`,
+          `${pct/100} × ${base} = ${ans}.`,
+        ],
+        commonTrap: 'A discount question asks for the discount itself, not the final price.',
+        mistakeTags: ['concept-gap', 'calculation-error'], ageMin: 10, ageMax: 16,
+      });
+    }),
+
+  ct({ id: 'word-money-change-v6', testIds: [...MATH_ALL], domain: 'quantitative', skillId: 'arithmetic-operations', difficulty: 2 },
+    (ctx, t) => {
+      const item1 = ctx.rng.int(2, 6);
+      const item2 = ctx.rng.int(3, 7);
+      const paid = 20;
+      const change = paid - (item1 + item2);
+      const lead = phrase(ctx.rng, [
+        `Jamal bought a book for $${item1} and a snack for $${item2}. He paid with a $${paid} bill. How much change should he get back?`,
+        `Two items cost $${item1} and $${item2}. If you hand the cashier $${paid}, what is your change?`,
+      ]);
+      const { options, correctOptionId } = makeOptions(`$${change}`, [
+        `$${item1 + item2}`, `$${paid - item1}`, `$${paid - item2}`
+      ], ctx.rng);
+      return baseQ(ctx, t, {
+        prompt: lead,
+        options, correctOptionId, correctAnswerLabel: `$${change}`,
+        explanationSteps: [
+          `Total cost = $${item1} + $${item2} = $${item1+item2}.`,
+          `Change = $${paid} − $${item1+item2} = $${change}.`,
+        ],
+        mistakeTags: ['multi-step-reasoning', 'calculation-error'], ageMin: 8, ageMax: 13,
+      });
+    }),
+
+  ct({ id: 'word-fractions-share-v6', testIds: [...MATH_ALL], domain: 'fractions-ratios', skillId: 'fractions-ratios', difficulty: 3 },
+    (ctx, t) => {
+      const total = ctx.rng.pick([12, 16, 20, 24]);
+      const denom = ctx.rng.pick([2, 4]);
+      const frac = total / denom;
+      const lead = phrase(ctx.rng, [
+        `There are ${total} cookies. ${denom === 2 ? 'Half' : 'A quarter'} of them are chocolate. How many are chocolate?`,
+        `${denom === 2 ? '1/2' : '1/4'} of ${total} students brought lunch. How many students is that?`,
+      ]);
+      const { options, correctOptionId } = makeOptions(String(frac), [
+        String(total - frac), String(frac * 2), String(total / 3)
+      ], ctx.rng);
+      return baseQ(ctx, t, {
+        prompt: lead,
+        options, correctOptionId, correctAnswerLabel: String(frac),
+        explanationSteps: [
+          `${denom === 2 ? '1/2' : '1/4'} of ${total} = ${total} ÷ ${denom} = ${frac}.`,
+        ],
+        mistakeTags: ['concept-gap'], ageMin: 8, ageMax: 13,
+      });
+    }),
+
+  // ── Spatial with visuals (4 templates) ─────────────────────────────────
+
+  ct({ id: 'spatial-cube-faces-v6', testIds: [...STEM, ...APT], domain: 'visual-spatial', skillId: 'spatial-reasoning', difficulty: 2 },
+    (ctx, t) => {
+      const lead = phrase(ctx.rng, [
+        'A solid cube sits in front of you. How many flat sides (faces) does it have?',
+        'Look at the cube above. How many faces (flat surfaces) does it have in total?',
+      ]);
+      const { options, correctOptionId } = makeOptions('6', ['4', '8', '12'], ctx.rng);
+      return baseQ(ctx, t, {
+        prompt: lead,
+        visualType: 'cube',
+        options, correctOptionId, correctAnswerLabel: '6',
+        explanationSteps: [
+          'A cube is the shape of a die.',
+          'Top + bottom + front + back + left + right = 6 faces.',
+        ],
+        commonTrap: 'Don\'t confuse faces (flat sides) with edges (lines) or corners.',
+        mistakeTags: ['spatial-visualization'], ageMin: 7, ageMax: 14,
+      });
+    }),
+
+  ct({ id: 'spatial-shape-symmetry-v6', testIds: [...STEM, ...APT], domain: 'visual-spatial', skillId: 'spatial-reasoning', difficulty: 3 },
+    (ctx, t) => {
+      const items = [
+        { shape: 'square',    answer: '4', wrong: ['1', '2', '8'] },
+        { shape: 'rectangle', answer: '2', wrong: ['1', '4', '0'] },
+        { shape: 'circle',    answer: 'Infinitely many', wrong: ['1', '2', '4'] },
+        { shape: 'triangle',  answer: '3', wrong: ['1', '0', '6'] },
+      ];
+      const item = ctx.rng.pick(items);
+      const lead = phrase(ctx.rng, [
+        `Look at the ${item.shape}. How many lines of symmetry does an equilateral version of this shape have?`,
+        `How many lines of symmetry does a regular ${item.shape} have?`,
+      ]);
+      const isEquilateral = item.shape === 'triangle' ? ' (equilateral)' : '';
+      const { options, correctOptionId } = makeOptions(item.answer, item.wrong, ctx.rng);
+      return baseQ(ctx, t, {
+        prompt: `${lead}${isEquilateral}`,
+        visualType: 'shape',
+        visualParams: { shape: item.shape },
+        options, correctOptionId, correctAnswerLabel: item.answer,
+        explanationSteps: [
+          'A line of symmetry divides the shape so the two halves are mirror images.',
+          `A regular ${item.shape} has ${item.answer.toLowerCase()} such line${item.answer === '1' ? '' : 's'}.`,
+        ],
+        mistakeTags: ['spatial-visualization', 'concept-gap'], ageMin: 8, ageMax: 14,
+      });
+    }),
+
+  ct({ id: 'spatial-mirror-reflection-v6', testIds: [...STEM, ...APT], domain: 'visual-spatial', skillId: 'spatial-reasoning', difficulty: 3 },
+    (ctx, t) => {
+      const items = [
+        { letter: 'b', mirror: 'd', wrong: ['p', 'q', 'b'] },
+        { letter: 'p', mirror: 'q', wrong: ['b', 'd', 'p'] },
+        { letter: 'E', mirror: 'Ǝ', wrong: ['F', 'W', 'E'] },
+      ];
+      const item = ctx.rng.pick(items);
+      const lead = phrase(ctx.rng, [
+        `If the letter "${item.letter}" is reflected across a vertical mirror line, what does it look like?`,
+        `Which letter is the mirror image of "${item.letter}" across a vertical axis?`,
+      ]);
+      const { options, correctOptionId } = makeOptions(item.mirror, item.wrong, ctx.rng);
+      return baseQ(ctx, t, {
+        prompt: lead,
+        visualType: 'mirror-letter',
+        visualParams: { letter: item.letter, axis: 'horizontal' },
+        options, correctOptionId, correctAnswerLabel: item.mirror,
+        explanationSteps: [
+          'A vertical mirror flips left and right.',
+          `So "${item.letter}" becomes "${item.mirror}" — its left and right sides swap.`,
+        ],
+        commonTrap: 'A vertical-axis mirror does not flip top and bottom.',
+        mistakeTags: ['spatial-visualization'], ageMin: 7, ageMax: 13,
+      });
+    }),
+
+  ct({ id: 'spatial-rotation-quarter-v6', testIds: [...STEM, ...APT], domain: 'visual-spatial', skillId: 'spatial-reasoning', difficulty: 3 },
+    (ctx, t) => {
+      const lead = phrase(ctx.rng, [
+        'An arrow pointing right is rotated 90 degrees clockwise. Which direction does it point now?',
+        'You turn an arrow that points right by a quarter turn clockwise. Where is it pointing?',
+      ]);
+      const { options, correctOptionId } = makeOptions('Down', ['Up', 'Left', 'Right'], ctx.rng);
+      return baseQ(ctx, t, {
+        prompt: lead,
+        visualType: 'mirror-arrow',
+        visualParams: { direction: 'right' },
+        options, correctOptionId, correctAnswerLabel: 'Down',
+        explanationSteps: [
+          'A 90° clockwise rotation moves: right → down → left → up → right.',
+          'So a right-pointing arrow now points down.',
+        ],
+        mistakeTags: ['spatial-visualization'], ageMin: 8, ageMax: 14,
+      });
+    }),
+
+  // ── Science reasoning (4 templates) ────────────────────────────────────
+
+  ct({ id: 'sci-states-of-matter-v6', testIds: [...STEM, ...APT, ...MIL], domain: 'science-reasoning', skillId: 'science-reasoning', difficulty: 2 },
+    (ctx, t) => {
+      const items = [
+        { q: 'Which of these is a gas at room temperature?', answer: 'Oxygen', wrong: ['Sand', 'Ice', 'Wood'] },
+        { q: 'Which substance is a liquid at room temperature?', answer: 'Water', wrong: ['Iron', 'Salt', 'Helium'] },
+        { q: 'Which is a solid at room temperature?', answer: 'Aluminum', wrong: ['Steam', 'Mercury', 'Hydrogen'] },
+      ];
+      const item = ctx.rng.pick(items);
+      const { options, correctOptionId } = makeOptions(item.answer, item.wrong, ctx.rng);
+      return baseQ(ctx, t, {
+        prompt: item.q,
+        options, correctOptionId, correctAnswerLabel: item.answer,
+        explanationSteps: [
+          'Matter has three common states: solid, liquid, and gas.',
+          `${item.answer} is the right answer for this state at room temperature.`,
+        ],
+        mistakeTags: ['concept-gap'], ageMin: 8, ageMax: 14,
+      });
+    }),
+
+  ct({ id: 'sci-life-cycle-v6', testIds: [...STEM, ...APT], domain: 'science-reasoning', skillId: 'science-reasoning', difficulty: 2 },
+    (ctx, t) => {
+      const items = [
+        { q: 'What is the correct order of a butterfly\'s life cycle?', answer: 'Egg → caterpillar → chrysalis → butterfly', wrong: ['Caterpillar → egg → butterfly → chrysalis', 'Butterfly → egg → chrysalis → caterpillar', 'Chrysalis → egg → caterpillar → butterfly'] },
+        { q: 'Which is the correct order of a frog\'s life cycle?', answer: 'Egg → tadpole → froglet → frog', wrong: ['Tadpole → egg → frog → froglet', 'Frog → egg → tadpole → froglet', 'Egg → frog → tadpole → froglet'] },
+      ];
+      const item = ctx.rng.pick(items);
+      const { options, correctOptionId } = makeOptions(item.answer, item.wrong, ctx.rng);
+      return baseQ(ctx, t, {
+        prompt: item.q,
+        options, correctOptionId, correctAnswerLabel: item.answer,
+        explanationSteps: [
+          'A life cycle starts with the earliest stage and ends with the adult.',
+          `Correct order: ${item.answer}.`,
+        ],
+        mistakeTags: ['concept-gap', 'attention-to-detail'], ageMin: 7, ageMax: 12,
+      });
+    }),
+
+  ct({ id: 'sci-forces-v6', testIds: [...STEM, ...MIL], domain: 'science-reasoning', skillId: 'science-reasoning', difficulty: 3 },
+    (ctx, t) => {
+      const lead = phrase(ctx.rng, [
+        'A book sits still on a flat table. Which best describes the forces on the book?',
+        'A pencil rests on a desk and does not move. What is true about the forces on it?',
+      ]);
+      const ans = 'The forces are balanced (gravity down equals support up).';
+      const wrong = [
+        'There are no forces on the book at all.',
+        'Gravity is the only force acting on the book.',
+        'The forces are unbalanced, so the book is moving slowly.',
+      ];
+      const { options, correctOptionId } = makeOptions(ans, wrong, ctx.rng);
+      return baseQ(ctx, t, {
+        prompt: lead,
+        options, correctOptionId, correctAnswerLabel: ans,
+        explanationSteps: [
+          'An object that is not moving has balanced forces.',
+          'Gravity pulls the book down; the table pushes it up with the same force.',
+        ],
+        commonTrap: 'No motion does NOT mean no forces — it means balanced forces.',
+        mistakeTags: ['concept-gap'], ageMin: 10, ageMax: 16,
+      });
+    }),
+
+  ct({ id: 'sci-experimental-variable-v6', testIds: [...STEM, ...APT], domain: 'science-reasoning', skillId: 'science-reasoning', difficulty: 4 },
+    (ctx, t) => {
+      const lead = phrase(ctx.rng, [
+        'Maria wants to know if plants grow taller with more sunlight. She gives three plants 2, 4, and 6 hours of sunlight a day, and gives all of them the same water and soil. What is the independent variable?',
+        'In an experiment testing how sunlight affects plant growth, with everything else held constant, which is the independent variable?',
+      ]);
+      const ans = 'The amount of sunlight';
+      const wrong = ['The height of the plants', 'The amount of water', 'The type of soil'];
+      const { options, correctOptionId } = makeOptions(ans, wrong, ctx.rng);
+      return baseQ(ctx, t, {
+        prompt: lead,
+        options, correctOptionId, correctAnswerLabel: ans,
+        explanationSteps: [
+          'The independent variable is what the scientist deliberately changes.',
+          'Here, sunlight is being changed; everything else is held constant.',
+          'Plant height is the *dependent* variable — what gets measured.',
+        ],
+        commonTrap: 'The thing being measured is the dependent variable, not the independent one.',
+        mistakeTags: ['concept-gap', 'multi-step-reasoning'], ageMin: 11, ageMax: 16,
+      });
+    }),
+
+  // ── Coding logic (4 templates incl. negative indexing) ─────────────────
+
+  ct({ id: 'code-loop-trace-v6', testIds: [...CODE, ...APT], domain: 'coding-logic', skillId: 'coding-logic', difficulty: 3 },
+    (ctx, t) => {
+      const start = ctx.rng.int(1, 3);
+      const reps = ctx.rng.int(3, 5);
+      const total = start * reps;
+      const lead = phrase(ctx.rng, [
+        `total = 0\nfor i in range(${reps}):\n    total = total + ${start}\nWhat is total at the end?`,
+        `Trace this loop:\nlet total = 0;\nfor (let i = 0; i < ${reps}; i++) total += ${start};\nWhat is total?`,
+      ]);
+      const { options, correctOptionId } = makeOptions(String(total), [
+        String(reps), String(start), String(total + start)
+      ], ctx.rng);
+      return baseQ(ctx, t, {
+        prompt: lead,
+        options, correctOptionId, correctAnswerLabel: String(total),
+        explanationSteps: [
+          `The loop body runs ${reps} times.`,
+          `Each time, total increases by ${start}.`,
+          `Final: ${reps} × ${start} = ${total}.`,
+        ],
+        mistakeTags: ['multi-step-reasoning', 'concept-gap'], ageMin: 11, ageMax: 18,
+      });
+    }),
+
+  ct({ id: 'code-conditional-v6', testIds: [...CODE], domain: 'coding-logic', skillId: 'coding-logic', difficulty: 3 },
+    (ctx, t) => {
+      const x = ctx.rng.int(3, 9);
+      const y = ctx.rng.int(3, 9);
+      const result = x > y ? 'A' : x < y ? 'B' : 'C';
+      const lead = `x = ${x}\ny = ${y}\nif x > y:\n    print("A")\nelif x < y:\n    print("B")\nelse:\n    print("C")\nWhat does this print?`;
+      const { options, correctOptionId } = makeOptions(result, ['A', 'B', 'C'].filter(v => v !== result), ctx.rng);
+      return baseQ(ctx, t, {
+        prompt: lead,
+        options, correctOptionId, correctAnswerLabel: result,
+        explanationSteps: [
+          `Compare x = ${x} and y = ${y}.`,
+          x > y ? 'x is greater, so the first branch runs and prints "A".'
+                : x < y ? 'x is smaller, so the elif branch runs and prints "B".'
+                : 'x equals y, so the else branch runs and prints "C".',
+        ],
+        mistakeTags: ['concept-gap', 'attention-to-detail'], ageMin: 11, ageMax: 18,
+      });
+    }),
+
+  ct({ id: 'code-list-negative-index-v6', testIds: [...CODE], domain: 'coding-logic', skillId: 'coding-logic', difficulty: 4 },
+    (ctx, t) => {
+      const items = ['apple', 'pear', 'lemon', 'plum'];
+      const idx = ctx.rng.int(1, 3); // 1, 2, or 3
+      const value = items[items.length - idx];
+      const lead = phrase(ctx.rng, [
+        `fruits = ["apple", "pear", "lemon", "plum"]\nWhat is fruits[-${idx}] in Python?`,
+        `In Python, given the list ["apple", "pear", "lemon", "plum"], what is the value at index -${idx}?`,
+      ]);
+      const { options, correctOptionId } = makeOptions(value, items.filter(v => v !== value), ctx.rng);
+      return baseQ(ctx, t, {
+        prompt: lead,
+        options, correctOptionId, correctAnswerLabel: value,
+        explanationSteps: [
+          'In Python, negative indices count from the end.',
+          'Index -1 is the last item, -2 is second-to-last, and so on.',
+          `Index -${idx} on a 4-item list points to: "${value}".`,
+        ],
+        commonTrap: 'Negative indices count from the END, not the start.',
+        mistakeTags: ['concept-gap'], ageMin: 12, ageMax: 18,
+      });
+    }),
+
+  ct({ id: 'code-debug-off-by-one-v6', testIds: [...CODE], domain: 'coding-logic', skillId: 'coding-logic', difficulty: 4 },
+    (ctx, t) => {
+      const lead = `A programmer wants to print the numbers 1 through 5. They write:\n\nfor i in range(1, 5):\n    print(i)\n\nWhat is wrong?`;
+      const ans = 'The loop stops at 4 because range(1, 5) does not include 5.';
+      const wrong = [
+        'The loop will run forever.',
+        'The loop prints nothing.',
+        'The loop prints 1 through 6.',
+      ];
+      const { options, correctOptionId } = makeOptions(ans, wrong, ctx.rng);
+      return baseQ(ctx, t, {
+        prompt: lead,
+        options, correctOptionId, correctAnswerLabel: ans,
+        explanationSteps: [
+          'In Python, range(a, b) goes from a up to b - 1.',
+          'So range(1, 5) yields 1, 2, 3, 4 — not 5.',
+          'To include 5, use range(1, 6).',
+        ],
+        commonTrap: 'The end value of range() is exclusive — a classic off-by-one bug.',
+        mistakeTags: ['concept-gap', 'attention-to-detail'], ageMin: 12, ageMax: 18,
+      });
+    }),
+
+  // ── Mechanical reasoning (3 templates) ─────────────────────────────────
+
+  ct({ id: 'mech-pulley-v6', testIds: [...MIL, ...STEM], domain: 'mechanical-reasoning', skillId: 'mechanical-reasoning', difficulty: 3 },
+    (ctx, t) => {
+      const lead = phrase(ctx.rng, [
+        'A simple pulley with two supporting ropes lifts a 100 kg load. About how much force is needed to lift it (ignoring friction)?',
+        'You use a pulley system with 2 supporting rope segments to raise a 100 kg crate. What force do you need (ignoring friction)?',
+      ]);
+      const ans = 'About 50 kg of force';
+      const wrong = ['About 100 kg of force', 'About 200 kg of force', 'No force at all'];
+      const { options, correctOptionId } = makeOptions(ans, wrong, ctx.rng);
+      return baseQ(ctx, t, {
+        prompt: lead,
+        options, correctOptionId, correctAnswerLabel: ans,
+        explanationSteps: [
+          'A pulley with N supporting ropes gives a mechanical advantage of N.',
+          'With 2 supporting ropes, force needed is 100 ÷ 2 = 50 kg.',
+        ],
+        commonTrap: 'A pulley does not eliminate force — it reduces it.',
+        mistakeTags: ['concept-gap'], ageMin: 12, ageMax: 18,
+      });
+    }),
+
+  ct({ id: 'mech-lever-balance-v6', testIds: [...MIL, ...STEM], domain: 'mechanical-reasoning', skillId: 'mechanical-reasoning', difficulty: 3 },
+    (ctx, t) => {
+      const w1 = ctx.rng.pick([10, 20, 40]);
+      const d1 = ctx.rng.pick([2, 4]);
+      const d2 = ctx.rng.int(1, 4);
+      const w2 = (w1 * d1) / d2;
+      const lead = `On a balanced seesaw, a ${w1} kg weight sits ${d1} m from the centre. To balance, what weight is needed at ${d2} m on the other side?`;
+      const { options, correctOptionId } = makeOptions(`${w2} kg`, [
+        `${w1} kg`, `${w1 * 2} kg`, `${w1 / 2} kg`
+      ], ctx.rng);
+      return baseQ(ctx, t, {
+        prompt: lead,
+        options, correctOptionId, correctAnswerLabel: `${w2} kg`,
+        explanationSteps: [
+          'A lever balances when weight × distance is the same on both sides.',
+          `Left side: ${w1} × ${d1} = ${w1*d1}.`,
+          `Right side: weight × ${d2} = ${w1*d1}, so weight = ${w2} kg.`,
+        ],
+        mistakeTags: ['concept-gap', 'multi-step-reasoning'], ageMin: 12, ageMax: 18,
+      });
+    }),
+
+  ct({ id: 'mech-gears-v6', testIds: [...MIL, ...STEM], domain: 'mechanical-reasoning', skillId: 'mechanical-reasoning', difficulty: 3 },
+    (ctx, t) => {
+      const lead = phrase(ctx.rng, [
+        'A small gear with 10 teeth drives a large gear with 30 teeth. If the small gear turns 3 full times, how many turns does the large gear make?',
+        'A 10-tooth gear is meshed with a 30-tooth gear. The small one rotates 3 times. How many rotations does the large gear make?',
+      ]);
+      const ans = '1 turn';
+      const wrong = ['3 turns', '9 turns', '6 turns'];
+      const { options, correctOptionId } = makeOptions(ans, wrong, ctx.rng);
+      return baseQ(ctx, t, {
+        prompt: lead,
+        options, correctOptionId, correctAnswerLabel: ans,
+        explanationSteps: [
+          'For each tooth a small gear advances, the large gear advances one tooth too.',
+          '3 turns × 10 teeth = 30 teeth advanced on the large gear.',
+          '30 teeth ÷ 30 teeth per turn = 1 full turn.',
+        ],
+        commonTrap: 'A larger gear turns SLOWER, not faster, when driven by a smaller one.',
+        mistakeTags: ['concept-gap'], ageMin: 12, ageMax: 18,
+      });
+    }),
+
+  // ── Working memory (3 templates) ───────────────────────────────────────
+
+  ct({ id: 'wm-digit-recall-v6', testIds: [...APT], domain: 'working-memory', skillId: 'working-memory', difficulty: 3 },
+    (ctx, t) => {
+      const digits = Array.from({ length: 5 }, () => ctx.rng.int(0, 9));
+      const sequence = digits.join('-');
+      const reversed = digits.slice().reverse().join('-');
+      const lead = `Read this number sequence and remember it: ${sequence}\n\nNow read it BACKWARDS. Which is correct?`;
+      const wrong = [
+        digits.join(''),
+        [...digits].sort().join('-'),
+        digits.slice(1).reverse().join('-'),
+      ];
+      const { options, correctOptionId } = makeOptions(reversed, wrong, ctx.rng);
+      return baseQ(ctx, t, {
+        prompt: lead,
+        options, correctOptionId, correctAnswerLabel: reversed,
+        explanationSteps: [
+          'Hold the sequence in mind and reverse it.',
+          `${sequence} reversed is ${reversed}.`,
+        ],
+        commonTrap: 'Reversing a sequence is not the same as sorting it.',
+        mistakeTags: ['attention-to-detail'], ageMin: 10, ageMax: 18,
+      });
+    }),
+
+  ct({ id: 'wm-instruction-follow-v6', testIds: [...APT, ...KG], domain: 'working-memory', skillId: 'following-directions', difficulty: 2 },
+    (ctx, t) => {
+      const items = [
+        { q: 'Listen carefully: First, clap once. Then stand up. Then sit down. What is the SECOND thing to do?', answer: 'Stand up', wrong: ['Clap once', 'Sit down', 'Wave'] },
+        { q: 'Pretend a teacher says: "Open your book, write your name, then close the book." What is the LAST thing to do?', answer: 'Close the book', wrong: ['Open your book', 'Write your name', 'Stand up'] },
+      ];
+      const item = ctx.rng.pick(items);
+      const { options, correctOptionId } = makeOptions(item.answer, item.wrong, ctx.rng);
+      return baseQ(ctx, t, {
+        prompt: item.q,
+        options, correctOptionId, correctAnswerLabel: item.answer,
+        explanationSteps: [
+          'Hold all the steps in mind.',
+          `Pick the one that matches the position asked for.`,
+        ],
+        mistakeTags: ['attention-to-detail'], ageMin: 5, ageMax: 12,
+      });
+    }),
+
+  ct({ id: 'wm-letter-recall-v6', testIds: [...APT], domain: 'working-memory', skillId: 'working-memory', difficulty: 3 },
+    (ctx, t) => {
+      const letters = 'BCDFGHJKLMNPRSTV'.split('');
+      const seq = ctx.rng.pickN(letters, 5);
+      const fourth = seq[3];
+      const lead = `Remember this sequence of letters: ${seq.join(' ')}\n\nWhat is the FOURTH letter?`;
+      const wrong = [seq[0], seq[1], seq[4]];
+      const { options, correctOptionId } = makeOptions(fourth, wrong, ctx.rng);
+      return baseQ(ctx, t, {
+        prompt: lead,
+        options, correctOptionId, correctAnswerLabel: fourth,
+        explanationSteps: [
+          'Count the letters from the left.',
+          `The 4th letter in "${seq.join(' ')}" is "${fourth}".`,
+        ],
+        mistakeTags: ['attention-to-detail'], ageMin: 9, ageMax: 16,
+      });
+    }),
+
+  // ── Algebra readiness (3 templates) ────────────────────────────────────
+
+  ct({ id: 'alg-solve-linear-v6', testIds: [...ALG, ...MATH], domain: 'algebra-readiness', skillId: 'algebra-readiness', difficulty: 3 },
+    (ctx, t) => {
+      const a = ctx.rng.pick([2, 3, 4, 5]);
+      const b = ctx.rng.int(2, 10);
+      const x = ctx.rng.int(2, 8);
+      const c = a * x + b;
+      const lead = phrase(ctx.rng, [
+        `Solve for x: ${a}x + ${b} = ${c}`,
+        `What value of x makes the equation ${a}x + ${b} = ${c} true?`,
+      ]);
+      const { options, correctOptionId } = makeOptions(String(x), [
+        String(x + 1), String(x - 1), String(c - b)
+      ], ctx.rng);
+      return baseQ(ctx, t, {
+        prompt: lead,
+        options, correctOptionId, correctAnswerLabel: String(x),
+        explanationSteps: [
+          `Subtract ${b} from both sides: ${a}x = ${c - b}.`,
+          `Divide both sides by ${a}: x = ${x}.`,
+        ],
+        commonTrap: 'You must do the same operation to BOTH sides of the equation.',
+        mistakeTags: ['procedure-error', 'concept-gap'], ageMin: 11, ageMax: 16,
+      });
+    }),
+
+  ct({ id: 'alg-evaluate-expression-v6', testIds: [...ALG, ...MATH], domain: 'algebra-readiness', skillId: 'algebra-readiness', difficulty: 2 },
+    (ctx, t) => {
+      const x = ctx.rng.int(2, 8);
+      const a = ctx.rng.int(2, 6);
+      const b = ctx.rng.int(1, 9);
+      const value = a * x - b;
+      const lead = `Evaluate ${a}x − ${b} when x = ${x}.`;
+      const { options, correctOptionId } = makeOptions(String(value), [
+        String(value + b), String(a + x - b), String(value - a)
+      ], ctx.rng);
+      return baseQ(ctx, t, {
+        prompt: lead,
+        options, correctOptionId, correctAnswerLabel: String(value),
+        explanationSteps: [
+          `Substitute x = ${x}: ${a}(${x}) − ${b} = ${a*x} − ${b}.`,
+          `${a*x} − ${b} = ${value}.`,
+        ],
+        mistakeTags: ['calculation-error', 'concept-gap'], ageMin: 10, ageMax: 14,
+      });
+    }),
+
+  ct({ id: 'alg-inequality-v6', testIds: [...ALG], domain: 'algebra-readiness', skillId: 'algebra-readiness', difficulty: 4 },
+    (ctx, t) => {
+      const lead = phrase(ctx.rng, [
+        'Which value of x makes the inequality x + 5 > 12 true?',
+        'For which x is x + 5 > 12?',
+      ]);
+      const correct = '8';
+      const wrong = ['5', '7', '6'];
+      const { options, correctOptionId } = makeOptions(correct, wrong, ctx.rng);
+      return baseQ(ctx, t, {
+        prompt: lead,
+        options, correctOptionId, correctAnswerLabel: correct,
+        explanationSteps: [
+          'Subtract 5 from both sides: x > 7.',
+          'So any value greater than 7 works. From the choices, 8 is the only one.',
+        ],
+        commonTrap: 'The inequality is strict (>), so 7 itself does NOT make it true.',
+        mistakeTags: ['concept-gap', 'procedure-error'], ageMin: 12, ageMax: 16,
+      });
+    }),
+
+  // ── Kindergarten readiness with visuals (2 templates) ──────────────────
+
+  ct({ id: 'kg-count-stars-v6', testIds: [...KG], domain: 'school-readiness', skillId: 'counting', difficulty: 1 },
+    (ctx, t) => {
+      const n = ctx.rng.int(3, 7);
+      const lead = phrase(ctx.rng, [
+        'Count the stars. How many do you see?',
+        'How many stars are shown above?',
+      ]);
+      const { options, correctOptionId } = makeOptions(String(n), [
+        String(n - 1), String(n + 1), String(n + 2)
+      ], ctx.rng);
+      return baseQ(ctx, t, {
+        prompt: lead,
+        visualType: 'count-stars',
+        visualParams: { count: n },
+        options, correctOptionId, correctAnswerLabel: String(n),
+        explanationSteps: [
+          'Touch each star with your eyes one at a time.',
+          `Count: 1, 2, 3 ... up to ${n}.`,
+        ],
+        mistakeTags: ['attention-to-detail', 'calculation-error'], ageMin: 4, ageMax: 7,
+      });
+    }),
+
+  ct({ id: 'kg-letter-sound-v6', testIds: [...KG], domain: 'vocabulary', skillId: 'vocabulary', difficulty: 1 },
+    (ctx, t) => {
+      const items = [
+        { q: 'Which word starts with the letter "B"?', answer: 'Ball', wrong: ['Cat', 'Dog', 'Apple'] },
+        { q: 'Which word starts with the letter "S"?', answer: 'Sun', wrong: ['Tree', 'Hat', 'Egg'] },
+        { q: 'Which word starts with the letter "M"?', answer: 'Moon', wrong: ['Boat', 'Pen', 'Owl'] },
+      ];
+      const item = ctx.rng.pick(items);
+      const { options, correctOptionId } = makeOptions(item.answer, item.wrong, ctx.rng);
+      return baseQ(ctx, t, {
+        prompt: item.q,
+        options, correctOptionId, correctAnswerLabel: item.answer,
+        explanationSteps: [
+          'Listen for the FIRST sound in each word.',
+          `"${item.answer}" begins with that letter.`,
+        ],
+        mistakeTags: ['vocabulary-confusion'], ageMin: 4, ageMax: 6,
+      });
+    }),
+
+];
+
+// Merge v6 templates into the main array
+questionTemplates.push(...v6Templates);
 
 // ─── Exports ─────────────────────────────────────────────────────────────────
 

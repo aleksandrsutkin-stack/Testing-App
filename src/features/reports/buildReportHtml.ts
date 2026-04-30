@@ -1,5 +1,14 @@
 // src/features/reports/buildReportHtml.ts
-// Polished v0.4 ScoreLift PDF report.
+//
+// v0.6 — major migration:
+//   - Cover lead metric is now the ScoreLift Score (1–100), not the old IQ-style
+//     QuestionLiftIQ Index (70–130). The pill below it shows the readiness band.
+//   - Percentile section cites the benchmark source (e.g. "vs. NWEA MAP grade
+//     norms") and uses the per-test caveat from result.percentileEstimate.
+//   - PdfScoreLift uses previousScore / liftScore (was: previousIndex / liftIndex).
+//   - PDF is intentionally light-mode only — keeps the print/share artefact
+//     readable everywhere.
+//
 // Sections:
 //   Cover → Score Lift (if provided) → Score Summary → Domain Profile →
 //   Strengths & Growth → Mistake Map → 7-Day Plan → Footer
@@ -34,10 +43,19 @@ function domainColor(domain: string): string {
   return (DOMAIN_COLORS as Record<string, string>)[domain] ?? '#4F46E5';
 }
 
-type BandColor = { bg: string; text: string; border: string; accent: string };
+function bandStyle(band: string) {
+  return (BAND_COLORS as Record<string, typeof BAND_COLORS['on-grade']>)[band] ?? BAND_COLORS['on-grade'];
+}
 
-function bandStyle(band: string): BandColor {
-  return (BAND_COLORS as Record<string, BandColor>)[band] ?? BAND_COLORS['developing'];
+// Short-name a verbose benchmark source for the cover badge.
+function benchmarkShortName(source: string | undefined): string {
+  if (!source) return 'Public norm';
+  if (source.includes('NWEA MAP')) return 'NWEA MAP';
+  if (source.includes('IAAT') || source.includes('Iowa Algebra')) return 'IAAT';
+  if (source.includes('DAT-5') || source.includes('Differential Aptitude')) return 'DAT-5';
+  if (source.includes('BRACKEN')) return 'BRACKEN-3';
+  if (source.includes('AFQT') || source.includes('ASVAB')) return 'ASVAB AFQT';
+  return source.split(' ').slice(0, 3).join(' ');
 }
 
 // ─── Optional ScoreLift type for PDF (mirrors historyService) ────────────────
@@ -45,10 +63,12 @@ function bandStyle(band: string): BandColor {
 export interface PdfScoreLift {
   hasPrevious: boolean;
   previousPercent?: number;
-  previousIndex?: number;
+  // v0.6: ScoreLift Score (1–100). Was: previousIndex (70–130).
+  previousScore?: number;
   previousDate?: string;
   liftPercent?: number;
-  liftIndex?: number;
+  // v0.6: Delta in ScoreLift Score. Was: liftIndex.
+  liftScore?: number;
 }
 
 // ─── Domain rows ─────────────────────────────────────────────────────────────
@@ -147,13 +167,13 @@ function planRows(assignments: PracticeAssignment[]): string {
     </tr>`).join('');
 }
 
-// ─── Score-lift section (NEW in v0.4) ────────────────────────────────────────
+// ─── Score-lift section (v0.6 — uses scoreLiftScore) ─────────────────────────
 
-function scoreLiftSection(lift: PdfScoreLift | undefined, currentPercent: number, currentIndex: number): string {
+function scoreLiftSection(lift: PdfScoreLift | undefined, currentPercent: number, currentScore: number): string {
   if (!lift || !lift.hasPrevious) return '';
 
   const liftPct = lift.liftPercent ?? 0;
-  const liftIdx = lift.liftIndex ?? 0;
+  const liftScoreDelta = lift.liftScore ?? 0;
   const direction = liftPct > 0 ? 'up' : liftPct < 0 ? 'down' : 'flat';
   const tone = direction === 'up'
     ? { bg: '#ECFDF5', border: '#6EE7B7', text: '#065F46', accent: '#10B981', label: 'Score lift!' }
@@ -162,7 +182,7 @@ function scoreLiftSection(lift: PdfScoreLift | undefined, currentPercent: number
     : { bg: '#F1F5F9', border: '#CBD5E1', text: '#475569', accent: '#64748B', label: 'Same as last attempt' };
 
   const sign = liftPct > 0 ? '+' : '';
-  const idxSign = liftIdx > 0 ? '+' : '';
+  const scoreSign = liftScoreDelta > 0 ? '+' : '';
   const prevPct = Math.round((lift.previousPercent ?? 0) * 100);
   const currentPctRounded = Math.round(currentPercent * 100);
   const prevDate = lift.previousDate ? new Date(lift.previousDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
@@ -178,7 +198,7 @@ function scoreLiftSection(lift: PdfScoreLift | undefined, currentPercent: number
           </div>
           <div style="text-align:right;">
             <div style="font-size:24px;font-weight:700;color:${tone.text};">${sign}${liftPct}%</div>
-            <div style="font-size:11px;color:${tone.text};opacity:0.8;">${idxSign}${liftIdx} index</div>
+            <div style="font-size:11px;color:${tone.text};opacity:0.8;">${scoreSign}${liftScoreDelta} ScoreLift Score</div>
           </div>
         </div>
         <div style="display:flex;align-items:center;gap:14px;border-top:1px solid ${tone.border};padding-top:12px;">
@@ -201,6 +221,7 @@ function scoreLiftSection(lift: PdfScoreLift | undefined, currentPercent: number
 export function buildReportHtml(result: AssessmentResult, lift?: PdfScoreLift): string {
   const pct = Math.round(result.percent * 100);
   const bs = bandStyle(result.readinessBand);
+  const benchShort = benchmarkShortName(result.percentileEstimate.benchmarkSource);
 
   const missedSection = result.missedQuestions.length === 0
     ? `<div style="background:#F0FDF4;border:1px solid #86EFAC;border-radius:12px;padding:16px 20px;text-align:center;">
@@ -244,8 +265,9 @@ export function buildReportHtml(result: AssessmentResult, lift?: PdfScoreLift): 
       <div style="font-size:13px;color:#C7D2FE;">Age ${result.age} &nbsp;·&nbsp; ${esc(gradeLabel(result.grade))} &nbsp;·&nbsp; ${esc(formatDate(result.completedAtIso))}</div>
     </div>
     <div style="text-align:right;">
-      <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.07em;color:#A5B4FC;margin-bottom:4px;">${esc(BRAND.productIndexName)}</div>
-      <div style="font-size:52px;font-weight:700;line-height:1;color:#fff;">${result.questionLiftIndex}</div>
+      <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.07em;color:#A5B4FC;margin-bottom:4px;">${esc(BRAND.productScoreName)}</div>
+      <div style="font-size:52px;font-weight:700;line-height:1;color:#fff;">${result.scoreLiftScore}</div>
+      <div style="font-size:11px;color:#C7D2FE;margin-top:2px;">${esc(result.scoreLiftScoreLabel)} &nbsp;·&nbsp; 1–100, 50 = on grade</div>
     </div>
   </div>
 
@@ -258,7 +280,7 @@ export function buildReportHtml(result: AssessmentResult, lift?: PdfScoreLift): 
     <div style="background:rgba(255,255,255,0.12);border-radius:14px;padding:14px;">
       <div style="font-size:10px;font-weight:600;letter-spacing:0.07em;text-transform:uppercase;color:#A5B4FC;margin-bottom:6px;">Estimated percentile</div>
       <div style="font-size:32px;font-weight:700;color:#fff;">${esc(result.percentileEstimate.rangeLabel)}</div>
-      <div style="font-size:12px;color:#C7D2FE;">Static estimate model</div>
+      <div style="font-size:12px;color:#C7D2FE;">vs. ${esc(benchShort)}</div>
     </div>
     <div style="background:rgba(255,255,255,0.12);border-radius:14px;padding:14px;">
       <div style="font-size:10px;font-weight:600;letter-spacing:0.07em;text-transform:uppercase;color:#A5B4FC;margin-bottom:6px;">Readiness band</div>
@@ -268,13 +290,19 @@ export function buildReportHtml(result: AssessmentResult, lift?: PdfScoreLift): 
   </div>
 </div>
 
-${scoreLiftSection(lift, result.percent, result.questionLiftIndex)}
+${scoreLiftSection(lift, result.percent, result.scoreLiftScore)}
 
 <!-- ── SCORE SUMMARY ─────────────────────────────────────────────────────── -->
 <div class="section">
   <h2>Score summary</h2>
   <div style="background:${bs.bg};border:1px solid ${bs.border};border-radius:12px;padding:16px 20px;margin-bottom:12px;">
     <p style="margin:0;font-size:14px;color:${bs.text};">${esc(result.summary)}</p>
+  </div>
+  <div style="background:#F8FAFC;border:1px solid #E5E7EB;border-radius:10px;padding:12px 14px;margin-bottom:8px;">
+    <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:#6B7280;margin-bottom:4px;">Percentile benchmark</div>
+    <p style="margin:0;font-size:12px;color:#374151;line-height:1.55;">
+      Compared against: <strong>${esc(result.percentileEstimate.benchmarkSource ?? 'Public norm table')}</strong>.
+    </p>
   </div>
   <p style="font-size:12px;color:#9CA3AF;margin:0;">${esc(result.percentileEstimate.caveat)}</p>
 </div>

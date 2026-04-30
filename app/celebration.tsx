@@ -1,18 +1,16 @@
 // app/celebration.tsx
 //
 // 1.7-second finish-the-test moment. Live-scores the responses, counts the
-// percent correct from 0 → final, animates a check, then forwards to /results
-// with the same params. Adds a single moment of delight without competing with
-// the actual report.
+// percent correct from 0 → final, animates a check, then forwards to /results.
+// Always-dark by design (the celebration screen is its own visual moment).
 
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Animated, Easing, StyleSheet, Text, View } from 'react-native';
 import { Check } from 'lucide-react-native';
-import { createAssessmentSession, selectBalancedSample } from '../src/features/assessment/assembleAssessment';
+import { createAssessmentSession } from '../src/features/assessment/assembleAssessment';
 import { scoreAssessment } from '../src/features/assessment/scoreAssessment';
 import { ResponseMap, TestId } from '../src/features/assessment/types';
-import { colors } from '../src/theme/colors';
 
 function firstParam(value: string | string[] | undefined, fallback: string): string {
   if (Array.isArray(value)) return value[0] ?? fallback;
@@ -33,7 +31,7 @@ export default function CelebrationScreen() {
     try {
       const responses: ResponseMap = JSON.parse(responsesJson);
       const session = createAssessmentSession({ testId, age, grade, seed });
-      const questions = sampleSize ? selectBalancedSample(session.questions, Number(sampleSize)) : session.questions;
+      const questions = sampleSize ? session.questions.slice(0, Number(sampleSize)) : session.questions;
       const result = scoreAssessment({ profile: { testId, age, grade }, questions, responses, seed });
       return Math.round(result.percent * 100);
     } catch {
@@ -47,12 +45,10 @@ export default function CelebrationScreen() {
   const cardOpacity = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    // Card fade in
     Animated.timing(cardOpacity, {
       toValue: 1, duration: 260, easing: Easing.out(Easing.quad), useNativeDriver: true
     }).start();
 
-    // Check pop in (after a brief beat)
     Animated.sequence([
       Animated.delay(180),
       Animated.parallel([
@@ -61,7 +57,6 @@ export default function CelebrationScreen() {
       ])
     ]).start();
 
-    // Count up the percent over ~900ms, ease-out
     const totalMs = 900;
     const steps = 30;
     const stepMs = totalMs / steps;
@@ -69,7 +64,7 @@ export default function CelebrationScreen() {
     const interval = setInterval(() => {
       i += 1;
       const progress = i / steps;
-      const eased = 1 - Math.pow(1 - progress, 2.4); // ease-out-quad-ish
+      const eased = 1 - Math.pow(1 - progress, 2.4);
       setDisplayPercent(Math.round(finalPercent * eased));
       if (i >= steps) {
         setDisplayPercent(finalPercent);
@@ -77,7 +72,6 @@ export default function CelebrationScreen() {
       }
     }, stepMs);
 
-    // Forward to results after the full moment is done.
     const forwardTimer = setTimeout(() => {
       router.replace({
         pathname: '/results',
@@ -111,28 +105,15 @@ export default function CelebrationScreen() {
 
 const styles = StyleSheet.create({
   root: {
-    flex: 1,
-    backgroundColor: '#1E1B4B',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 24
+    flex: 1, backgroundColor: '#1E1B4B',
+    alignItems: 'center', justifyContent: 'center', padding: 24
   },
-  card: {
-    alignItems: 'center',
-    gap: 14
-  },
+  card: { alignItems: 'center', gap: 14 },
   checkBubble: {
-    width: 96,
-    height: 96,
-    borderRadius: 48,
+    width: 96, height: 96, borderRadius: 48,
     backgroundColor: '#10B981',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 16,
-    shadowColor: '#10B981',
-    shadowOpacity: 0.5,
-    shadowRadius: 24,
-    shadowOffset: { width: 0, height: 8 }
+    alignItems: 'center', justifyContent: 'center', marginBottom: 16,
+    shadowColor: '#10B981', shadowOpacity: 0.5, shadowRadius: 24, shadowOffset: { width: 0, height: 8 }
   },
   title: { color: '#FFFFFF', fontSize: 28, fontWeight: '700' },
   percent: { color: '#A5B4FC', fontSize: 64, fontWeight: '700', lineHeight: 70 },

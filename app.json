@@ -2,7 +2,7 @@
   "expo": {
     "name": "QuestionLiftIQ",
     "slug": "questionliftiq",
-    "version": "0.5.1",
+    "version": "0.3.0",
     "orientation": "portrait",
     "scheme": "questionliftiq",
     "userInterfaceStyle": "automatic",

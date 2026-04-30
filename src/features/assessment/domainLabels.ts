@@ -1,3 +1,6 @@
+// src/features/assessment/domainLabels.ts
+// v0.6: 5-band score model with parent-friendly labels.
+
 import { DomainId, ScoreBand } from './types';
 
 export const domainLabels: Record<DomainId, string> = {
@@ -21,20 +24,30 @@ export const domainLabels: Record<DomainId, string> = {
   'executive-function': 'Focus & Executive Function'
 };
 
+// v0.6 5-band labels. Parent-friendly. No "Needs Practice" stigma.
 export const scoreBandLabels: Record<ScoreBand, string> = {
-  'needs-practice': 'Needs Practice',
-  'developing': 'Developing',
-  'ready-soon': 'Ready Soon',
-  'ready': 'Ready',
-  'advanced': 'Advanced'
+  'well-above':  'Well above grade',
+  'above':       'Above grade',
+  'on-grade':    'On grade level',
+  'approaching': 'Approaching grade',
+  'below':       'Building foundations'
 };
 
+/**
+ * v0.6 band thresholds. Tied to the ScoreLift Score model where 50 = on-grade.
+ * Cuts at the percent-correct level:
+ *   ≥0.85 → well-above
+ *   ≥0.70 → above
+ *   ≥0.50 → on-grade
+ *   ≥0.30 → approaching
+ *   else  → below
+ */
 export function getBand(percent: number): ScoreBand {
-  if (percent >= 0.9) return 'advanced';
-  if (percent >= 0.78) return 'ready';
-  if (percent >= 0.65) return 'ready-soon';
-  if (percent >= 0.45) return 'developing';
-  return 'needs-practice';
+  if (percent >= 0.85) return 'well-above';
+  if (percent >= 0.70) return 'above';
+  if (percent >= 0.50) return 'on-grade';
+  if (percent >= 0.30) return 'approaching';
+  return 'below';
 }
 
 export function getReadinessLabel(band: ScoreBand): string {

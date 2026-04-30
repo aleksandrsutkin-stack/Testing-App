@@ -1,9 +1,22 @@
+// src/features/assessment/scoreAssessment.ts
+//
+// v0.6: Migrated to ScoreLift Score + external benchmark percentiles.
+// The old QuestionLiftIQ Index (toIndex) and static-distribution percentile
+// estimation are gone. Now we use:
+//   - computeScoreLiftScore(percent, testId, grade)  for the 1–100 headline
+//   - estimatePercentile(percent, testId)            for directional percentile
+//
+// The result still exposes the same shape (just with `scoreLiftScore` instead
+// of `questionLiftIndex`), so consumers (results screen, PDF, history) all
+// migrate together.
+
 import { getTestDefinition } from '../../data/testCatalog';
 import { practiceLink } from '../../data/practiceLibrary';
-import { estimatePercentile, readinessFromPercent } from '../scoring/staticDistributions';
+import { computeScoreLiftScore, scoreLiftScoreLabel } from '../scoring/scoreLiftScore';
+import { estimatePercentile } from '../scoring/externalBenchmarks';
 import {
   AssessmentQuestion, AssessmentResult, DomainId, DomainScore,
-  LearnerProfile, MissedQuestionReview, PracticeAssignment, ResponseMap
+  LearnerProfile, MissedQuestionReview, PracticeAssignment, ResponseMap, ScoreBand
 } from './types';
 import { domainLabels, getBand, getMistakeTypeLabel, scoreBandLabels } from './domainLabels';
 
@@ -19,9 +32,6 @@ function maxQuestionScore(q: AssessmentQuestion): number {
 function selectedAnswerLabel(q: AssessmentQuestion, id: string | undefined): string {
   if (!id) return 'No answer selected';
   return q.options.find(o => o.id === id)?.label ?? 'Unknown';
-}
-function toIndex(percent: number): number {
-  return Math.round(70 + percent * 60);
 }
 
 function buildStrengths(scores: DomainScore[]): string[] {
@@ -75,20 +85,25 @@ function buildPracticePlan(missed: MissedQuestionReview[], growth: string[]): Pr
   return Array.from(bySkill.values()).slice(0, 6);
 }
 
-function buildSummary(p: { percent: number; readinessLabel: string; percentileRange: string; missedCount: number; totalQuestions: number }): string {
+function buildSummary(p: { percent: number; readinessLabel: string; percentileRange: string; missedCount: number }): string {
   const pct = Math.round(p.percent * 100);
-  if (p.percent >= 0.9) return `Strong result: ${pct}% correct, estimated percentile range ${p.percentileRange}. Review the few misses, then try a harder sprint or related module.`;
-  if (p.percent >= 0.78) return `Ready result: ${pct}% correct, estimated around the ${p.percentileRange} range. The ScoreLift plan focuses on the ${p.missedCount} missed questions.`;
-  if (p.percent >= 0.65) return `Ready soon: ${pct}% correct, estimated around the ${p.percentileRange} range. A targeted week of practice on the missed-question patterns should help before retaking.`;
-  if (p.percent >= 0.45) return `Developing: ${pct}% correct. The most valuable next step is reviewing the Mistake Map and practising the skills linked below.`;
-  return `Needs practice: ${pct}% correct. Start with the first two growth areas and work through the step-by-step solutions before retaking.`;
+  if (p.percent >= 0.85) return `Strong result: ${pct}% correct, estimated around the ${p.percentileRange} range. Review the few misses, then try a harder sprint or related module.`;
+  if (p.percent >= 0.70) return `Above-grade result: ${pct}% correct, estimated around the ${p.percentileRange} range. The ScoreLift plan focuses on the ${p.missedCount} missed questions.`;
+  if (p.percent >= 0.50) return `On grade level: ${pct}% correct, estimated around the ${p.percentileRange} range. A targeted week of practice on the missed-question patterns should help before retaking.`;
+  if (p.percent >= 0.30) return `Approaching grade: ${pct}% correct. The most valuable next step is reviewing the Mistake Map and practising the skills linked below.`;
+  return `Building foundations: ${pct}% correct. Start with the first two growth areas and work through the step-by-step solutions before retaking.`;
 }
 
 function buildRetake(percent: number, missedCount: number): string {
-  if (percent >= 0.9) return 'Retake with a harder or adjacent module when ready.';
+  if (percent >= 0.85) return 'Retake with a harder or adjacent module when ready.';
   if (missedCount <= 2) return 'Review the missed solutions, practise for one short session, then take a new randomised retake sprint.';
-  if (percent >= 0.65) return 'Practise the top 2–3 weak skills for 3–4 days, then retake with new numbers and equivalent difficulty.';
+  if (percent >= 0.50) return 'Practise the top 2–3 weak skills for 3–4 days, then retake with new numbers and equivalent difficulty.';
   return 'Work through the step-by-step solutions and practice links for 5–7 days before retaking.';
+}
+
+function readinessFromPercent(percent: number): { band: ScoreBand; label: string } {
+  const band = getBand(percent);
+  return { band, label: scoreBandLabels[band] };
 }
 
 export function scoreAssessment(params: {
@@ -111,7 +126,19 @@ export function scoreAssessment(params: {
 
   const percent = maxScore > 0 ? rawScore / maxScore : 0;
   const readiness = readinessFromPercent(percent);
-  const percentileEstimate = estimatePercentile({ testId: params.profile.testId, age: params.profile.age, grade: params.profile.grade, percent });
+
+  // v0.6: NEW score and percentile
+  const scoreLiftScore = computeScoreLiftScore(percent, params.profile.testId, params.profile.grade);
+  const scoreLiftScoreLbl = scoreLiftScoreLabel(scoreLiftScore);
+  const benchmark = estimatePercentile(percent, params.profile.testId);
+
+  const percentileEstimate = {
+    percentile: benchmark.percentile,
+    rangeLabel: benchmark.rangeLabel,
+    distributionLabel: benchmark.source,        // legacy field; same value
+    benchmarkSource: benchmark.source,           // v0.6: new explicit field
+    caveat: benchmark.caveat,
+  };
 
   const domainScores = Array.from(accumulators.values()).map<DomainScore>(s => {
     const dp = s.maxScore > 0 ? s.rawScore / s.maxScore : 0;
@@ -128,9 +155,11 @@ export function scoreAssessment(params: {
     age: params.profile.age, grade: params.profile.grade, seed: params.seed,
     rawScore, maxScore, percent,
     percentCorrectLabel: `${Math.round(percent * 100)}%`,
-    questionLiftIndex: toIndex(percent),
-    percentileEstimate, readinessBand: readiness.band, readinessLabel: readiness.label,
-    summary: buildSummary({ percent, readinessLabel: readiness.label, percentileRange: percentileEstimate.rangeLabel, missedCount: missedQuestions.length, totalQuestions: params.questions.length }),
+    scoreLiftScore,
+    scoreLiftScoreLabel: scoreLiftScoreLbl,
+    percentileEstimate,
+    readinessBand: readiness.band, readinessLabel: readiness.label,
+    summary: buildSummary({ percent, readinessLabel: readiness.label, percentileRange: percentileEstimate.rangeLabel, missedCount: missedQuestions.length }),
     strengths, growthAreas, domainScores, missedQuestions, practicePlan,
     retakeRecommendation: buildRetake(percent, missedQuestions.length),
     completedAtIso: new Date().toISOString(),

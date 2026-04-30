@@ -1,3 +1,8 @@
+// src/features/assessment/types.ts
+// v0.6: scoreLiftScore (1–100) replaces questionLiftIndex (70–130).
+// 5 v0.6 band names: well-above / above / on-grade / approaching / below.
+// PercentileEstimate carries a benchmarkSource (e.g. "NWEA MAP grade norms").
+
 export type TestId =
   | 'questionliftiq-aptitude-snapshot'
   | 'compacted-math-readiness'
@@ -22,8 +27,7 @@ export type QuestionType = 'single-choice' | 'parent-rating';
 export type MistakeTag =
   | 'concept-gap' | 'procedure-error' | 'calculation-error' | 'misread-question'
   | 'vocabulary-confusion' | 'pattern-recognition' | 'time-pressure'
-  | 'multi-step-reasoning' | 'attention-to-detail' | 'spatial-visualization'
-  | 'reading-comprehension' | 'spatial-reasoning' | 'science-reasoning';
+  | 'multi-step-reasoning' | 'attention-to-detail' | 'spatial-visualization';
 
 export interface Range { min: number; max: number; }
 
@@ -89,15 +93,35 @@ export interface AssessmentSession {
 }
 
 export type ResponseMap = Record<string, string>;
-export type ScoreBand = 'needs-practice' | 'developing' | 'ready-soon' | 'ready' | 'advanced';
+
+// ─── v0.6: 5-band readiness model ────────────────────────────────────────────
+// Replaces: 'needs-practice' | 'developing' | 'ready-soon' | 'ready' | 'advanced'
+// Reasons:
+//  1. "below grade / above grade" reads parent-natural and ties cleanly to
+//     a 50-anchored ScoreLift Score.
+//  2. Removes "Needs Practice" stigma for early elementary parents.
+
+export type ScoreBand = 'below' | 'approaching' | 'on-grade' | 'above' | 'well-above';
 
 export interface DomainScore {
   domain: DomainId; label: string;
   rawScore: number; maxScore: number; percent: number; band: ScoreBand;
 }
 
+// ─── v0.6: PercentileEstimate carries benchmark source ───────────────────────
+
 export interface PercentileEstimate {
-  percentile: number; rangeLabel: string; distributionLabel: string; caveat: string;
+  percentile: number;
+  rangeLabel: string;
+  // Legacy (v0.5): kept so old code paths don't crash. New code reads benchmarkSource.
+  distributionLabel: string;
+  /**
+   * Human-readable name of the public norm table this percentile was mapped
+   * against, e.g. "NWEA MAP grade norms" or "ASVAB AFQT". Surfaced in the UI
+   * and in the PDF report so parents see what the comparison is against.
+   */
+  benchmarkSource?: string;
+  caveat: string;
 }
 
 export interface MissedQuestionReview {
@@ -117,7 +141,13 @@ export interface PracticeAssignment {
 export interface AssessmentResult {
   testId: TestId; testTitle: string; age: number; grade: number; seed: string;
   rawScore: number; maxScore: number; percent: number; percentCorrectLabel: string;
-  questionLiftIndex: number; percentileEstimate: PercentileEstimate;
+
+  // v0.6: NEW headline metric. 1–100 scale, 50 = on-grade-level expected
+  // performance for the test/age/grade. Replaces questionLiftIndex (70–130).
+  scoreLiftScore: number;
+  scoreLiftScoreLabel: string;
+
+  percentileEstimate: PercentileEstimate;
   readinessBand: ScoreBand; readinessLabel: string; summary: string;
   strengths: string[]; growthAreas: string[]; domainScores: DomainScore[];
   missedQuestions: MissedQuestionReview[]; practicePlan: PracticeAssignment[];

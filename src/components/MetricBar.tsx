@@ -1,5 +1,8 @@
+// src/components/MetricBar.tsx
+// v0.6: useColors() + makeStyles(colors) factory pattern. Light + dark mode.
+import { useMemo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { colors } from '../theme/colors';
+import { useColors, ColorPalette } from '../theme/colors';
 
 interface MetricBarProps {
   label: string;
@@ -9,6 +12,8 @@ interface MetricBarProps {
 }
 
 export function MetricBar({ label, percent, caption, color }: MetricBarProps) {
+  const colors = useColors();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const safe = Math.max(0, Math.min(percent, 100));
   const fillColor = color ?? colors.primary;
 
@@ -29,14 +34,16 @@ export function MetricBar({ label, percent, caption, color }: MetricBarProps) {
   );
 }
 
-const styles = StyleSheet.create({
-  wrapper: { gap: 6 },
-  row: { flexDirection: 'row', justifyContent: 'space-between', gap: 12, alignItems: 'center' },
-  labelRow: { flexDirection: 'row', alignItems: 'center', gap: 8, flex: 1 },
-  dot: { width: 9, height: 9, borderRadius: 5 },
-  label: { color: colors.ink, fontWeight: '600', flex: 1, fontSize: 14 },
-  value: { fontWeight: '700', fontSize: 14 },
-  track: { height: 9, backgroundColor: colors.surfaceMuted, borderRadius: 999, overflow: 'hidden' },
-  fill: { height: '100%', borderRadius: 999 },
-  caption: { color: colors.inkMuted, fontSize: 12, lineHeight: 17 }
-});
+function makeStyles(colors: ColorPalette) {
+  return StyleSheet.create({
+    wrapper: { gap: 6 },
+    row: { flexDirection: 'row', justifyContent: 'space-between', gap: 12, alignItems: 'center' },
+    labelRow: { flexDirection: 'row', alignItems: 'center', gap: 8, flex: 1 },
+    dot: { width: 9, height: 9, borderRadius: 5 },
+    label: { color: colors.ink, fontWeight: '600', flex: 1, fontSize: 14 },
+    value: { fontWeight: '700', fontSize: 14 },
+    track: { height: 9, backgroundColor: colors.surfaceMuted, borderRadius: 999, overflow: 'hidden' },
+    fill: { height: '100%', borderRadius: 999 },
+    caption: { color: colors.inkMuted, fontSize: 12, lineHeight: 17 }
+  });
+}

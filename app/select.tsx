@@ -1,3 +1,6 @@
+// app/select.tsx
+// v0.6: useColors() + makeStyles(colors) factory pattern. Full dark mode.
+
 import { router, useLocalSearchParams } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
@@ -11,7 +14,7 @@ import { getRecommendedTestsForProfile, getTestDefinition, testCatalog } from '.
 import { TestId } from '../src/features/assessment/types';
 import { makeSessionSeed } from '../src/features/generation/seededRandom';
 import { ageFromGrade } from '../src/utils/ageFromGrade';
-import { colors } from '../src/theme/colors';
+import { useColors, ColorPalette } from '../src/theme/colors';
 
 const gradeOptions: PickerOption<number>[] = [
   { label: 'Pre-K', value: -1 },
@@ -28,15 +31,15 @@ function firstParam(value: string | string[] | undefined, fallback: string): str
 }
 
 export default function SelectScreen() {
+  const colors = useColors();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const params = useLocalSearchParams();
   const preselect = firstParam(params.preselect, 'questionliftiq-aptitude-snapshot') as TestId;
 
   const [grade, setGrade] = useState(5);
   const [selectedTestId, setSelectedTestId] = useState<TestId>(preselect);
 
-  // Age is auto-derived from grade. No separate picker.
   const age = ageFromGrade(grade);
-
   const selectedTest = getTestDefinition(selectedTestId);
   const selectedBlueprint = getBlueprint(selectedTestId);
   const recommendedTests = useMemo(() => getRecommendedTestsForProfile(age, grade), [age, grade]);
@@ -103,21 +106,23 @@ export default function SelectScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  title: { fontSize: 28, color: colors.ink, fontWeight: '700', marginBottom: 8 },
-  subtitle: { color: colors.inkMuted, fontSize: 15, lineHeight: 22, marginBottom: 18 },
-  formCard: { gap: 18, marginBottom: 16 },
-  previewCard: { gap: 14, marginBottom: 16 },
-  pillRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  pill: { alignSelf: 'flex-start', overflow: 'hidden', borderRadius: 999, paddingHorizontal: 10, paddingVertical: 6, backgroundColor: colors.surfaceMuted, color: colors.inkMuted, fontSize: 12, fontWeight: '600' },
-  pillGood: { color: colors.success, backgroundColor: '#EAF7EE' },
-  pillWarn: { color: colors.warning, backgroundColor: '#FFF4E1' },
-  previewTitle: { color: colors.ink, fontSize: 21, fontWeight: '700' },
-  previewSubtitle: { color: colors.primary, fontWeight: '600', lineHeight: 21, fontSize: 14 },
-  body: { color: colors.inkMuted, lineHeight: 22, fontSize: 14 },
-  reportLabel: { color: colors.ink, fontSize: 12, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.6 },
-  disclaimer: { color: colors.inkMuted, fontSize: 12, lineHeight: 18, backgroundColor: '#FFFCF4', padding: 12, borderRadius: 14 },
-  recommendCard: { gap: 8 },
-  recommendTitle: { color: colors.ink, fontWeight: '700', fontSize: 17 },
-  recommendItem: { color: colors.inkMuted, lineHeight: 22, fontWeight: '500', fontSize: 14 }
-});
+function makeStyles(colors: ColorPalette) {
+  return StyleSheet.create({
+    title: { fontSize: 28, color: colors.ink, fontWeight: '700', marginBottom: 8 },
+    subtitle: { color: colors.inkMuted, fontSize: 15, lineHeight: 22, marginBottom: 18 },
+    formCard: { gap: 18, marginBottom: 16 },
+    previewCard: { gap: 14, marginBottom: 16 },
+    pillRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+    pill: { alignSelf: 'flex-start', overflow: 'hidden', borderRadius: 999, paddingHorizontal: 10, paddingVertical: 6, backgroundColor: colors.surfaceMuted, color: colors.inkMuted, fontSize: 12, fontWeight: '600' },
+    pillGood: { color: colors.success, backgroundColor: colors.surfaceMuted },
+    pillWarn: { color: colors.warning, backgroundColor: colors.surfaceMuted },
+    previewTitle: { color: colors.ink, fontSize: 21, fontWeight: '700' },
+    previewSubtitle: { color: colors.primary, fontWeight: '600', lineHeight: 21, fontSize: 14 },
+    body: { color: colors.inkMuted, lineHeight: 22, fontSize: 14 },
+    reportLabel: { color: colors.ink, fontSize: 12, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.6 },
+    disclaimer: { color: colors.inkMuted, fontSize: 12, lineHeight: 18, backgroundColor: colors.surfaceMuted, padding: 12, borderRadius: 14 },
+    recommendCard: { gap: 8 },
+    recommendTitle: { color: colors.ink, fontWeight: '700', fontSize: 17 },
+    recommendItem: { color: colors.inkMuted, lineHeight: 22, fontWeight: '500', fontSize: 14 }
+  });
+}

@@ -1,204 +1,187 @@
-# QuestionLiftIQ — v0.5.1
+# QuestionLiftIQ — v0.6
 
-> Turn every missed question into a score-lift plan.
+Privacy-first iOS / iPad educational test-improvement app.
+Stack: Expo + React Native + TypeScript + Expo Router.
 
-Privacy-first iOS/iPad educational test-improvement app. Short diagnostics → percent score + estimated percentile → Mistake Map with step-by-step solutions → 7-day practice plan → Retake Sprint that **shows the lift**.
-
----
-
-## What's fixed in v0.5.1
-
-This package keeps the v0.5 feature set and adds these fixes:
-
-- Fixed a TypeScript syntax error in the elapsed-time question template.
-- Updated package/app versions and smoke-test expectations to `0.5.1`.
-- Restored GitHub-ready docs, `.gitignore`, and push instructions.
-- Removed malformed brace-expansion folders from the previous ZIP.
-- Prevented PDF score-lift from comparing a result against itself after local history append.
-- Restored privacy-strict behavior: after PDF sharing returns and the temp file is deleted, the app leaves the results route.
-- Made Quick Start sample questions balanced across domains instead of slicing the first section-heavy questions.
-- Made blueprint target difficulty and age-band checks influence generated question selection.
-
-## What's new in v0.5
-
-Four major additions on top of v0.4:
-
-| # | Feature | Where it lives |
-|---|---------|----------------|
-| 1 | **Paywall** between Score tab (free) and Mistakes/Plan/PDF (paid) | `src/services/paywallService.ts` + `src/components/PaywallModal.tsx` |
-| 2 | **Day 7 retake reminder** via local push notifications | `src/services/notificationService.ts` |
-| 3 | **SVG visuals for spatial questions** (cube, grid, mirror reflections, shapes, counting) | `src/components/SpatialVisual.tsx` |
-| 4 | **Finish-the-test celebration** — animated check + counting score | `app/celebration.tsx` |
-
-Plus the Quick Start now runs a 10-question sample (always free, fully unlocked) so users can experience the full product before being asked to pay for the real test.
+> **Tagline:** Turn every missed question into a score-lift plan.
 
 ---
 
-## The paywall
+## What's new in v0.6
 
-**Pricing model:** lifetime, not subscription. Two SKUs:
+This release is the largest content + UX upgrade so far. The four headline changes:
 
-- `$2.99` — single test pack. Unlocks Mistakes / Plan / PDF for one test type, lifetime.
-- `$14.99` — All-Access. All 9 modules, lifetime, on this device.
+### 1. New headline metric: ScoreLift Score (1–100)
 
-**Where it lives:** between the Score tab (free) and the Mistakes / Plan tabs (paid). The PDF export button also routes through the paywall when locked. The paywall **never** appears during the test, before the test, or on the Score tab — by the time it shows up, the user has already seen their percent correct, percentile range, domain ratings, and Score Lift card.
+The old QuestionLiftIQ Index (a 70–130 IQ-style scale modeled on Wechsler) is **gone**. It carried unacceptable legal and positioning risk.
 
-**Quick Start exception:** `sampleSize=10` sessions are always fully unlocked. This is the demo path — users get to see the full Mistakes/Plan experience on a 10-question sample before deciding whether to pay for the full 25-question test.
+In its place: the **ScoreLift Score**, a grade-anchored 1–100 scale where **50 = on-grade-level expected performance** for the chosen test, age, and grade. A 5th-grader scoring 50 on the aptitude snapshot is hitting expectations; a 5th-grader scoring 50 on the Algebra Fast-Track is also hitting expectations *for that test* — even though raw percent-correct will look very different.
 
-**App Store compliance:**
-- "Restore Purchases" button is always visible in the modal
-- One-time payments (no auto-renewing subscription)
-- No deceptive pricing, no countdown timers, no free-trial-that-converts
+Implemented in `src/features/scoring/scoreLiftScore.ts`. Each of the 9 tests has a per-grade expected percent that always maps to 50; the rest of the scale is built by piecewise-linear interpolation through 7 anchors.
 
-**Mock IAP for v0.5:** the actual purchase is mocked (`AsyncStorage`-backed) so the flow can be exercised end-to-end during development. Three TODOs in `paywallService.ts` mark exactly where StoreKit 2 calls go in v0.6 — replace those bodies and ship.
+### 2. Directional percentiles from public norm tables
 
-```typescript
-// In paywallService.ts:
-export async function purchaseSingleTest(testId: TestId) { /* TODO: StoreKit 2 */ }
-export async function purchaseAllAccess()                { /* TODO: StoreKit 2 */ }
-export async function restorePurchases()                 { /* TODO: StoreKit 2 */ }
+We promised parents a percentile so the score has real-world meaning. We also promise no account, no server, no third-party analytics — so we can't build our own norm distributions.
+
+Solution: bake in publicly-published norm tables from comparable tests and interpolate. The PDF and results screen now cite which benchmark each percentile is mapped against:
+
+| Test                          | Benchmark                                             |
+|-------------------------------|-------------------------------------------------------|
+| Aptitude Snapshot             | NWEA MAP grade math norms                             |
+| Compacted Math Readiness      | NWEA MAP grade math norms                             |
+| Algebra Fast-Track Readiness  | Iowa Algebra Aptitude Test (IAAT)                     |
+| Grade-Level Math Skills       | NWEA MAP grade math norms                             |
+| Reading + Vocabulary          | NWEA MAP grade reading norms                          |
+| STEM + Spatial                | Differential Aptitude Test 5th ed. (DAT-5)            |
+| Coding Logic                  | Differential Aptitude Test 5th ed. (DAT-5)            |
+| Kindergarten Readiness        | BRACKEN School Readiness Assessment 3rd ed.           |
+| Military Aptitude (unofficial)| ASVAB AFQT                                            |
+
+These are reference distributions. **No user data ever leaves the device.** Implemented in `src/features/scoring/externalBenchmarks.ts`.
+
+### 3. Full dark mode + Liftie mascot + adaptive ordering
+
+* **Dark mode** — every component and screen migrated to the `useColors() + makeStyles(colors)` factory pattern. Light and dark palettes live in `src/theme/colors.ts`. The PDF report intentionally stays light-mode only.
+* **Illustrations** — `Mascot` (Liftie, 4 expressions × 3 moods), `Decoration`, `EmptyState`, `AchievementBadge` in `src/components/Illustrations.tsx`.
+* **Adaptive presentation order** — same blueprint, same set of questions, but the order tunes to last-3-question accuracy. ≥80% correct steps difficulty up, ≤40% steps down. Implemented in `src/features/assessment/adaptiveSelector.ts`. Percent-correct stays meaningful.
+
+### 4. Templates: 86 → 118
+
+32 new v0.6 templates with a `phrase()` helper for deterministic surface-wording variants:
+
+* **Reading comprehension** — 3 real-passage templates (honeybees, sequoias, Wright brothers, Maya/baking, Sam/dog, Pacific octopus, Mount Everest) with main-idea, inference, and detail variants
+* **Vocabulary in context** — 1
+* **Word problems** — 5 (two-step arithmetic, rate × distance, percent of, money + change, fractions sharing)
+* **Spatial with visuals** — 4 wired to the SpatialVisual component
+* **Science reasoning** — 4 (states of matter, life cycles, balanced forces, experimental variables)
+* **Coding logic** — 4 (loop trace, conditional, Python negative-index, off-by-one debug)
+* **Mechanical reasoning** — 3 (pulley advantage, lever balance, gear ratios)
+* **Working memory** — 3 (digit recall reverse, instruction follow, letter recall)
+* **Algebra readiness** — 3 (linear solve, expression evaluation, strict inequality)
+* **K readiness with visuals** — 2 (count-stars, letter sounds)
+
+---
+
+## Project layout
+
+```
+app/                    Expo Router screens
+  _layout.tsx           Stack + scheme-aware status bar
+  index.tsx             Home (Liftie mascot + Quick Start + test catalog)
+  select.tsx            Grade + test picker
+  assessment.tsx        Question runner with adaptive ordering
+  celebration.tsx       1.7-second finish moment
+  results.tsx           ScoreLift Report (Score / Mistakes / Plan tabs)
+
+src/
+  config/brand.ts                          App brand + 1–100 scale + caveat
+  theme/
+    colors.ts                              light + dark palettes, useColors()
+    domainColors.ts                        domain & 5 v0.6 band colors (light + dark)
+    spacing.ts
+  components/
+    AppButton, Card, Screen, MetricBar, ProgressBar,
+    QuestionOptionCard, LabeledPicker,
+    SpatialVisual,                         theme-aware SVG illustrations
+    PaywallModal,
+    Illustrations.tsx                      Mascot, Decoration, EmptyState, AchievementBadge
+  data/
+    testCatalog, testBlueprints, practiceLibrary, questionBank,
+    questionTemplates                      118 templates total
+  features/
+    assessment/
+      types.ts                             ScoreLift Score, 5 v0.6 bands, benchmarkSource
+      domainLabels                         5-band parent-friendly labels + thresholds
+      assembleAssessment                   blueprint → questions
+      scoreAssessment                      wires scoreLiftScore + externalBenchmarks
+      adaptiveSelector                     pickInitialQuestion / pickNextQuestion
+    generation/
+      seededRandom, questionTemplateTypes
+    scoring/
+      scoreLiftScore.ts                    grade-anchored 1–100 mapping (NEW)
+      externalBenchmarks.ts                NWEA MAP / IAAT / DAT-5 / BRACKEN-3 / ASVAB AFQT (NEW)
+    reports/
+      buildReportHtml                      light-mode PDF, ScoreLift Score lead, benchmark cite
+  services/
+    historyService                         opt-in local history, scoreLiftScore + previousScore + liftScore
+    pdfReportService                       Print → Share → Delete
+    paywallService                         $2.99 / $14.99, mock IAP (3 StoreKit 2 TODOs)
+    notificationService                    Day-7 retake reminder
+    privacyWipeService
+  utils/
+    ageFromGrade, speakPrompt
+
+scripts/
+  smoke-test-content.js                    201 v0.6 invariant checks
 ```
 
 ---
 
-## Day 7 retake reminder
-
-Local notification scheduled when a test completes. Privacy-respecting:
-
-- Only fires if the user has opted in to history tracking (the lift loop)
-- Local-only — no APNs/FCM round-trip, no analytics server
-- Cancels prior reminders for the same test before scheduling a new one
-- Permission requested via standard iOS prompt
-- Cancelled automatically when user retakes early
-
-Schedule, cancel, and the foreground display config all live in `notificationService.ts`. The schedule call happens at the bottom of the results screen's load effect, after the history entry is appended.
-
----
-
-## SVG visuals for spatial questions
-
-Six visual types covering the most-impacted spatial templates:
-
-- `cube` — isometric 3D cube (used by `spatial-cube-faces`)
-- `grid-3` / `grid-4` — N×N grid of squares (used by `spatial-count-shapes`)
-- `mirror-letter` — original letter/symbol + axis + reflection placeholder
-- `mirror-arrow` — same as above but for arrow direction
-- `shape` — basic 2D shapes for the KG module (circle, square, triangle, rectangle)
-- `count-stars` — N stars for the KG counting question
-
-Question templates set `visualType` and optional `visualParams` on the result of `baseQ()`. The assessment screen renders `<SpatialVisual />` above the prompt when present. Templates without a `visualType` render unchanged.
-
-To add a new visual type:
-
-1. Add the renderer to `RENDERERS` in `src/components/SpatialVisual.tsx`
-2. Add the new key to the `visualType` union in `src/features/assessment/types.ts`
-3. Pass `visualType` from any template's `baseQ()` call
-
----
-
-## Finish-the-test celebration
-
-A 1.7-second interstitial route that scores the responses, animates a check from scale 0 → 1, counts the percent up from 0 → final, then navigates to `/results`.
-
-Why it matters: previously, tapping "See ScoreLift Report" instantly replaced the screen. The user got their result but didn't *feel* the moment. Adding even a brief celebration is table-stakes for educational apps. Built with `Animated` + `setInterval` — no third-party animation library.
-
-Lives at `app/celebration.tsx`. Registered in `_layout.tsx` with `headerShown: false` and `gestureEnabled: false` so the user can't swipe back into a half-finished test.
-
----
-
-## Project structure
-
-```
-questionliftiq/
-├── app/
-│   ├── _layout.tsx              Stack + foreground notification config
-│   ├── index.tsx                Home — Quick Start (10q), icons, history toggle
-│   ├── select.tsx               Setup — grade picker only
-│   ├── assessment.tsx           Test — SVG visuals + Read aloud + sampleSize
-│   ├── celebration.tsx          🆕 Finish-the-test moment
-│   └── results.tsx              Tabbed: Score (free) / Mistakes (paid) / Plan (paid)
-│
-├── src/
-│   ├── components/
-│   │   ├── AppButton.tsx
-│   │   ├── Card.tsx
-│   │   ├── LabeledPicker.tsx
-│   │   ├── MetricBar.tsx
-│   │   ├── ProgressBar.tsx
-│   │   ├── QuestionOptionCard.tsx
-│   │   ├── Screen.tsx
-│   │   ├── PaywallModal.tsx     🆕 Unlock modal w/ Restore Purchases
-│   │   └── SpatialVisual.tsx    🆕 SVG renderer for spatial questions
-│   ├── config/brand.ts
-│   ├── data/
-│   │   ├── practiceLibrary.ts
-│   │   ├── questionBank.ts
-│   │   ├── questionTemplates.ts (86 templates, 4+ now have visualType)
-│   │   ├── testBlueprints.ts
-│   │   └── testCatalog.ts
-│   ├── features/
-│   │   ├── assessment/          types (now with visualType), assembler, scorer, labels
-│   │   ├── generation/          questionTemplateTypes, seededRandom
-│   │   ├── reports/             buildReportHtml (PDF w/ optional score-lift)
-│   │   └── scoring/             staticDistributions
-│   ├── services/
-│   │   ├── pdfReportService.ts
-│   │   ├── privacyWipeService.ts (now also wipes notifications)
-│   │   ├── historyService.ts
-│   │   ├── paywallService.ts    🆕 Mock IAP w/ StoreKit 2 TODOs
-│   │   └── notificationService.ts 🆕 Day 7 reminder
-│   ├── theme/
-│   │   ├── colors.ts
-│   │   ├── spacing.ts
-│   │   └── domainColors.ts      Shared by app + PDF
-│   └── utils/
-│       ├── speakPrompt.ts       expo-speech wrapper
-│       └── ageFromGrade.ts
-│
-└── scripts/
-    └── smoke-test-content.js    100+ checks
-```
-
----
-
-## Quick start
+## Run the smoke test
 
 ```bash
-npx create-expo-app@latest questionliftiq --template blank-typescript
-cd questionliftiq
+node scripts/smoke-test-content.js
+```
 
-# v0.5.1 dependencies
-npx expo install \
-  expo-router expo-print expo-sharing expo-file-system \
-  expo-speech expo-notifications \
-  @react-native-async-storage/async-storage \
-  @react-native-picker/picker \
-  lucide-react-native react-native-svg
+Should report:
 
-# Drop the v0.5.1 zip contents into the project root
-node scripts/smoke-test-content.js   # → ALL CHECKS PASSED
-npx expo start --ios
+```
+ALL CHECKS PASSED — v0.6 is ready.
 ```
 
 ---
 
-## What didn't ship in v0.5 (week-2 backlog)
+## Privacy promise (unchanged)
 
-- **Real StoreKit 2 IAP** — three function bodies in `paywallService.ts` to replace
-- **App Store Connect product setup** — create the two product IDs (`com.example.questionliftiq.single_test`, `com.example.questionliftiq.all_access`) and price tiers
-- **Hint button mid-question** for practice modules
-- **Family pass / multi-profile** support
-- **More SVG visual types** for harder spatial questions (3D rotation, gear systems)
-- **Subscription tier** (deferred — discussed in PM convo)
-- **App Store metadata, screenshots, privacy disclosures**
-- **Trademark clearance** for "QuestionLiftIQ"
+* **No account.** No sign-in, ever.
+* **No server-stored results.** Everything is computed and stored on-device.
+* **No third-party analytics.** No SDKs that phone home.
+* **No ads.**
+* **No child name required.** A grade picker is the only profile input.
+* **Local-only scoring.** Even the percentile lookup is a baked-in pure function.
+* **Opt-in history.** Default OFF. Stored as `qlq:history:v1` in AsyncStorage. Deleted with the app.
+
+The benchmark norm tables in `src/features/scoring/externalBenchmarks.ts` are reference distributions only. **No user data is ever sent anywhere.**
 
 ---
 
-## Pricing rationale (recap)
+## Pricing (unchanged from v0.5)
 
-`$14.99 lifetime All-Access` is anchored against a single $50–$200 tutoring session. Stays below the comparison-shopping threshold ($20) where parents start asking "is this better than buying a tutoring book?" Above that, conversion drops. Below that, it feels like an obvious yes.
+* **Single test** — $2.99 lifetime, unlocks Mistakes / Plan / PDF for one test.
+* **All-Access** — $14.99 lifetime, unlocks all 9 modules forever.
+* **Quick Start** — 10-question free sample, fully unlocked, no setup.
 
-`$2.99 single test` exists for users who only care about one specific module (e.g. ASVAB only, or Algebra Fast-Track only) and want impulse-purchase territory. About 70% of buyers will probably skip this and grab All-Access — that's the upsell working as intended.
+StoreKit 2 is still mocked in v0.6. Three TODOs in `paywallService.ts` are the integration points.
 
-No subscriptions in v1. Lifetime-per-device fits the privacy-first / no-account architecture; subscriptions can come later via a Pro tier (cloud sync, family profiles, advanced analytics) without breaking promises to v1 buyers.
+---
+
+## Disclaimers (preserved)
+
+QuestionLiftIQ is an educational practice and screening tool. It is **not**:
+
+* a clinical IQ test or diagnostic instrument,
+* an official school placement test,
+* an official military exam product,
+* a normed assessment with QuestionLiftIQ-specific percentile ranks.
+
+ASVAB / military aptitude practice is unofficial. Percentile estimates are directional comparisons against published public norm tables for similar tests. The QuestionLiftIQ trademark has not yet been formally cleared.
+
+---
+
+## Migration guide (v0.5 → v0.6)
+
+If you forked v0.5, the rename map is:
+
+| v0.5                                          | v0.6                                          |
+|-----------------------------------------------|-----------------------------------------------|
+| `BRAND.productIndexName`                      | `BRAND.productScoreName`                      |
+| `result.questionLiftIndex`                    | `result.scoreLiftScore`                       |
+| `result.percentileEstimate.distributionLabel` | `result.percentileEstimate.benchmarkSource`   |
+| `HistoryEntry.questionLiftIndex`              | `HistoryEntry.scoreLiftScore`                 |
+| `ScoreLift.previousIndex`                     | `ScoreLift.previousScore`                     |
+| `ScoreLift.liftIndex`                         | `ScoreLift.liftScore`                         |
+| `'needs-practice' \| 'developing' \| 'ready-soon' \| 'ready' \| 'advanced'` | `'below' \| 'approaching' \| 'on-grade' \| 'above' \| 'well-above'` |
+| `colors` static import                        | `useColors()` hook + `makeStyles(colors)`     |
+| `bandStyle()` static helper                   | `useBandStyle()` hook                         |
+| `domainColor()` static helper                 | `useDomainColor()` hook                       |
+| `staticDistributions.ts`                      | DELETED — replaced by `externalBenchmarks.ts` |

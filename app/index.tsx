@@ -1,5 +1,10 @@
+// app/index.tsx
+// v0.6: useColors() + makeStyles(colors) factory pattern with full dark mode.
+// Adds Liftie mascot + Decoration to the hero. Quick-Start brand-accent dark
+// indigo is preserved on purpose in both schemes.
+
 import { router } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Pressable, StyleSheet, Switch, Text, View } from 'react-native';
 import {
   Sparkles, Calculator, Rocket, Ruler, BookOpen, Shapes, Code2,
@@ -8,6 +13,7 @@ import {
 import { AppButton } from '../src/components/AppButton';
 import { Card } from '../src/components/Card';
 import { Screen } from '../src/components/Screen';
+import { Mascot, Decoration } from '../src/components/Illustrations';
 import { BRAND } from '../src/config/brand';
 import { testCatalog } from '../src/data/testCatalog';
 import { TestId } from '../src/features/assessment/types';
@@ -15,7 +21,7 @@ import { makeSessionSeed } from '../src/features/generation/seededRandom';
 import { ageFromGrade } from '../src/utils/ageFromGrade';
 import { getSettings, setTrackHistory } from '../src/services/historyService';
 import { privacyWipeChecklist } from '../src/services/privacyWipeService';
-import { colors } from '../src/theme/colors';
+import { useColors, ColorPalette } from '../src/theme/colors';
 
 // Map test catalog icon names to lucide components.
 const ICONS: Record<string, any> = {
@@ -44,6 +50,8 @@ const TEST_ACCENT: Record<TestId, string> = {
 };
 
 export default function HomeScreen() {
+  const colors = useColors();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const [trackHistory, setTrackHistoryState] = useState(false);
 
   useEffect(() => {
@@ -57,7 +65,6 @@ export default function HomeScreen() {
 
   function quickStart() {
     // Quick Start: 10-question sample of the aptitude snapshot.
-    // Always free, full unlock — this is the demo experience.
     const grade = 5;
     const age = ageFromGrade(grade);
     const testId: TestId = 'questionliftiq-aptitude-snapshot';
@@ -75,9 +82,15 @@ export default function HomeScreen() {
   return (
     <Screen>
       <View style={styles.hero}>
-        <Text style={styles.kicker}>Private test-improvement diagnostics</Text>
-        <Text style={styles.title}>{BRAND.appName}</Text>
-        <Text style={styles.subtitle}>{BRAND.tagline}</Text>
+        <View style={styles.heroRow}>
+          <View style={styles.heroText}>
+            <Text style={styles.kicker}>Private test-improvement diagnostics</Text>
+            <Text style={styles.title}>{BRAND.appName}</Text>
+            <Text style={styles.subtitle}>{BRAND.tagline}</Text>
+          </View>
+          <Mascot expression="happy" mood="primary" size={72} />
+        </View>
+        <Decoration variant="blobs" height={48} style={{ marginTop: 6, opacity: 0.85 }} />
       </View>
 
       {/* Quick Start CTA — first-time-friendly, no setup */}
@@ -155,49 +168,49 @@ export default function HomeScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  hero: { gap: 10, marginBottom: 20 },
-  kicker: { color: colors.primary, fontWeight: '600', fontSize: 13, textTransform: 'uppercase', letterSpacing: 0.6 },
-  title: { color: colors.ink, fontSize: 40, fontWeight: '700', lineHeight: 46 },
-  subtitle: { color: colors.inkMuted, fontSize: 17, lineHeight: 25, fontWeight: '500' },
+function makeStyles(colors: ColorPalette) {
+  return StyleSheet.create({
+    hero: { gap: 6, marginBottom: 20 },
+    heroRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+    heroText: { flex: 1, gap: 8 },
+    kicker: { color: colors.primary, fontWeight: '600', fontSize: 13, textTransform: 'uppercase', letterSpacing: 0.6 },
+    title: { color: colors.ink, fontSize: 40, fontWeight: '700', lineHeight: 46 },
+    subtitle: { color: colors.inkMuted, fontSize: 17, lineHeight: 25, fontWeight: '500' },
 
-  quickStartCard: { gap: 14, marginBottom: 24, backgroundColor: '#1E1B4B', borderColor: '#312E81' },
-  quickStartHead: { flexDirection: 'row', gap: 12, alignItems: 'center' },
-  zapIcon: { width: 40, height: 40, borderRadius: 12, backgroundColor: '#4F46E5', alignItems: 'center', justifyContent: 'center' },
-  quickStartTextBlock: { flex: 1, gap: 2 },
-  quickStartTitle: { color: '#FFFFFF', fontSize: 20, fontWeight: '700' },
-  quickStartSub: { color: '#C7D2FE', fontSize: 13, lineHeight: 19 },
+    // Deliberate dark-indigo brand accent in both schemes.
+    quickStartCard: { gap: 14, marginBottom: 24, backgroundColor: '#1E1B4B', borderColor: '#312E81' },
+    quickStartHead: { flexDirection: 'row', gap: 12, alignItems: 'center' },
+    zapIcon: { width: 40, height: 40, borderRadius: 12, backgroundColor: '#4F46E5', alignItems: 'center', justifyContent: 'center' },
+    quickStartTextBlock: { flex: 1, gap: 2 },
+    quickStartTitle: { color: '#FFFFFF', fontSize: 20, fontWeight: '700' },
+    quickStartSub: { color: '#C7D2FE', fontSize: 13, lineHeight: 19 },
 
-  sectionHeader: { gap: 5, marginBottom: 14 },
-  sectionTitle: { color: colors.ink, fontWeight: '700', fontSize: 22 },
-  sectionSubtitle: { color: colors.inkMuted, lineHeight: 21, fontSize: 14 },
+    sectionHeader: { gap: 5, marginBottom: 14 },
+    sectionTitle: { color: colors.ink, fontWeight: '700', fontSize: 22 },
+    sectionSubtitle: { color: colors.inkMuted, lineHeight: 21, fontSize: 14 },
 
-  catalogGrid: { gap: 10, marginBottom: 22 },
-  testCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 14,
-    backgroundColor: colors.surface,
-    borderRadius: 18,
-    padding: 14,
-    borderWidth: 1,
-    borderColor: colors.border
-  },
-  testCardPressed: { opacity: 0.85, transform: [{ scale: 0.99 }] },
-  iconCircle: { width: 44, height: 44, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
-  testTextBlock: { flex: 1, gap: 3 },
-  testTitle: { color: colors.ink, fontWeight: '600', fontSize: 15 },
-  testSubtitle: { color: colors.inkMuted, lineHeight: 18, fontSize: 13 },
-  testMeta: { color: colors.primary, fontWeight: '600', fontSize: 11, textTransform: 'uppercase', letterSpacing: 0.4, marginTop: 2 },
+    catalogGrid: { gap: 10, marginBottom: 22 },
+    testCard: {
+      flexDirection: 'row', alignItems: 'center', gap: 14,
+      backgroundColor: colors.surface, borderRadius: 18, padding: 14,
+      borderWidth: 1, borderColor: colors.border
+    },
+    testCardPressed: { opacity: 0.85, transform: [{ scale: 0.99 }] },
+    iconCircle: { width: 44, height: 44, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
+    testTextBlock: { flex: 1, gap: 3 },
+    testTitle: { color: colors.ink, fontWeight: '600', fontSize: 15 },
+    testSubtitle: { color: colors.inkMuted, lineHeight: 18, fontSize: 13 },
+    testMeta: { color: colors.primary, fontWeight: '600', fontSize: 11, textTransform: 'uppercase', letterSpacing: 0.4, marginTop: 2 },
 
-  toggleCard: { marginBottom: 16 },
-  toggleRow: { flexDirection: 'row', alignItems: 'center', gap: 14 },
-  toggleTextBlock: { flex: 1, gap: 4 },
-  toggleTitle: { color: colors.ink, fontWeight: '600', fontSize: 15 },
-  toggleSub: { color: colors.inkMuted, fontSize: 12, lineHeight: 18 },
+    toggleCard: { marginBottom: 16 },
+    toggleRow: { flexDirection: 'row', alignItems: 'center', gap: 14 },
+    toggleTextBlock: { flex: 1, gap: 4 },
+    toggleTitle: { color: colors.ink, fontWeight: '600', fontSize: 15 },
+    toggleSub: { color: colors.inkMuted, fontSize: 12, lineHeight: 18 },
 
-  privacyCard: { gap: 8, marginBottom: 14 },
-  cardTitle: { color: colors.ink, fontSize: 18, fontWeight: '700', lineHeight: 24 },
-  checkItem: { color: colors.inkMuted, lineHeight: 22, fontWeight: '500', fontSize: 13 },
-  disclaimer: { color: colors.inkMuted, fontSize: 12, lineHeight: 18, textAlign: 'center' }
-});
+    privacyCard: { gap: 8, marginBottom: 14 },
+    cardTitle: { color: colors.ink, fontSize: 18, fontWeight: '700', lineHeight: 24 },
+    checkItem: { color: colors.inkMuted, lineHeight: 22, fontWeight: '500', fontSize: 13 },
+    disclaimer: { color: colors.inkMuted, fontSize: 12, lineHeight: 18, textAlign: 'center' }
+  });
+}

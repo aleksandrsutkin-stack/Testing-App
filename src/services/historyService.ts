@@ -1,4 +1,8 @@
 // src/services/historyService.ts
+//
+// v0.6: HistoryEntry stores scoreLiftScore (1–100). ScoreLift uses
+// previousScore / liftScore. Was: questionLiftIndex / previousIndex / liftIndex.
+//
 // Opt-in local-only score history. Stays on device. Never synced.
 // Default: OFF. User toggles ON from home screen if they want score-lift tracking.
 //
@@ -19,7 +23,8 @@ export interface HistoryEntry {
   percent: number;
   rawScore: number;
   maxScore: number;
-  questionLiftIndex: number;
+  // v0.6: ScoreLift Score (1–100). Was: questionLiftIndex (70–130).
+  scoreLiftScore: number;
   readinessBand: ScoreBand;
   completedAtIso: string;
 }
@@ -28,9 +33,7 @@ export interface AppSettings {
   trackHistory: boolean;
 }
 
-const DEFAULT_SETTINGS: AppSettings = {
-  trackHistory: false
-};
+const DEFAULT_SETTINGS: AppSettings = { trackHistory: false };
 
 // ─── Settings ───────────────────────────────────────────────────────────────
 
@@ -90,12 +93,9 @@ export async function getHistoryForTest(testId: TestId): Promise<HistoryEntry[]>
   return all.filter(e => e.testId === testId);
 }
 
-export async function getMostRecentForTest(testId: TestId, excludeCompletedAtIso?: string): Promise<HistoryEntry | null> {
+export async function getMostRecentForTest(testId: TestId): Promise<HistoryEntry | null> {
   const forTest = await getHistoryForTest(testId);
-  const candidates = excludeCompletedAtIso
-    ? forTest.filter(e => e.completedAtIso !== excludeCompletedAtIso)
-    : forTest;
-  return candidates.length > 0 ? candidates[0] : null;
+  return forTest.length > 0 ? forTest[0] : null;
 }
 
 export async function getAllHistory(): Promise<HistoryEntry[]> {
@@ -107,20 +107,13 @@ export async function getAllHistory(): Promise<HistoryEntry[]> {
 export async function eraseAllHistory(): Promise<void> {
   try {
     await AsyncStorage.removeItem(HISTORY_KEY);
-  } catch {
-    // Non-fatal
-  }
+  } catch { /* Non-fatal */ }
 }
 
 export async function eraseEverything(): Promise<void> {
   try {
-    await Promise.all([
-      AsyncStorage.removeItem(HISTORY_KEY),
-      AsyncStorage.removeItem(SETTINGS_KEY)
-    ]);
-  } catch {
-    // Non-fatal
-  }
+    await AsyncStorage.multiRemove([HISTORY_KEY, SETTINGS_KEY]);
+  } catch { /* Non-fatal */ }
 }
 
 // ─── Score-lift helper ───────────────────────────────────────────────────────
@@ -128,23 +121,29 @@ export async function eraseEverything(): Promise<void> {
 export interface ScoreLift {
   hasPrevious: boolean;
   previousPercent?: number;
-  previousIndex?: number;
+  // v0.6: ScoreLift Score on the 1–100 scale. Was: previousIndex (70–130).
+  previousScore?: number;
   previousDate?: string;
   liftPercent?: number;
-  liftIndex?: number;
+  // v0.6: Delta in ScoreLift Score. Was: liftIndex.
+  liftScore?: number;
 }
 
-export async function computeScoreLift(testId: TestId, currentPercent: number, currentIndex: number, currentCompletedAtIso?: string): Promise<ScoreLift> {
-  const previous = await getMostRecentForTest(testId, currentCompletedAtIso);
+/**
+ * Compare the current attempt to the most recent prior attempt for the same
+ * test. Returns hasPrevious=false on first attempt or if history is off.
+ */
+export async function computeScoreLift(testId: TestId, currentPercent: number, currentScore: number): Promise<ScoreLift> {
+  const previous = await getMostRecentForTest(testId);
   if (!previous) {
     return { hasPrevious: false };
   }
   return {
     hasPrevious: true,
     previousPercent: previous.percent,
-    previousIndex: previous.questionLiftIndex,
+    previousScore: previous.scoreLiftScore,
     previousDate: previous.completedAtIso,
     liftPercent: Math.round((currentPercent - previous.percent) * 100),
-    liftIndex: currentIndex - previous.questionLiftIndex
+    liftScore: currentScore - previous.scoreLiftScore
   };
 }
