@@ -14,7 +14,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { TestId } from '../features/assessment/types';
 import { getSettings } from './historyService';
 
-const SCHEDULED_KEY = 'qlq:scheduled-notifications:v1';
+const SCHEDULED_KEY = 'qlft:scheduled-notifications:v1';
 const DAY_7_SECONDS = 7 * 24 * 60 * 60;
 
 interface ScheduledMap {

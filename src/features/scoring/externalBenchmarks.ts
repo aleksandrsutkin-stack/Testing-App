@@ -50,7 +50,7 @@ interface BenchmarkTable {
 
 const NWEA_MAP_MATH: BenchmarkTable = {
   source: 'NWEA MAP grade math norms',
-  caveat: 'Comparison is against publicly-published NWEA MAP Growth math norm percentiles for the closest grade. Directional only; not a normed score for QuestionLiftIQ.',
+  caveat: 'Comparison is against publicly-published NWEA MAP Growth math norm percentiles for the closest grade. Directional only; not a normed score for QuizLift.',
   anchors: [
     { percent: 0.10, percentile:  3 },
     { percent: 0.30, percentile: 15 },
@@ -64,7 +64,7 @@ const NWEA_MAP_MATH: BenchmarkTable = {
 
 const NWEA_MAP_READING: BenchmarkTable = {
   source: 'NWEA MAP grade reading norms',
-  caveat: 'Comparison is against publicly-published NWEA MAP Growth reading norm percentiles for the closest grade. Directional only; not a normed score for QuestionLiftIQ.',
+  caveat: 'Comparison is against publicly-published NWEA MAP Growth reading norm percentiles for the closest grade. Directional only; not a normed score for QuizLift.',
   anchors: [
     { percent: 0.10, percentile:  4 },
     { percent: 0.30, percentile: 18 },
@@ -135,7 +135,7 @@ const ASVAB_AFQT: BenchmarkTable = {
 // ─── Test-id → benchmark table mapping ───────────────────────────────────────
 
 const BENCHMARK_FOR_TEST: Record<TestId, BenchmarkTable> = {
-  'questionliftiq-aptitude-snapshot':    NWEA_MAP_MATH,   // closest broad-aptitude analogue
+  'quizlift-aptitude-snapshot':    NWEA_MAP_MATH,   // closest broad-aptitude analogue
   'compacted-math-readiness':            NWEA_MAP_MATH,
   'double-compacted-algebra-readiness':  IAAT_ALGEBRA,
   'grade-math-skills-check':             NWEA_MAP_MATH,

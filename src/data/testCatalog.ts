@@ -2,8 +2,8 @@ import { TestDefinition, TestId } from '../features/assessment/types';
 
 export const testCatalog: TestDefinition[] = [
   {
-    id: 'questionliftiq-aptitude-snapshot',
-    title: 'QuestionLiftIQ Aptitude Snapshot',
+    id: 'quizlift-aptitude-snapshot',
+    title: 'QuizLift Aptitude Snapshot',
     subtitle: 'A broad IQ-style aptitude screen with improvement steps.',
     category: 'aptitude',
     recommendedAges: { min: 6, max: 18 },
@@ -13,7 +13,7 @@ export const testCatalog: TestDefinition[] = [
     icon: 'sparkles',
     parentBenefit: 'A quick picture of reasoning, verbal, spatial, memory, and quantitative strengths without clinical IQ claims.',
     studentBenefit: 'A puzzle sprint that turns missed questions into next-step practice.',
-    reportPromise: 'Percent correct, estimated percentile range, QuestionLiftIQ Index, Mistake Map, Step Solutions, and practice links.',
+    reportPromise: 'Percent correct, estimated percentile range, ScoreLift Score, Mistake Map, Step Solutions, and practice links.',
     domains: ['fluid-reasoning', 'visual-spatial', 'verbal', 'quantitative', 'working-memory'],
     practiceLinks: [
       { provider: 'Khan Academy', label: 'Khan Academy math practice', url: 'https://www.khanacademy.org/math', reason: 'General quantitative practice by grade.' },

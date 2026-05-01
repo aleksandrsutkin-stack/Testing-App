@@ -139,7 +139,7 @@ export function PaywallModal({ visible, testId, testTitle, missedCount, onClose,
         </View>
 
         <Text style={styles.footer}>
-          QuestionLiftIQ is privacy-first — your scores never leave this device. Mock IAP active in this build.
+          QuizLift is privacy-first — your scores never leave this device. Mock IAP active in this build.
         </Text>
       </View>
     </Modal>

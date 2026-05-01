@@ -4,7 +4,7 @@
 // PercentileEstimate carries a benchmarkSource (e.g. "NWEA MAP grade norms").
 
 export type TestId =
-  | 'questionliftiq-aptitude-snapshot'
+  | 'quizlift-aptitude-snapshot'
   | 'compacted-math-readiness'
   | 'double-compacted-algebra-readiness'
   | 'grade-math-skills-check'

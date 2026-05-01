@@ -1,20 +1,20 @@
-# QuestionLiftIQ — Project Instructions / Compact Context
+# QuizLift — Project Instructions / Compact Context
 
-Build **QuestionLiftIQ**, a privacy-first iPhone/iPad educational test-improvement app. The app started as a kid IQ/readiness app, but the current product direction is broader: short diagnostic tests that help students improve test results.
+Build **QuizLift**, a privacy-first iPhone/iPad educational test-improvement app. The app started as a kid IQ/readiness app, but the current product direction is broader: short diagnostic tests that help students improve test results.
 
 Core promise:
 
 > Take a short test -> see percent correct and estimated percentile range -> review what you got wrong -> learn step-by-step solutions -> practice targeted skills -> retake with new but equivalent questions.
 
-Use the tagline: **Turn every missed question into a score-lift plan.**
+Use the tagline: **Every miss becomes a lesson.**
 
 ## Positioning
 
-QuestionLiftIQ is an educational screening and practice tool, not a clinical IQ test, diagnostic instrument, school placement decision, gifted-identification test, or official ASVAB product. Use phrases like **IQ-style aptitude snapshot**, **readiness screen**, **practice sprint**, **estimated percentile range**, **ScoreLift Report**, and **QuestionLiftIQ Index**. Do not claim national norming unless real norming data exists.
+QuizLift is an educational screening and practice tool, not a clinical IQ test, diagnostic instrument, school placement decision, gifted-identification test, or official ASVAB product. Use phrases like **IQ-style aptitude snapshot**, **readiness screen**, **practice sprint**, **estimated percentile range**, **ScoreLift Report**, and **ScoreLift Score**. Do not claim national norming unless real norming data exists.
 
 Percentiles in v1/v2 are static estimates. Always say:
 
-> Estimated percentile ranges are based on QuestionLiftIQ static difficulty models. They are not nationally normed percentile ranks.
+> Estimated percentile ranges are based on QuizLift static difficulty models. They are not nationally normed percentile ranks.
 
 ASVAB-related content must be phrased as **unofficial ASVAB-style practice** only.
 
@@ -24,7 +24,7 @@ Non-negotiable v1 privacy model: no account, no server storage, no third-party a
 
 ## Current codebase
 
-Current codebase: **QuestionLiftIQ v0.5.1**, built with Expo + React Native + TypeScript + Expo Router.
+Current codebase: **QuizLift v0.5.1**, built with Expo + React Native + TypeScript + Expo Router.
 
 Main screens:
 
@@ -40,7 +40,7 @@ Main modules:
 - `src/data/questionTemplates.ts` — generated question families with answer choices, explanations, mistake tags, and practice links.
 - `src/features/assessment/assembleAssessment.ts` — creates deterministic generated sessions from test, profile, and seed.
 - `src/features/scoring/staticDistributions.ts` — static estimated percentile model.
-- `src/features/assessment/scoreAssessment.ts` — percent correct, QuestionLiftIQ Index, domain scores, Mistake Map, and practice plan.
+- `src/features/assessment/scoreAssessment.ts` — percent correct, ScoreLift Score, domain scores, Mistake Map, and practice plan.
 - `src/features/reports/buildReportHtml.ts` — ScoreLift PDF report.
 - `src/services/pdfReportService.ts` — local PDF creation, native sharing, and deletion.
 
@@ -48,7 +48,7 @@ Main modules:
 
 V1 modules are:
 
-1. QuestionLiftIQ Aptitude Snapshot.
+1. QuizLift Aptitude Snapshot.
 2. Compacted Math Readiness.
 3. Double-Compacted / Algebra Fast-Track.
 4. Grade-Level Math Skills Check.
@@ -87,7 +87,7 @@ The PDF is the paid product. It should include:
 - percent correct
 - estimated percentile range
 - readiness/rating band
-- QuestionLiftIQ Index when relevant
+- ScoreLift Score when relevant
 - domain ratings
 - strengths
 - growth areas
@@ -104,7 +104,7 @@ The PDF is the paid product. It should include:
 
 ## Naming
 
-Working name is **QuestionLiftIQ**. This is not legal clearance. Avoid BrightSpark, SparkIQ, WunderkindIQ, WizKidzIQ, TestsRus, TestLift, PrepLift, TestWise, TestCoach, TestSprint, StepWise, PracticeIQ, SkillSprint, and TestFix unless legally cleared.
+Working name is **QuizLift**. This is not legal clearance. Avoid BrightSpark, SparkIQ, WunderkindIQ, WizKidzIQ, TestsRus, TestLift, PrepLift, TestWise, TestCoach, TestSprint, StepWise, PracticeIQ, SkillSprint, and TestFix unless legally cleared.
 
 ## Content rules
 

@@ -1,9 +1,9 @@
-# QuestionLiftIQ — v0.6
+# QuizLift — v0.6
 
 Privacy-first iOS / iPad educational test-improvement app.
 Stack: Expo + React Native + TypeScript + Expo Router.
 
-> **Tagline:** Turn every missed question into a score-lift plan.
+> **Tagline:** Every miss becomes a lesson.
 
 ---
 
@@ -157,14 +157,14 @@ StoreKit 2 is still mocked in v0.6. Three TODOs in `paywallService.ts` are the i
 
 ## Disclaimers (preserved)
 
-QuestionLiftIQ is an educational practice and screening tool. It is **not**:
+QuizLift is an educational practice and screening tool. It is **not**:
 
 * a clinical IQ test or diagnostic instrument,
 * an official school placement test,
 * an official military exam product,
-* a normed assessment with QuestionLiftIQ-specific percentile ranks.
+* a normed assessment with QuizLift-specific percentile ranks.
 
-ASVAB / military aptitude practice is unofficial. Percentile estimates are directional comparisons against published public norm tables for similar tests. The QuestionLiftIQ trademark has not yet been formally cleared.
+ASVAB / military aptitude practice is unofficial. Percentile estimates are directional comparisons against published public norm tables for similar tests. The QuizLift trademark has not yet been formally cleared.
 
 ---
 

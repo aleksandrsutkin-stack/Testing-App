@@ -34,7 +34,7 @@ export default function SelectScreen() {
   const colors = useColors();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const params = useLocalSearchParams();
-  const preselect = firstParam(params.preselect, 'questionliftiq-aptitude-snapshot') as TestId;
+  const preselect = firstParam(params.preselect, 'quizlift-aptitude-snapshot') as TestId;
 
   const [grade, setGrade] = useState(5);
   const [selectedTestId, setSelectedTestId] = useState<TestId>(preselect);

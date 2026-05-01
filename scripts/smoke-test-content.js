@@ -20,12 +20,12 @@ function check(label, pass, note = '') {
   if (!pass) allPassed = false;
 }
 
-console.log('\nQuestionLiftIQ v0.6 smoke test\n');
+console.log('\nQuizLift v0.6 smoke test\n');
 
 // ── Brand ────────────────────────────────────────────────────────────────────
 const brandFile = fs.readFileSync(path.join(ROOT, 'src/config/brand.ts'), 'utf8');
 const brandStripped = stripComments(brandFile);
-check('Brand name is QuestionLiftIQ.', brandFile.includes("appName: 'QuestionLiftIQ'"));
+check('Brand name is QuizLift.', brandFile.includes("appName: 'QuizLift'"));
 check('No legacy BrightWit/BrightSpark in brand.', !brandFile.includes('BrightWit') && !brandFile.includes('BrightSpark'));
 check('v0.6 brand uses productScoreName (not productIndexName).',
   brandStripped.includes('productScoreName') && !brandStripped.includes('productIndexName'));
@@ -38,7 +38,7 @@ check('v0.6 scoreBandCopy has 5 v0.6 band keys.',
 const typesFile = fs.readFileSync(path.join(ROOT, 'src/features/assessment/types.ts'), 'utf8');
 const typesStripped = stripComments(typesFile);
 const ALL_TEST_IDS = [
-  'questionliftiq-aptitude-snapshot', 'compacted-math-readiness',
+  'quizlift-aptitude-snapshot', 'compacted-math-readiness',
   'double-compacted-algebra-readiness', 'grade-math-skills-check',
   'reading-vocabulary-snapshot', 'stem-spatial-reasoning',
   'coding-logic-sprint', 'kindergarten-readiness', 'military-aptitude-practice'

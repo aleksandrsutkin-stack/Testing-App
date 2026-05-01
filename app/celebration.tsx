@@ -19,7 +19,7 @@ function firstParam(value: string | string[] | undefined, fallback: string): str
 
 export default function CelebrationScreen() {
   const params = useLocalSearchParams();
-  const testId = firstParam(params.testId, 'questionliftiq-aptitude-snapshot') as TestId;
+  const testId = firstParam(params.testId, 'quizlift-aptitude-snapshot') as TestId;
   const age = Number(firstParam(params.age, '10'));
   const grade = Number(firstParam(params.grade, '5'));
   const seed = firstParam(params.seed, '');

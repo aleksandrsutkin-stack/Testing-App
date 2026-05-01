@@ -38,7 +38,7 @@ const ICONS: Record<string, any> = {
 
 // Each test gets a stable accent color (matches in-app domain mood).
 const TEST_ACCENT: Record<TestId, string> = {
-  'questionliftiq-aptitude-snapshot':       '#4F46E5',
+  'quizlift-aptitude-snapshot':       '#4F46E5',
   'compacted-math-readiness':               '#0891B2',
   'double-compacted-algebra-readiness':     '#9333EA',
   'grade-math-skills-check':                '#0D9488',
@@ -67,7 +67,7 @@ export default function HomeScreen() {
     // Quick Start: 10-question sample of the aptitude snapshot.
     const grade = 5;
     const age = ageFromGrade(grade);
-    const testId: TestId = 'questionliftiq-aptitude-snapshot';
+    const testId: TestId = 'quizlift-aptitude-snapshot';
     const seed = makeSessionSeed(testId, age, grade);
     router.push({
       pathname: '/assessment',
@@ -162,7 +162,7 @@ export default function HomeScreen() {
       </Card>
 
       <Text style={styles.disclaimer}>
-        QuestionLiftIQ is an educational practice and screening tool. It is not a clinical IQ test, diagnostic instrument, official school placement test, or official military exam product.
+        QuizLift is an educational practice and screening tool. It is not a clinical IQ test, diagnostic instrument, official school placement test, or official military exam product.
       </Text>
     </Screen>
   );

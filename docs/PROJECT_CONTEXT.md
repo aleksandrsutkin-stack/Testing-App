@@ -1,9 +1,9 @@
-# QuestionLiftIQ — Project Context Document
+# QuizLift — Project Context Document
 
-**Recommended use:** Load this document into the ChatGPT Project as the main project knowledge/context file. Use `QuestionLiftIQ_Project_Instructions_Compact.md` as the always-on Project Instructions if there is a separate instructions field.
+**Recommended use:** Load this document into the ChatGPT Project as the main project knowledge/context file. Use `QuizLift_Project_Instructions_Compact.md` as the always-on Project Instructions if there is a separate instructions field.
 
-**Current working name:** QuestionLiftIQ  
-**Tagline:** Turn every missed question into a score-lift plan.  
+**Current working name:** QuizLift  
+**Tagline:** Every miss becomes a lesson.  
 **Current app version:** v0.5.1 GitHub-ready candidate  
 **Platform:** iPhone/iPad first, using Expo + React Native + TypeScript + Expo Router.
 
@@ -11,7 +11,7 @@
 
 ## 1. What we are building
 
-QuestionLiftIQ is a privacy-first educational test-improvement app. The product started as a kid IQ/readiness idea, but the current direction is broader and stronger:
+QuizLift is a privacy-first educational test-improvement app. The product started as a kid IQ/readiness idea, but the current direction is broader and stronger:
 
 > A short-test diagnostic app that helps students improve test results by turning every missed question into a step-by-step practice plan.
 
@@ -38,7 +38,7 @@ The earlier app concept was named BrightWit IQ and focused on a broad IQ-style c
 
 ### Current direction
 
-The app is now **QuestionLiftIQ**, a broader test-improvement product. The IQ-style module remains, but it is one test module inside a broader diagnostic/practice platform.
+The app is now **QuizLift**, a broader test-improvement product. The IQ-style module remains, but it is one test module inside a broader diagnostic/practice platform.
 
 This is a better business direction because:
 
@@ -51,7 +51,7 @@ This is a better business direction because:
 
 ## 3. Product guardrails
 
-QuestionLiftIQ is an educational screening and practice tool. It must not be positioned as:
+QuizLift is an educational screening and practice tool. It must not be positioned as:
 
 - a clinical IQ test
 - a diagnostic instrument
@@ -66,7 +66,7 @@ Use careful language:
 - readiness screen
 - practice sprint
 - estimated percentile range
-- QuestionLiftIQ Index
+- ScoreLift Score
 - ScoreLift Report
 - practice plan
 
@@ -81,7 +81,7 @@ Do not say:
 
 The standard percentile disclaimer is:
 
-> Estimated percentile ranges are based on QuestionLiftIQ static difficulty models. They are not nationally normed percentile ranks.
+> Estimated percentile ranges are based on QuizLift static difficulty models. They are not nationally normed percentile ranks.
 
 For ASVAB-related content:
 
@@ -119,7 +119,7 @@ This privacy model is reflected in `src/services/pdfReportService.ts` and `src/s
 
 ## 5. Current codebase summary
 
-The current deliverable is a full Expo/React Native TypeScript app named `questionliftiq-mobile-app`, now packaged as v0.5.1 for GitHub upload.
+The current deliverable is a full Expo/React Native TypeScript app named `quizlift-mobile-app`, now packaged as v0.5.1 for GitHub upload.
 
 ### Main screens
 
@@ -159,7 +159,7 @@ The current deliverable is a full Expo/React Native TypeScript app named `questi
 
 V0.2 supports these test modules:
 
-1. **QuestionLiftIQ Aptitude Snapshot** — broad IQ-style aptitude screen with improvement steps.
+1. **QuizLift Aptitude Snapshot** — broad IQ-style aptitude screen with improvement steps.
 2. **Compacted Math Readiness** — accelerated math readiness.
 3. **Double-Compacted / Algebra Fast-Track** — aggressive math acceleration readiness.
 4. **Grade-Level Math Skills Check** — current-grade math gap diagnostic.
@@ -234,7 +234,7 @@ Current PDF sections:
 - Percent correct.
 - Estimated percentile range.
 - Readiness band.
-- QuestionLiftIQ Index.
+- ScoreLift Score.
 - Domain ratings.
 - Strengths.
 - Growth areas.
@@ -253,13 +253,13 @@ Feature names:
 - Practice Links
 - Retake Sprint
 - Estimated Percentile Range
-- QuestionLiftIQ Index
+- ScoreLift Score
 
 ---
 
 ## 10. Naming notes
 
-Current working name: **QuestionLiftIQ**.
+Current working name: **QuizLift**.
 
 This is a working name only, not legal clearance. The name was preferred over QuestionLift because it preserves the aptitude/IQ signal while supporting broader test-improvement positioning.
 
@@ -281,7 +281,7 @@ Names previously considered or screened as risky/crowded:
 - SkillSprint
 - TestFix
 
-Recommendation: keep QuestionLiftIQ as working name while preparing formal trademark/domain/App Store clearance.
+Recommendation: keep QuizLift as working name while preparing formal trademark/domain/App Store clearance.
 
 ---
 
@@ -345,7 +345,7 @@ Created earlier:
 
 Created in the current update:
 
-- Full rebranded **QuestionLiftIQ** codebase.
+- Full rebranded **QuizLift** codebase.
 - Broader test-improvement positioning.
 - ScoreLift Report concept.
 - Static distribution/estimated percentile scoring system.
@@ -362,7 +362,7 @@ Created in the current update:
 
 ### Product
 
-1. Decide whether QuestionLiftIQ remains the working name after formal clearance.
+1. Decide whether QuizLift remains the working name after formal clearance.
 2. Choose exact V1 target audience: parents of grades 3-8, tutors, homeschoolers, or older test-prep users.
 3. Decide which module is the V1 wedge: Compacted Math, Algebra Fast-Track, grade math gaps, or aptitude snapshot.
 4. Define pricing: free test preview, paid PDF, subscription, bundle, or tutor-facing SKU.

@@ -19,8 +19,8 @@ export interface TestBlueprint {
 // only 3 per domain — too noisy to trust.
 
 export const testBlueprints: Record<TestId, TestBlueprint> = {
-  'questionliftiq-aptitude-snapshot': {
-    testId: 'questionliftiq-aptitude-snapshot',
+  'quizlift-aptitude-snapshot': {
+    testId: 'quizlift-aptitude-snapshot',
     totalQuestions: 30,
     scoreModel: 'aptitude-index',
     sections: [
