@@ -23,6 +23,7 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { BlurView } from 'expo-blur';
 import { TrendingUp, TrendingDown, Minus, Lock, Share2 } from 'lucide-react-native';
 import { AppButton } from '../src/components/AppButton';
 import { Card } from '../src/components/Card';
@@ -569,11 +570,18 @@ function TeaserOverlay({
   children: React.ReactNode;
 }) {
   if (!locked) return <>{children}</>;
-  // Faux-blur via reduced opacity. expo-blur could be swapped in here later
-  // for a true frosted-glass effect; opacity keeps the build dependency-free.
+  // v0.8: Real frosted-glass blur via expo-blur. Reduced opacity is kept
+  // alongside it so dark-mode (which gives the BlurView a darker tint)
+  // still feels obviously "locked" rather than just "dim."
   return (
     <View style={{ position: 'relative' }}>
-      <View pointerEvents="none" style={{ opacity: 0.18 }}>{children}</View>
+      <View pointerEvents="none" style={{ opacity: 0.6 }}>{children}</View>
+      <BlurView
+        intensity={28}
+        tint="default"
+        pointerEvents="none"
+        style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+      />
       <View style={{
         position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
         alignItems: 'center', justifyContent: 'center', padding: 24
@@ -720,7 +728,10 @@ function makeStyles(colors: ColorPalette) {
 
     // v0.8: ScoreCard render container — positioned outside the visible
     // viewport so we can captureRef() it without showing it on screen.
-    offscreen: { position: 'absolute', left: -10000, top: 0, opacity: 0 },
+    // NB: do NOT set opacity:0 here — react-native-view-shot can skip
+    // drawing transparent subtrees on some platforms. Off-screen position
+    // alone is enough to hide it from users while keeping it capturable.
+    offscreen: { position: 'absolute', left: -10000, top: 0 },
 
     footerCard: { backgroundColor: colors.surfaceMuted, borderRadius: 14, padding: 14, gap: 6, marginBottom: 8 },
     footerTitle: { color: colors.ink, fontSize: 12, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.06, marginTop: 6 },
