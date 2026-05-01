@@ -8,6 +8,7 @@ import { useColorScheme } from 'react-native';
 import { useColors } from '../src/theme/colors';
 import { BRAND } from '../src/config/brand';
 import { configureForegroundDisplay } from '../src/services/notificationService';
+import { connectIAP, disconnectIAP } from '../src/services/paywallService';
 
 export default function RootLayout() {
   const scheme = useColorScheme();
@@ -18,6 +19,14 @@ export default function RootLayout() {
   // Safe to call once on mount.
   useEffect(() => {
     configureForegroundDisplay();
+  }, []);
+
+  // v0.8: Open the StoreKit / Play Billing connection at app start so the
+  // first paywall tap can complete a real purchase. Failure is non-fatal —
+  // the app still works with cached unlock state.
+  useEffect(() => {
+    connectIAP();
+    return () => { disconnectIAP(); };
   }, []);
 
   return (
