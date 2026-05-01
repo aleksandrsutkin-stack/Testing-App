@@ -843,7 +843,7 @@ export const questionTemplates: QuestionTemplate[] = [
       if (em >= 60) { eh++; em -= 60; }
       const fmt = (h: number, m: number) => `${h}:${m.toString().padStart(2,'0')}`, ans = fmt(eh, em);
       const { options, correctOptionId } = makeOptions(ans, [fmt(eh+1,em), fmt(eh-1,em), fmt(sh+dh+1,sm)], ctx.rng);
-      return baseQ(ctx, t, { prompt: `An experiment starts at ${fmt(sh,sm)} and takes ${dh} hour${dh>1?'s':''}${dm>0?` and ${dm} minutes`:'''}. What time does it end?`, options, correctOptionId, correctAnswerLabel: ans, explanationSteps: [`Add hours: ${sh} + ${dh} = ${sh+dh}.`, dm>0?`Add minutes: ${sm} + ${dm} = ${sm+dm} (carry if ≥60).`:'No extra minutes.', `End time: ${ans}.`], commonTrap: 'Carry over to hours when minutes reach 60 or more.', mistakeTags: ['calculation-error'], ageMin: 8 });
+      return baseQ(ctx, t, { prompt: `An experiment starts at ${fmt(sh,sm)} and takes ${dh} hour${dh>1?'s':''}${dm>0?` and ${dm} minutes`:''}. What time does it end?`, options, correctOptionId, correctAnswerLabel: ans, explanationSteps: [`Add hours: ${sh} + ${dh} = ${sh+dh}.`, dm>0?`Add minutes: ${sm} + ${dm} = ${sm+dm} (carry if ≥60).`:'No extra minutes.', `End time: ${ans}.`], commonTrap: 'Carry over to hours when minutes reach 60 or more.', mistakeTags: ['calculation-error'], ageMin: 8 });
     }),
 
   ct({ id: 'stem-force-motion', testIds: [...STEM,...MIL], domain: 'science-reasoning', skillId: 'science-reasoning', difficulty: 3 },

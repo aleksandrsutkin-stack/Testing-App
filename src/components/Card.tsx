@@ -1,10 +1,12 @@
 // src/components/Card.tsx
 // v0.6: useColors() + makeStyles(colors) factory pattern. Light + dark mode.
 import { ReactNode, useMemo } from 'react';
-import { StyleSheet, View, ViewStyle } from 'react-native';
+import { StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
 import { useColors, ColorPalette } from '../theme/colors';
 
-interface CardProps { children: ReactNode; style?: ViewStyle; }
+// StyleProp<ViewStyle> accepts both a single style object and arrays
+// (composed styles), which is what most callers pass.
+interface CardProps { children: ReactNode; style?: StyleProp<ViewStyle>; }
 
 export function Card({ children, style }: CardProps) {
   const colors = useColors();
