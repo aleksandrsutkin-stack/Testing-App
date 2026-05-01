@@ -64,6 +64,8 @@ check('All blueprints target 20+ questions per session.',
 const templatesFile = fs.readFileSync(path.join(ROOT, 'src/data/questionTemplates.ts'), 'utf8');
 const templateCount = (templatesFile.match(/ct\(\{/g) || []).length;
 check('110+ question templates in combined file.', templateCount >= 110, `${templateCount} templates`);
+// v0.7 content review pass: 5 new templates merged via v7Templates.
+check('At least 122 templates exist (118 + new v7 additions).', templateCount >= 122, `${templateCount} templates`);
 const templateIds = [...templatesFile.matchAll(/id:\s*'([^']+)'/g)].map(m => m[1]);
 const uniqueIds = new Set(templateIds);
 check('All template IDs are unique.', uniqueIds.size === templateIds.length, `${uniqueIds.size} unique`);
@@ -357,10 +359,28 @@ check('package.json includes expo-notifications.', !!pkg.dependencies['expo-noti
 check('package.json includes react-native-svg.', !!pkg.dependencies['react-native-svg']);
 check('package.json includes async-storage.', !!pkg.dependencies['@react-native-async-storage/async-storage']);
 
+// ── v0.7 content review checks ──────────────────────────────────────────────
+check('SpatialVisual supports "dot-compare" type.', spatialFile.includes("'dot-compare'"));
+check('NAME_POOL exists in questionTemplates.', templatesFile.includes('NAME_POOL'));
+check('randomName helper exists.', templatesFile.includes('function randomName'));
+check('rc-passage-inference-v7 template exists.', templatesFile.includes("'rc-passage-inference-v7'"));
+check('rc-passage-detail-v7 template exists.', templatesFile.includes("'rc-passage-detail-v7'"));
+check('kg-parent-observe-readiness-v7 template exists.', templatesFile.includes("'kg-parent-observe-readiness-v7'"));
+check('kg-shape-identify-v7 template exists.', templatesFile.includes("'kg-shape-identify-v7'"));
+check('reading-simile-v7 template exists.', templatesFile.includes("'reading-simile-v7'"));
+check('stem-classify-life-science no longer restates the answer.',
+  !/(explanationSteps:\s*\[\s*`?\$\{q\.answer\}`?\s*\])/.test(templatesFile));
+check('military-mechanical-leverage no longer restates the answer.',
+  !/(explanationSteps:\s*\[\s*s\.answer\s*\])/.test(templatesFile));
+check('kg-compare-numbers uses dot-compare visual.',
+  /id:\s*'kg-compare-numbers'[\s\S]{0,1500}visualType:\s*'dot-compare'/.test(templatesFile));
+check('kg-vocabulary-body now teaches beginning letter sounds.',
+  /id:\s*'kg-vocabulary-body'[\s\S]{0,800}Which letter does the word/.test(templatesFile));
+
 // ── Summary ─────────────────────────────────────────────────────────────────
 console.log('\n' + '─'.repeat(50));
 if (allPassed) {
-  console.log('\x1b[32m\nALL CHECKS PASSED — v0.6 is ready.\x1b[0m\n');
+  console.log('\x1b[32m\nALL CHECKS PASSED — v0.7 content pass is ready.\x1b[0m\n');
 } else {
   console.log('\x1b[31m\nSOME CHECKS FAILED — fix errors above before shipping.\x1b[0m\n');
   process.exit(1);

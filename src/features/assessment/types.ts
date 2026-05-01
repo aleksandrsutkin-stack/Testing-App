@@ -84,7 +84,8 @@ export interface AssessmentQuestion {
   ageBand: Range;
   // v0.5: optional spatial-visual hint. When present, the assessment screen
   // renders the matching SVG above the prompt. Leaves text-only questions untouched.
-  visualType?: 'cube' | 'grid-3' | 'grid-4' | 'mirror-letter' | 'mirror-arrow' | 'shape' | 'count-stars';
+  // v0.7: 'dot-compare' added for KG number-comparison support.
+  visualType?: 'cube' | 'grid-3' | 'grid-4' | 'mirror-letter' | 'mirror-arrow' | 'shape' | 'count-stars' | 'dot-compare';
   visualParams?: Record<string, string | number>;
 }
 
