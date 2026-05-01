@@ -230,6 +230,48 @@ const RENDERERS: Record<string, (params: Record<string, string | number>, v: Vis
       </G>
     );
   },
+
+  // v0.7: Two side-by-side dot groups so KG kids can compare quantities
+  // visually instead of decoding bare numerals.
+  'dot-compare': (params, v) => {
+    const left = Math.max(1, Math.min(9, Number(params.left ?? 3)));
+    const right = Math.max(1, Math.min(9, Number(params.right ?? 5)));
+    const groupCx = [90, 230];
+    const groupCounts = [left, right];
+    const dotsForGroup = (cx: number, n: number) => {
+      const cols = Math.min(3, n);
+      const rows = Math.ceil(n / cols);
+      const spacing = 22;
+      const startX = cx - ((cols - 1) * spacing) / 2;
+      const startY = 56 - ((rows - 1) * spacing) / 2;
+      const dots = [];
+      for (let i = 0; i < n; i++) {
+        const r = Math.floor(i / cols);
+        const c = i % cols;
+        dots.push(
+          <Circle
+            key={`${cx}-${i}`}
+            cx={startX + c * spacing}
+            cy={startY + r * spacing}
+            r={8}
+            fill={v.fillMid}
+            stroke={v.stroke}
+            strokeWidth={1.5}
+          />
+        );
+      }
+      return dots;
+    };
+    return (
+      <G>
+        {dotsForGroup(groupCx[0], groupCounts[0])}
+        {dotsForGroup(groupCx[1], groupCounts[1])}
+        <SvgText x={groupCx[0]} y={132} textAnchor="middle" fill={v.textDark} fontSize="20" fontWeight="700">{left}</SvgText>
+        <SvgText x={groupCx[1]} y={132} textAnchor="middle" fill={v.textDark} fontSize="20" fontWeight="700">{right}</SvgText>
+        <Line x1={160} y1={20} x2={160} y2={140} stroke={v.faded} strokeWidth={1} strokeDasharray="3,3" />
+      </G>
+    );
+  },
 };
 
 function makeStyles(colors: ColorPalette) {

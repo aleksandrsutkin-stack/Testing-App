@@ -40,7 +40,7 @@ function baseQ(
     correctAnswerLabel: string; explanationSteps: string[]; commonTrap?: string;
     wrongAnswerFeedback?: Record<string, string>; mistakeTags: MistakeTag[];
     practiceLinks?: PracticeLink[]; helperText?: string; ageMin?: number; ageMax?: number;
-    visualType?: 'cube' | 'grid-3' | 'grid-4' | 'mirror-letter' | 'mirror-arrow' | 'shape' | 'count-stars';
+    visualType?: 'cube' | 'grid-3' | 'grid-4' | 'mirror-letter' | 'mirror-arrow' | 'shape' | 'count-stars' | 'dot-compare';
     visualParams?: Record<string, string | number>;
   }
 ): AssessmentQuestion {
@@ -311,7 +311,7 @@ export const questionTemplates: QuestionTemplate[] = [
         { prompt: 'Which choice helps when a task feels hard?', answer: 'Ask for help or try again', distractors: ['Rip the paper', 'Quit right away', 'Blame a friend'] }
       ]);
       const { options, correctOptionId, wrongAnswerFeedback } = makeOptions(item.answer, item.distractors, ctx.rng, { [item.distractors[1]]: 'Think about the choice that helps learning continue.' });
-      return baseQ(ctx, t, { prompt: item.prompt, options, correctOptionId, correctAnswerLabel: item.answer, explanationSteps: ['School readiness includes listening, trying, and using safe learning habits.', `The helpful choice is: ${item.answer}.`], commonTrap: 'Funny choices can be tempting — choose the one that helps learning.', wrongAnswerFeedback, mistakeTags: ['attention-to-detail'], practiceLinks: [practiceLink('early-math')], ageMin: 4, ageMax: 6 });
+      return baseQ(ctx, t, { prompt: item.prompt, options, correctOptionId, correctAnswerLabel: item.answer, explanationSteps: ['School readiness includes listening, trying, and using safe learning habits.', `The helpful choice is: ${item.answer}.`], commonTrap: 'Young children sometimes pick the silliest or most exciting answer. Gently ask: which one would actually help?', wrongAnswerFeedback, mistakeTags: ['attention-to-detail'], practiceLinks: [practiceLink('early-math')], ageMin: 4, ageMax: 6 });
     }),
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -534,27 +534,51 @@ export const questionTemplates: QuestionTemplate[] = [
   ct({ id: 'military-mechanical-leverage', testIds: MIL, domain: 'mechanical-reasoning', skillId: 'mechanical-reasoning', difficulty: 3 },
     (ctx, t) => {
       const scenarios = [
-        { q: 'A lever has a load on one end. To lift the same load with LESS force, you should:', answer: 'Move the fulcrum closer to the load', distractors: ['Move the fulcrum away from the load', 'Shorten the lever arm', 'Place the load at the center'] },
-        { q: 'Two gears are connected. Gear A has 10 teeth and Gear B has 20 teeth. If Gear A turns once, how many times does Gear B turn?', answer: 'Half a turn (0.5 times)', distractors: ['One full turn', 'Two full turns', 'Same number of teeth'] },
-        { q: 'A ramp is used to push a heavy box into a truck. If you make the ramp longer, the force needed to push the box:', answer: 'Decreases', distractors: ['Increases', 'Stays the same', 'Doubles'] },
-        { q: 'Water flows through a wide pipe into a narrow pipe. The speed of the water in the narrow pipe is:', answer: 'Faster', distractors: ['Slower', 'The same', 'Stops completely'] },
+        { q: 'A lever has a load on one end. To lift the same load with LESS force, you should:', answer: 'Move the fulcrum closer to the load', distractors: ['Move the fulcrum away from the load', 'Shorten the lever arm', 'Place the load at the center'],
+          steps: [
+            'A lever trades force for distance. Moving the fulcrum closer to the load means your end of the lever is longer.',
+            'A longer effort arm = less force needed to lift the same weight.',
+            'Moving the fulcrum away from the load would make you need MORE force.',
+          ] },
+        { q: 'Two gears are connected. Gear A has 10 teeth and Gear B has 20 teeth. If Gear A turns once, how many times does Gear B turn?', answer: 'Half a turn (0.5 times)', distractors: ['One full turn', 'Two full turns', 'Same number of teeth'],
+          steps: [
+            'When a small gear drives a larger one, the large gear turns slower.',
+            'Gear ratio = driving teeth ÷ driven teeth = 10 ÷ 20 = 0.5.',
+            'So Gear B turns once for every 2 turns of Gear A — half a turn per turn.',
+          ] },
+        { q: 'A ramp is used to push a heavy box into a truck. If you make the ramp longer, the force needed to push the box:', answer: 'Decreases', distractors: ['Increases', 'Stays the same', 'Doubles'],
+          steps: [
+            'A ramp is a simple machine that trades distance for force.',
+            'A longer ramp means you push over a greater distance, but with less force.',
+            'The total work stays the same — you just spread the effort out.',
+          ] },
+        { q: 'Water flows through a wide pipe into a narrow pipe. The speed of the water in the narrow pipe is:', answer: 'Faster', distractors: ['Slower', 'The same', 'Stops completely'],
+          steps: [
+            'When water flows from a wide pipe into a narrow pipe, it must speed up.',
+            'The same volume of water has to pass through a smaller opening in the same time.',
+            'This is called the continuity principle — narrower = faster.',
+          ] },
       ];
       const s = ctx.rng.pick(scenarios);
       const { options, correctOptionId } = makeOptions(s.answer, s.distractors, ctx.rng);
-      return baseQ(ctx, t, { prompt: s.q, options, correctOptionId, correctAnswerLabel: s.answer, explanationSteps: [s.answer], commonTrap: 'Mechanical advantage involves trade-offs: less force usually means more distance or time.', mistakeTags: ['science-reasoning'], ageMin: 14 });
+      return baseQ(ctx, t, { prompt: s.q, options, correctOptionId, correctAnswerLabel: s.answer, explanationSteps: s.steps, commonTrap: 'Mechanical advantage involves trade-offs: less force usually means more distance or time.', mistakeTags: ['science-reasoning'], ageMin: 14 });
     }),
 
   ct({ id: 'military-science-basic', testIds: [...MIL, ...STEM], domain: 'science-reasoning', skillId: 'science-reasoning', difficulty: 3 },
     (ctx, t) => {
       const questions = [
-        { q: 'Which type of energy is stored in a compressed spring?', answer: 'Elastic potential energy', wrong: ['Kinetic energy', 'Chemical energy', 'Thermal energy'] },
-        { q: 'A metal rod is heated at one end. The other end gradually becomes warm. This is an example of:', answer: 'Conduction', wrong: ['Convection', 'Radiation', 'Reflection'] },
-        { q: 'Which circuit allows electricity to still flow if one bulb is removed?', answer: 'Parallel circuit', wrong: ['Series circuit', 'Open circuit', 'Grounded circuit'] },
-        { q: 'Which of the following is an example of a chemical change?', answer: 'Iron rusting', wrong: ['Ice melting', 'Glass breaking', 'Water boiling'] },
+        { q: 'Which type of energy is stored in a compressed spring?', answer: 'Elastic potential energy', wrong: ['Kinetic energy', 'Chemical energy', 'Thermal energy'],
+          steps: ['Stored energy due to position or shape is called potential energy.', 'A compressed spring stores energy in the bend of its coils — this specific kind is "elastic" potential energy.', 'When released, the spring converts that elastic potential energy back into motion (kinetic energy).'] },
+        { q: 'A metal rod is heated at one end. The other end gradually becomes warm. This is an example of:', answer: 'Conduction', wrong: ['Convection', 'Radiation', 'Reflection'],
+          steps: ['Heat transfer through direct contact in a solid is called conduction.', 'Vibrating atoms at the hot end pass energy to neighbouring atoms, then to their neighbours, until the cool end warms up.', 'Convection moves heat through a fluid, and radiation moves it through electromagnetic waves — neither matches a solid metal rod.'] },
+        { q: 'Which circuit allows electricity to still flow if one bulb is removed?', answer: 'Parallel circuit', wrong: ['Series circuit', 'Open circuit', 'Grounded circuit'],
+          steps: ['In a series circuit there is only one path, so removing any bulb breaks the path.', 'In a parallel circuit each bulb has its own loop back to the battery.', 'Removing one bulb leaves the other loops intact, so the remaining bulbs stay lit.'] },
+        { q: 'Which of the following is an example of a chemical change?', answer: 'Iron rusting', wrong: ['Ice melting', 'Glass breaking', 'Water boiling'],
+          steps: ['A chemical change creates a NEW substance with new properties.', 'Iron rusting is iron + oxygen → iron oxide, a brand-new compound.', 'Melting, breaking, and boiling are physical changes — they rearrange matter without creating a new substance.'] },
       ];
       const q = ctx.rng.pick(questions);
       const { options, correctOptionId } = makeOptions(q.answer, q.wrong, ctx.rng);
-      return baseQ(ctx, t, { prompt: q.q, options, correctOptionId, correctAnswerLabel: q.answer, explanationSteps: [`The correct answer is: ${q.answer}`], commonTrap: 'Physical changes are reversible and do not create new substances. Chemical changes create new substances.', mistakeTags: ['science-reasoning'], ageMin: 14 });
+      return baseQ(ctx, t, { prompt: q.q, options, correctOptionId, correctAnswerLabel: q.answer, explanationSteps: q.steps, commonTrap: 'Physical changes are reversible and do not create new substances. Chemical changes create new substances.', mistakeTags: ['science-reasoning'], ageMin: 14 });
     }),
 
   ct({ id: 'military-math-percentage', testIds: MIL, domain: 'quantitative', skillId: 'arithmetic-operations', difficulty: 3 },
@@ -849,14 +873,18 @@ export const questionTemplates: QuestionTemplate[] = [
   ct({ id: 'stem-force-motion', testIds: [...STEM,...MIL], domain: 'science-reasoning', skillId: 'science-reasoning', difficulty: 3 },
     (ctx, t) => {
       const questions = [
-        { q: 'A ball is rolling on a flat surface. It gradually slows down. What force is causing this?', answer: 'Friction', wrong: ['Gravity', 'Magnetism', 'Air pressure'] },
-        { q: 'Two equally matched tug-of-war teams pull in opposite directions. The rope does not move. What is the net force?', answer: 'Zero', wrong: ['Strong to the left', 'Strong to the right', 'Doubled'] },
-        { q: 'A skateboarder goes down a ramp and speeds up. Which energy conversion is occurring?', answer: 'Potential energy to kinetic energy', wrong: ['Kinetic to potential', 'Chemical to electrical', 'Thermal to kinetic'] },
-        { q: 'What happens to an object\'s weight when it is moved to the moon (weaker gravity)?', answer: 'Its weight decreases but its mass stays the same', wrong: ['Both weight and mass decrease', 'Both weight and mass increase', 'Weight increases, mass decreases'] },
+        { q: 'A ball is rolling on a flat surface. It gradually slows down. What force is causing this?', answer: 'Friction', wrong: ['Gravity', 'Magnetism', 'Air pressure'],
+          steps: ['Gravity pulls down, not sideways, so it would not slow a ball rolling along a flat surface.', 'Friction is the force between two surfaces in contact that opposes motion.', 'As the ball rolls, friction with the ground robs it of kinetic energy until it stops.'] },
+        { q: 'Two equally matched tug-of-war teams pull in opposite directions. The rope does not move. What is the net force?', answer: 'Zero', wrong: ['Strong to the left', 'Strong to the right', 'Doubled'],
+          steps: ['Net force is the total of all forces, with direction taken into account.', 'Two equal forces pulling in opposite directions cancel each other out.', 'Equal + opposite = zero net force, which is why the rope stays still.'] },
+        { q: 'A skateboarder goes down a ramp and speeds up. Which energy conversion is occurring?', answer: 'Potential energy to kinetic energy', wrong: ['Kinetic to potential', 'Chemical to electrical', 'Thermal to kinetic'],
+          steps: ['At the top of the ramp the skateboarder has stored gravitational potential energy from their height.', 'As they descend, that height (potential) converts into motion (kinetic) — they speed up.', 'Going UP a ramp would be the reverse: kinetic into potential.'] },
+        { q: 'What happens to an object\'s weight when it is moved to the moon (weaker gravity)?', answer: 'Its weight decreases but its mass stays the same', wrong: ['Both weight and mass decrease', 'Both weight and mass increase', 'Weight increases, mass decreases'],
+          steps: ['Mass is the amount of matter in the object — it does not change just because you move the object.', 'Weight is the FORCE of gravity on that mass: weight = mass × gravity.', 'The moon has weaker gravity, so the same mass produces less weight.'] },
       ];
       const q = ctx.rng.pick(questions);
       const { options, correctOptionId } = makeOptions(q.answer, q.wrong, ctx.rng);
-      return baseQ(ctx, t, { prompt: q.q, options, correctOptionId, correctAnswerLabel: q.answer, explanationSteps: [`The answer is: ${q.answer}`], commonTrap: 'Mass (amount of matter) stays constant everywhere. Weight (force of gravity) changes with gravity.', mistakeTags: ['science-reasoning'], ageMin: 10 });
+      return baseQ(ctx, t, { prompt: q.q, options, correctOptionId, correctAnswerLabel: q.answer, explanationSteps: q.steps, commonTrap: 'Mass (amount of matter) stays constant everywhere. Weight (force of gravity) changes with gravity.', mistakeTags: ['science-reasoning'], ageMin: 10 });
     }),
 
   ct({ id: 'stem-data-read', testIds: STEM, domain: 'science-reasoning', skillId: 'data-statistics', difficulty: 2 },
@@ -870,26 +898,61 @@ export const questionTemplates: QuestionTemplate[] = [
   ct({ id: 'stem-system-diagram', testIds: STEM, domain: 'visual-spatial', skillId: 'spatial-reasoning', difficulty: 3 },
     (ctx, t) => {
       const scenarios = [
-        { q: 'Three gears in a row: A drives B, and B drives C. Gear A turns clockwise. Which direction does Gear C turn?', answer: 'Clockwise', wrong: ['Counter-clockwise', 'It does not move', 'It depends on speed'] },
-        { q: 'Water flows from a tall tank (high) through a pipe to a low tank. If you raise the tall tank higher, what happens to the flow speed?', answer: 'It increases', wrong: ['It decreases', 'It stays the same', 'The water flows backwards'] },
-        { q: 'A pulley system has 2 pulleys. Pulling the rope 10 cm lifts the load how far?', answer: '5 cm', wrong: ['10 cm', '20 cm', '2.5 cm'] },
+        { q: 'Three gears in a row: A drives B, and B drives C. Gear A turns clockwise. Which direction does Gear C turn?', answer: 'Clockwise', wrong: ['Counter-clockwise', 'It does not move', 'It depends on speed'],
+          steps: [
+            'When two touching gears mesh, they rotate in opposite directions.',
+            'A→B reverses direction, then B→C reverses again — two flips return to the original direction.',
+            'So if A turns clockwise, C also turns clockwise.',
+          ] },
+        { q: 'Water flows from a tall tank (high) through a pipe to a low tank. If you raise the tall tank higher, what happens to the flow speed?', answer: 'It increases', wrong: ['It decreases', 'It stays the same', 'The water flows backwards'],
+          steps: [
+            'Water flows downhill because of gravity. A bigger height difference means more pressure pushing it through the pipe.',
+            'More pressure pushing the same water through the same pipe = faster flow.',
+            'So raising the tall tank speeds up the flow into the low tank.',
+          ] },
+        { q: 'A pulley system has 2 pulleys. Pulling the rope 10 cm lifts the load how far?', answer: '5 cm', wrong: ['10 cm', '20 cm', '2.5 cm'],
+          steps: [
+            'A 2-pulley system gives you 2× the lifting force, but you must pull twice as much rope.',
+            'Pulling 10 cm of rope lifts the load by half that distance.',
+            '10 cm ÷ 2 = 5 cm.',
+          ] },
       ];
       const s = ctx.rng.pick(scenarios);
       const { options, correctOptionId } = makeOptions(s.answer, s.wrong, ctx.rng);
-      return baseQ(ctx, t, { prompt: s.q, options, correctOptionId, correctAnswerLabel: s.answer, explanationSteps: [s.answer], commonTrap: 'System diagrams require tracing the effect through each component in sequence.', mistakeTags: ['science-reasoning', 'spatial-reasoning'], ageMin: 11 });
+      return baseQ(ctx, t, { prompt: s.q, options, correctOptionId, correctAnswerLabel: s.answer, explanationSteps: s.steps, commonTrap: 'System diagrams require tracing the effect through each component in sequence.', mistakeTags: ['science-reasoning', 'spatial-reasoning'], ageMin: 11 });
     }),
 
   ct({ id: 'stem-classify-life-science', testIds: STEM, domain: 'science-reasoning', skillId: 'science-reasoning', difficulty: 2 },
     (ctx, t) => {
       const questions = [
-        { q: 'Which of these organisms is a producer in a food chain?', answer: 'Grass', wrong: ['Rabbit', 'Fox', 'Worm'] },
-        { q: 'Which of the following is an invertebrate?', answer: 'Jellyfish', wrong: ['Frog', 'Salmon', 'Lizard'] },
-        { q: 'Which kingdom do mushrooms belong to?', answer: 'Fungi', wrong: ['Plant', 'Animal', 'Bacteria'] },
-        { q: 'Which process do plants use to make their own food?', answer: 'Photosynthesis', wrong: ['Respiration', 'Digestion', 'Fermentation'] },
+        { q: 'Which of these organisms is a producer in a food chain?', answer: 'Grass', wrong: ['Rabbit', 'Fox', 'Worm'],
+          steps: [
+            'Producers are organisms that make their own food using sunlight.',
+            'Grass uses photosynthesis to convert sunlight into energy.',
+            'Rabbits, foxes, and worms all eat other organisms — they are consumers.',
+          ] },
+        { q: 'Which of the following is an invertebrate?', answer: 'Jellyfish', wrong: ['Frog', 'Salmon', 'Lizard'],
+          steps: [
+            'Invertebrates are animals without a backbone.',
+            'Jellyfish have soft bodies with no spine or skeleton.',
+            'Frogs, salmon, and lizards all have backbones — they are vertebrates.',
+          ] },
+        { q: 'Which kingdom do mushrooms belong to?', answer: 'Fungi', wrong: ['Plant', 'Animal', 'Bacteria'],
+          steps: [
+            'Mushrooms are not plants — they do not photosynthesise.',
+            'They belong to the Fungi kingdom, which breaks down dead material for nutrients.',
+            'Plants make their own food; animals eat other organisms; bacteria are single-celled.',
+          ] },
+        { q: 'Which process do plants use to make their own food?', answer: 'Photosynthesis', wrong: ['Respiration', 'Digestion', 'Fermentation'],
+          steps: [
+            'Plants use a process called photosynthesis to make food from sunlight, water, and carbon dioxide.',
+            'Respiration is how organisms release energy — it is not the same as making food.',
+            'Digestion and fermentation are breakdown processes, not food-making processes.',
+          ] },
       ];
       const q = ctx.rng.pick(questions);
       const { options, correctOptionId } = makeOptions(q.answer, q.wrong, ctx.rng);
-      return baseQ(ctx, t, { prompt: q.q, options, correctOptionId, correctAnswerLabel: q.answer, explanationSteps: [`${q.answer}`], commonTrap: 'Producers make their own energy from sunlight; consumers eat other organisms.', mistakeTags: ['science-reasoning'], ageMin: 9 });
+      return baseQ(ctx, t, { prompt: q.q, options, correctOptionId, correctAnswerLabel: q.answer, explanationSteps: q.steps, commonTrap: 'Producers make their own energy from sunlight; consumers eat other organisms.', mistakeTags: ['science-reasoning'], ageMin: 9 });
     }),
 
   // ── 75-78. Coding expansion 2 ────────────────────────────────────────────
@@ -952,14 +1015,18 @@ export const questionTemplates: QuestionTemplate[] = [
   ct({ id: 'military-electrical-basic', testIds: MIL, domain: 'mechanical-reasoning', skillId: 'mechanical-reasoning', difficulty: 3 },
     (ctx, t) => {
       const questions = [
-        { q: 'In a simple circuit, what happens if you add a second battery in series?', answer: 'The voltage doubles and the current increases', wrong: ['The voltage stays the same', 'The circuit breaks', 'The voltage halves'] },
-        { q: 'What unit is used to measure electrical resistance?', answer: 'Ohm (Ω)', wrong: ['Volt (V)', 'Ampere (A)', 'Watt (W)'] },
-        { q: 'Ohm\'s Law: V = I × R. If resistance doubles and voltage stays the same, what happens to current?', answer: 'Current halves', wrong: ['Current doubles', 'Current stays the same', 'Current goes to zero'] },
-        { q: 'Which material is the best insulator?', answer: 'Rubber', wrong: ['Copper', 'Aluminium', 'Steel'] },
+        { q: 'In a simple circuit, what happens if you add a second battery in series?', answer: 'The voltage doubles and the current increases', wrong: ['The voltage stays the same', 'The circuit breaks', 'The voltage halves'],
+          steps: ['Batteries in series stack their voltages: each cell contributes its own push.', 'Two equal batteries in series = double the voltage.', 'Higher voltage with the same resistance means more current (Ohm\'s Law: I = V/R).'] },
+        { q: 'What unit is used to measure electrical resistance?', answer: 'Ohm (Ω)', wrong: ['Volt (V)', 'Ampere (A)', 'Watt (W)'],
+          steps: ['Volts (V) measure voltage, amps (A) measure current, watts (W) measure power.', 'Resistance — how much a material opposes current flow — is measured in ohms.', 'The symbol is the Greek letter omega (Ω).'] },
+        { q: 'Ohm\'s Law: V = I × R. If resistance doubles and voltage stays the same, what happens to current?', answer: 'Current halves', wrong: ['Current doubles', 'Current stays the same', 'Current goes to zero'],
+          steps: ['Rearrange Ohm\'s Law to solve for current: I = V / R.', 'V is unchanged, so doubling R means dividing the same V by twice as much.', 'Same number divided by twice as much = half the current.'] },
+        { q: 'Which material is the best insulator?', answer: 'Rubber', wrong: ['Copper', 'Aluminium', 'Steel'],
+          steps: ['Insulators resist the flow of electricity; conductors allow it.', 'Metals like copper, aluminium, and steel all conduct electricity well — they are not insulators.', 'Rubber\'s atomic structure traps electrons in place, which is why electrical wires are coated in it.'] },
       ];
       const q = ctx.rng.pick(questions);
       const { options, correctOptionId } = makeOptions(q.answer, q.wrong, ctx.rng);
-      return baseQ(ctx, t, { prompt: q.q, options, correctOptionId, correctAnswerLabel: q.answer, explanationSteps: [q.answer], commonTrap: 'Ohm\'s Law: V = I × R. Rearranging: I = V/R. If R doubles, I is halved (V constant).', mistakeTags: ['science-reasoning'], ageMin: 14 });
+      return baseQ(ctx, t, { prompt: q.q, options, correctOptionId, correctAnswerLabel: q.answer, explanationSteps: q.steps, commonTrap: 'Ohm\'s Law: V = I × R. Rearranging: I = V/R. If R doubles, I is halved (V constant).', mistakeTags: ['science-reasoning'], ageMin: 14 });
     }),
 
   ct({ id: 'military-map-grid', testIds: MIL, domain: 'visual-spatial', skillId: 'spatial-reasoning', difficulty: 3 },
@@ -979,7 +1046,15 @@ export const questionTemplates: QuestionTemplate[] = [
       const a = ctx.rng.int(1,9); let b = ctx.rng.int(1,9); while (b===a) b = (b%9)+1;
       const bigger = Math.max(a,b);
       const { options, correctOptionId } = makeOptions(String(bigger), [String(Math.min(a,b)), String(bigger+1), String(bigger-1)], ctx.rng);
-      return baseQ(ctx, t, { prompt: `Which number is bigger: ${a} or ${b}?`, helperText: 'You can count on your fingers to compare.', options, correctOptionId, correctAnswerLabel: String(bigger), explanationSteps: [`Count to ${a} and to ${b}.`, `${bigger} is more than ${Math.min(a,b)}.`], commonTrap: 'The number you say LATER when counting is bigger.', mistakeTags: ['concept-gap'], ageMin: 4, ageMax: 7 });
+      return baseQ(ctx, t, {
+        prompt: `Which number is bigger: ${a} or ${b}?`,
+        helperText: 'Look at the dots above. The side with more dots is the bigger number.',
+        options, correctOptionId, correctAnswerLabel: String(bigger),
+        explanationSteps: [`Count the dots in each group: ${a} on one side, ${b} on the other.`, `${bigger} dots is more than ${Math.min(a,b)} dots, so ${bigger} is the bigger number.`],
+        commonTrap: 'The group with MORE dots is the bigger number, no matter which side it is on.',
+        mistakeTags: ['concept-gap'], ageMin: 4, ageMax: 7,
+        visualType: 'dot-compare', visualParams: { left: a, right: b },
+      });
     }),
 
   ct({ id: 'kg-simple-add', testIds: KG, domain: 'number-sense', skillId: 'arithmetic-operations', difficulty: 1 },
@@ -994,20 +1069,36 @@ export const questionTemplates: QuestionTemplate[] = [
       const colors = ['red','blue','green','yellow','orange'], target = ctx.rng.pick(colors);
       const count = ctx.rng.int(2,5), others = ctx.rng.int(1,4);
       const { options, correctOptionId } = makeOptions(String(count), [String(count+others), String(others), String(count-1)], ctx.rng, { [String(count+others)]: `That counts ALL objects, not just the ${target} ones.` });
-      return baseQ(ctx, t, { prompt: `There are ${count} ${target} circles and ${others} blue circles.\n\nHow many ${target} circles are there?`, options, correctOptionId, correctAnswerLabel: String(count), explanationSteps: [`Only count the ${target} circles.`, `There are ${count} ${target} circles.`], commonTrap: `Read carefully — only count the objects of the named colour.`, mistakeTags: ['attention-to-detail'], ageMin: 4, ageMax: 7 });
+      return baseQ(ctx, t, { prompt: `There are ${count} ${target} circles and ${others} blue circles.\n\nHow many ${target} circles are there?`, options, correctOptionId, correctAnswerLabel: String(count), explanationSteps: [`Only count the ${target} circles.`, `There are ${count} ${target} circles.`], commonTrap: `Look carefully — only count the circles that are ${target}, not the blue ones.`, mistakeTags: ['attention-to-detail'], ageMin: 4, ageMax: 7 });
     }),
 
+  // v0.7: Body-parts items replaced with beginning-letter-sound items per
+  // teacher-review feedback. Template ID preserved so existing seeds still
+  // generate valid sessions.
   ct({ id: 'kg-vocabulary-body', testIds: KG, domain: 'vocabulary', skillId: 'vocabulary', difficulty: 1 },
     (ctx, t) => {
       const items = [
-        { q: 'Which part of your body do you use to smell things?', answer: 'Nose', wrong: ['Ears', 'Fingers', 'Eyes'] },
-        { q: 'Which part of your body do you use to hear sounds?', answer: 'Ears', wrong: ['Eyes', 'Nose', 'Mouth'] },
-        { q: 'Which part of your body helps you walk and run?', answer: 'Legs', wrong: ['Arms', 'Head', 'Belly'] },
-        { q: 'What do you use to pick up and hold things?', answer: 'Hands', wrong: ['Feet', 'Ears', 'Eyes'] },
+        { word: 'ball', answer: 'B', wrong: ['D', 'P', 'G'] },
+        { word: 'sun',  answer: 'S', wrong: ['Z', 'C', 'M'] },
+        { word: 'dog',  answer: 'D', wrong: ['B', 'G', 'P'] },
+        { word: 'fish', answer: 'F', wrong: ['V', 'S', 'H'] },
+        { word: 'moon', answer: 'M', wrong: ['N', 'W', 'R'] },
       ];
       const item = ctx.rng.pick(items);
       const { options, correctOptionId } = makeOptions(item.answer, item.wrong, ctx.rng);
-      return baseQ(ctx, t, { prompt: item.q, options, correctOptionId, correctAnswerLabel: item.answer, explanationSteps: [`We use our ${item.answer.toLowerCase()} for that.`], commonTrap: 'Think about which body part does that specific job.', mistakeTags: ['vocabulary-confusion'], ageMin: 4, ageMax: 7 });
+      return baseQ(ctx, t, {
+        prompt: `Which letter does the word "${item.word}" start with?`,
+        helperText: 'Say the word out loud and listen to the very first sound.',
+        options, correctOptionId, correctAnswerLabel: item.answer,
+        explanationSteps: [
+          `Say the word "${item.word}" slowly. Listen to the very first sound.`,
+          `The first sound is "${item.answer.toLowerCase()}," and that sound is made by the letter ${item.answer}.`,
+        ],
+        commonTrap: 'Say the word out loud and listen for the very first sound — not a sound from the middle or end.',
+        mistakeTags: ['vocabulary-confusion'],
+        practiceLinks: [practiceLink('vocabulary')],
+        ageMin: 4, ageMax: 7,
+      });
     }),
 
 ]; // end questionTemplates array
@@ -1032,6 +1123,19 @@ function phrase(rng: SeededRandom, options: string[]): string {
   return options[rng.int(0, options.length - 1)];
 }
 
+// ─── Diverse name pool (v0.7) ────────────────────────────────────────────────
+// Randomised via rng.pick() so seed determinism is preserved.
+// Mix of common US names across ethnicities and gender. Deliberately includes
+// names that don't signal a specific background so the pool feels natural.
+const NAME_POOL = [
+  'Alex', 'Maya', 'Jamal', 'Sara', 'Liam', 'Priya', 'Carlos', 'Mei',
+  'Aiden', 'Sofia', 'Noah', 'Zara', 'Ethan', 'Amara', 'Ben', 'Lily',
+];
+
+function randomName(rng: SeededRandom): string {
+  return rng.pick(NAME_POOL);
+}
+
 const v6Templates: QuestionTemplate[] = [
 
   // ── Reading comprehension: real passages (3 templates) ──────────────────
@@ -1048,6 +1152,20 @@ const v6Templates: QuestionTemplate[] = [
         { passage: 'In December 1903, two brothers named Wilbur and Orville Wright made history. They flew the first powered airplane near Kitty Hawk, North Carolina. The flight lasted only twelve seconds and went about a hundred and twenty feet. It does not sound like much today, but at the time it was a huge breakthrough. Their invention launched a century of aviation that would change how people travel, work, and connect with each other.',
           mainIdea: 'A short flight by the Wright brothers led to an entire age of aviation.',
           wrong: ['The Wright brothers built the first hot-air balloon.', 'The first flight lasted several hours.', 'Wilbur and Orville competed against each other.'] },
+        // v0.7 additions — easier tier (~Lexile 500–600).
+        { passage: 'Dogs have been pets for thousands of years. They come in many sizes, from tiny Chihuahuas to huge Great Danes. Dogs can learn tricks, help people who cannot see, and even work with the police. Most of all, dogs are known for being loyal friends to the people who take care of them.',
+          mainIdea: 'Dogs have been useful and loyal companions to humans for a very long time.',
+          wrong: ['Chihuahuas are the smallest dogs.', 'Dogs are smarter than other animals.', 'Police dogs are the most important kind of dog.'] },
+        { passage: 'The ocean is home to millions of different animals. Some, like dolphins, breathe air and swim near the surface. Others, like anglerfish, live so deep that sunlight never reaches them. Scientists believe there are still many ocean species that have not been discovered yet.',
+          mainIdea: 'The ocean contains a huge variety of animal life, much of it still undiscovered.',
+          wrong: ['Dolphins are the most common ocean animal.', 'Anglerfish are dangerous to humans.', 'Scientists have found every species in the ocean.'] },
+        // v0.7 additions — harder tier (~Lexile 900–1000) and a non-US human-achievement passage.
+        { passage: 'Around the year 1440, a German goldsmith named Johannes Gutenberg built a printing press with movable metal type. Before this invention, every book in Europe had to be copied by hand — a process that could take months. Gutenberg\'s press could produce pages far more quickly and cheaply. Within fifty years, millions of books had been printed across Europe. The sudden availability of written knowledge helped spark advances in science, religion, and government that changed the world.',
+          mainIdea: 'Gutenberg\'s printing press made books widely available and transformed European society.',
+          wrong: ['Gutenberg invented paper.', 'Books were free after the printing press was invented.', 'The printing press was only used in Germany.'] },
+        { passage: 'Coral reefs occupy less than one percent of the ocean floor, yet they support roughly a quarter of all marine species. Reefs are built over centuries by tiny animals called coral polyps, which secrete hard calcium carbonate skeletons. Rising ocean temperatures cause coral bleaching — a stress response where corals expel the algae that give them colour and nutrients. If temperatures remain high, the coral dies. Scientists warn that without significant action on climate change, most of the world\'s coral reefs could disappear within decades.',
+          mainIdea: 'Coral reefs are vital ecosystems that are threatened by rising ocean temperatures.',
+          wrong: ['Coral reefs cover most of the ocean floor.', 'Coral bleaching makes reefs more colourful.', 'Coral polyps are a type of plant.'] },
       ];
       const item = ctx.rng.pick(passages);
       const lead = phrase(ctx.rng, [
@@ -1162,9 +1280,10 @@ const v6Templates: QuestionTemplate[] = [
       const give = ctx.rng.int(3, 9);
       const groups = ctx.rng.int(2, 4);
       const remaining = start - give * groups;
+      const name = randomName(ctx.rng);
       const lead = phrase(ctx.rng, [
         `A class has ${start} pencils. The teacher gives ${give} pencils to each of ${groups} students. How many pencils are left?`,
-        `Sara had ${start} stickers. She gave ${give} stickers each to ${groups} friends. How many stickers does she have now?`,
+        `${name} had ${start} stickers and gave ${give} stickers each to ${groups} friends. How many stickers does ${name} have now?`,
       ]);
       const { options, correctOptionId } = makeOptions(String(remaining), [
         String(start - give), String(start + give), String(give * groups)
@@ -1238,8 +1357,9 @@ const v6Templates: QuestionTemplate[] = [
       const item2 = ctx.rng.int(3, 7);
       const paid = 20;
       const change = paid - (item1 + item2);
+      const name = randomName(ctx.rng);
       const lead = phrase(ctx.rng, [
-        `Jamal bought a book for $${item1} and a snack for $${item2}. He paid with a $${paid} bill. How much change should he get back?`,
+        `${name} bought a book for $${item1} and a snack for $${item2}. They paid with a $${paid} bill. How much change should they get back?`,
         `Two items cost $${item1} and $${item2}. If you hand the cashier $${paid}, what is your change?`,
       ]);
       const { options, correctOptionId } = makeOptions(`$${change}`, [
@@ -1560,18 +1680,19 @@ const v6Templates: QuestionTemplate[] = [
   ct({ id: 'mech-pulley-v6', testIds: [...MIL, ...STEM], domain: 'mechanical-reasoning', skillId: 'mechanical-reasoning', difficulty: 3 },
     (ctx, t) => {
       const lead = phrase(ctx.rng, [
-        'A simple pulley with two supporting ropes lifts a 100 kg load. About how much force is needed to lift it (ignoring friction)?',
-        'You use a pulley system with 2 supporting rope segments to raise a 100 kg crate. What force do you need (ignoring friction)?',
+        'A simple pulley with two supporting ropes lifts a 100 kg load. About how much effort is needed to lift it (ignoring friction)?',
+        'You use a pulley system with 2 supporting rope segments to raise a 100 kg crate. What effort do you need to apply (ignoring friction)?',
       ]);
-      const ans = 'About 50 kg of force';
-      const wrong = ['About 100 kg of force', 'About 200 kg of force', 'No force at all'];
+      const ans = 'About half the effort — roughly 50 kg-force';
+      const wrong = ['The full effort — about 100 kg-force', 'Twice the effort — about 200 kg-force', 'No effort at all'];
       const { options, correctOptionId } = makeOptions(ans, wrong, ctx.rng);
       return baseQ(ctx, t, {
         prompt: lead,
         options, correctOptionId, correctAnswerLabel: ans,
         explanationSteps: [
           'A pulley with N supporting ropes gives a mechanical advantage of N.',
-          'With 2 supporting ropes, force needed is 100 ÷ 2 = 50 kg.',
+          'With 2 supporting ropes, the effort needed is 100 ÷ 2 = 50 kg-force.',
+          'We say "50 kg-force" as a shorthand. In physics class you would express that as about 500 newtons (N).',
         ],
         commonTrap: 'A pulley does not eliminate force — it reduces it.',
         mistakeTags: ['concept-gap'], ageMin: 12, ageMax: 18,
@@ -1747,8 +1868,10 @@ const v6Templates: QuestionTemplate[] = [
         prompt: lead,
         options, correctOptionId, correctAnswerLabel: correct,
         explanationSteps: [
-          'Subtract 5 from both sides: x > 7.',
-          'So any value greater than 7 works. From the choices, 8 is the only one.',
+          'Start with the inequality: x + 5 > 12.',
+          'Subtract 5 from both sides: x + 5 − 5 > 12 − 5, which simplifies to x > 7.',
+          'The symbol > means "strictly greater than," so 7 itself does NOT work.',
+          'From the choices, 8 is the only value greater than 7.',
         ],
         commonTrap: 'The inequality is strict (>), so 7 itself does NOT make it true.',
         mistakeTags: ['concept-gap', 'procedure-error'], ageMin: 12, ageMax: 16,
@@ -1804,6 +1927,189 @@ const v6Templates: QuestionTemplate[] = [
 
 // Merge v6 templates into the main array
 questionTemplates.push(...v6Templates);
+
+// ════════════════════════════════════════════════════════════════════════════
+// SECTION 5 — v0.7 CONTENT REVIEW PASS
+// 5 new templates added per teacher-review feedback. All existing template IDs
+// preserved; these are additive variants giving the assembler more pool depth.
+// ════════════════════════════════════════════════════════════════════════════
+
+const v7Templates: QuestionTemplate[] = [
+
+  // KG parent-observation readiness — uses the existing parent-rating frame
+  // (yes/sometimes/not-yet) with concrete classroom-prep behaviours.
+  ct({ id: 'kg-parent-observe-readiness-v7', testIds: KG, domain: 'school-readiness', skillId: 'early-math', difficulty: 1 },
+    (ctx, t) => {
+      const item = ctx.rng.pick([
+        { prompt: 'Can your child hold a pencil or crayon with a proper grip (not a fist)?', yes: 'Yes, most of the time', sometimes: 'Sometimes, but often switches to a fist grip', notYet: 'Not yet — still uses a fist grip', learning: 'Pencil grip develops with practice. Try short drawing activities with thick crayons or triangular pencils.' },
+        { prompt: 'Can your child recognise their own first name when they see it written?', yes: 'Yes, they spot it right away', sometimes: 'Sometimes, if the letters are large', notYet: 'Not yet', learning: 'Write their name on their belongings and point it out often. Repetition builds recognition.' },
+        { prompt: 'Can your child follow a two-step direction (e.g., "Put your shoes by the door and then wash your hands")?', yes: 'Yes, usually', sometimes: 'They remember one step but forget the second', notYet: 'Not yet — needs each step repeated separately', learning: 'Practice giving simple two-step directions during daily routines. Pause between steps to let them finish the first one.' },
+      ]);
+      const { options, correctOptionId } = makeOptions(item.yes, [item.sometimes, item.notYet, 'I am not sure'], ctx.rng);
+      return baseQ(ctx, t, {
+        prompt: `Parent observation:\n\n${item.prompt}`,
+        helperText: 'Answer based on what you have seen your child do at home — there is no wrong answer.',
+        options, correctOptionId, correctAnswerLabel: item.yes,
+        explanationSteps: [
+          'This is a readiness observation, not a pass/fail question.',
+          item.learning,
+          'Children develop these skills at different rates. Practice and exposure help.',
+        ],
+        commonTrap: 'Pick what your child does most often, not what they did once on a good day.',
+        mistakeTags: ['attention-to-detail'],
+        practiceLinks: [practiceLink('early-math')],
+        ageMin: 4, ageMax: 6,
+      });
+    }),
+
+  // KG shape identification — adds a counting-sides phrasing variant on top of
+  // the existing kg-shape-identify (which uses "perfectly round" / "N sides").
+  ct({ id: 'kg-shape-identify-v7', testIds: KG, domain: 'school-readiness', skillId: 'spatial-reasoning', difficulty: 1 },
+    (ctx, t) => {
+      const shapes = [
+        { name: 'triangle', sides: 3, description: 'It has 3 straight sides and 3 corners.' },
+        { name: 'square', sides: 4, description: 'It has 4 equal sides and 4 corners.' },
+        { name: 'circle', sides: 0, description: 'It is round with no straight sides or corners.' },
+        { name: 'rectangle', sides: 4, description: 'It has 4 sides — two long and two short — and 4 corners.' },
+      ];
+      const target = ctx.rng.pick(shapes);
+      const prompt = phrase(ctx.rng, [
+        `Which shape has ${target.sides === 0 ? 'no corners and no straight sides' : `${target.sides} sides`}?`,
+        `What is the name of a shape that ${target.sides === 0 ? 'is perfectly round' : `has exactly ${target.sides} straight sides`}?`,
+      ]);
+      const wrongNames = shapes.filter(s => s.name !== target.name).map(s => s.name);
+      const { options, correctOptionId } = makeOptions(target.name, wrongNames, ctx.rng);
+      return baseQ(ctx, t, {
+        prompt,
+        options, correctOptionId, correctAnswerLabel: target.name,
+        explanationSteps: [
+          target.description,
+          `So the answer is: ${target.name}.`,
+        ],
+        commonTrap: 'Count the sides carefully. A square and a rectangle both have 4 sides, but a square has 4 EQUAL sides.',
+        mistakeTags: ['concept-gap'],
+        practiceLinks: [practiceLink('early-math')],
+        ageMin: 4, ageMax: 6,
+      });
+    }),
+
+  // Reading inference — short slice-of-life passages with multiple sensory clues.
+  // Sibling to the existing rc-passage-inference-v6 (which uses denser items).
+  ct({ id: 'rc-passage-inference-v7', testIds: [...READ, ...APT], domain: 'reading-comprehension', skillId: 'reading-comprehension', difficulty: 3 },
+    (ctx, t) => {
+      const passages = [
+        { passage: 'Maya checked the oven for the third time in five minutes. She wiped the counter again even though it was already clean. When the doorbell rang, she jumped.',
+          question: 'How is Maya most likely feeling?',
+          answer: 'Nervous or anxious',
+          wrong: ['Bored', 'Angry', 'Sleepy'],
+          explain: 'Maya is checking the oven repeatedly, cleaning an already clean counter, and jumping at the doorbell. These are signs of nervousness.' },
+        { passage: 'Sam grabbed his umbrella, zipped up his raincoat, and pulled on his rubber boots. He looked out the window and sighed before opening the front door.',
+          question: 'What can you infer about the weather outside?',
+          answer: 'It is raining or about to rain',
+          wrong: ['It is sunny and warm', 'It is snowing heavily', 'It is a windy but dry day'],
+          explain: 'Sam is preparing with rain gear (umbrella, raincoat, rubber boots) and sighing, suggesting unpleasant wet weather.' },
+        { passage: 'The theatre lights dimmed. The audience stopped talking. A single spotlight appeared on the empty stage, and the sound of a piano drifted from behind the curtain.',
+          question: 'What is about to happen?',
+          answer: 'A performance is about to begin',
+          wrong: ['The theatre is closing for the night', 'There is a power cut', 'The audience is leaving'],
+          explain: 'Dimming lights, a spotlight, and music from backstage are all signs that a show is starting.' },
+      ];
+      const item = ctx.rng.pick(passages);
+      const lead = phrase(ctx.rng, [
+        item.question,
+        `Based on the passage, ${item.question.toLowerCase().replace('?', '')}?`,
+      ]);
+      const { options, correctOptionId } = makeOptions(item.answer, item.wrong, ctx.rng);
+      return baseQ(ctx, t, {
+        prompt: `${item.passage}\n\n${lead}`,
+        helperText: 'The answer is not stated directly — use clues from the passage.',
+        options, correctOptionId, correctAnswerLabel: item.answer,
+        explanationSteps: [
+          'An inference is a conclusion you draw from clues, not something stated directly.',
+          item.explain,
+        ],
+        commonTrap: 'Inference questions ask what the passage SUGGESTS, not what it says word for word.',
+        mistakeTags: ['reading-comprehension'],
+        practiceLinks: [practiceLink('reading-comprehension')],
+        ageMin: 8,
+      });
+    }),
+
+  // Reading detail-retrieval — fact-finding within a passage. Sibling to
+  // rc-passage-detail-v6; uses different content (Pacific Ocean / penicillin /
+  // elephants) for additional retake variety.
+  ct({ id: 'rc-passage-detail-v7', testIds: [...READ], domain: 'reading-comprehension', skillId: 'reading-evidence', difficulty: 2 },
+    (ctx, t) => {
+      const passages = [
+        { passage: 'The Pacific Ocean is the largest and deepest ocean on Earth. It covers more than 60 million square miles and contains the Mariana Trench, which reaches a depth of about 36,000 feet. The Pacific is also home to the Ring of Fire, a horseshoe-shaped zone where many earthquakes and volcanic eruptions occur.',
+          question: 'How deep is the Mariana Trench?',
+          answer: 'About 36,000 feet',
+          wrong: ['About 60 million feet', 'About 10,000 feet', 'The passage does not say'] },
+        { passage: 'Alexander Fleming discovered penicillin in 1928 when he noticed mould growing on a bacteria dish in his laboratory. The mould had killed the bacteria around it. This accidental discovery led to the development of antibiotics, which have saved millions of lives since then.',
+          question: 'When was penicillin discovered?',
+          answer: '1928',
+          wrong: ['1945', '1900', '1832'] },
+        { passage: 'Elephants are the largest land animals alive today. African elephants can weigh up to 14,000 pounds and stand about 13 feet tall at the shoulder. They live in family groups led by the oldest female, called the matriarch. Elephants are known for their excellent memory and strong social bonds.',
+          question: 'Who leads an elephant family group?',
+          answer: 'The oldest female (the matriarch)',
+          wrong: ['The largest male', 'The youngest elephant', 'Elephants do not live in groups'] },
+      ];
+      const item = ctx.rng.pick(passages);
+      const { options, correctOptionId } = makeOptions(item.answer, item.wrong, ctx.rng);
+      return baseQ(ctx, t, {
+        prompt: `${item.passage}\n\n${item.question}`,
+        helperText: 'Find the specific fact in the passage.',
+        options, correctOptionId, correctAnswerLabel: item.answer,
+        explanationSteps: [
+          'Detail questions ask you to find a specific piece of information stated in the passage.',
+          `The passage says: "${item.answer}."`,
+          'Scan the passage for key words from the question to locate the answer quickly.',
+        ],
+        commonTrap: 'Read the passage — do not guess from general knowledge. The answer is in the text.',
+        mistakeTags: ['reading-comprehension', 'attention-to-detail'],
+        practiceLinks: [practiceLink('reading-comprehension')],
+        ageMin: 7,
+      });
+    }),
+
+  // Reading simile — easier-tier figurative-language template. Pulled out as
+  // its own template at difficulty 2 because explicit "as…as" / "like"
+  // comparisons are noticeably easier than metaphor or personification.
+  // The original simile item stays in reading-figurative-language so existing
+  // seeds keep producing valid sessions; this is an additive sibling.
+  ct({ id: 'reading-simile-v7', testIds: READ, domain: 'vocabulary', skillId: 'vocabulary', difficulty: 2 },
+    (ctx, t) => {
+      const examples = [
+        { sentence: 'Her smile was as bright as the sun.', answer: 'Her smile was very bright and joyful.', wrong: ['The sun was smiling.', 'She smiled exactly once.', 'The sun was very hot.'] },
+        { sentence: 'He ran like the wind.', answer: 'He ran very fast.', wrong: ['The wind was running.', 'He ran in a straight line.', 'He could not run any faster.'] },
+        { sentence: 'The stars were like diamonds in the sky.', answer: 'The stars looked bright and sparkling.', wrong: ['Diamonds were falling from the sky.', 'Someone had put diamonds in the sky.', 'The sky was made of diamonds.'] },
+      ];
+      const e = ctx.rng.pick(examples);
+      const lead = phrase(ctx.rng, [
+        `"${e.sentence}"\n\nWhat does this sentence most likely mean?`,
+        `What is the speaker really saying with the sentence: "${e.sentence}"?`,
+      ]);
+      const { options, correctOptionId } = makeOptions(e.answer, e.wrong, ctx.rng);
+      return baseQ(ctx, t, {
+        prompt: lead,
+        helperText: 'A simile compares two things using "as…as" or "like." It is not literal.',
+        options, correctOptionId, correctAnswerLabel: e.answer,
+        explanationSteps: [
+          'A simile compares two things using "as…as" or "like" to make a description more vivid.',
+          'It does not mean exactly what the words say.',
+          `The real meaning here is: ${e.answer}`,
+        ],
+        commonTrap: 'Similes are comparisons. Do not interpret them literally.',
+        mistakeTags: ['vocabulary-confusion'],
+        practiceLinks: [practiceLink('vocabulary')],
+        ageMin: 8,
+      });
+    }),
+
+];
+
+// Merge v7 templates into the main array
+questionTemplates.push(...v7Templates);
 
 // ─── Exports ─────────────────────────────────────────────────────────────────
 
