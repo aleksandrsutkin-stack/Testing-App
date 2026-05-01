@@ -640,7 +640,17 @@ export const questionTemplates: QuestionTemplate[] = [
       ];
       const item = ctx.rng.pick(words), ans = ctx.rng.pick(item.words);
       const { options, correctOptionId } = makeOptions(ans, item.wrong, ctx.rng);
-      return baseQ(ctx, t, { prompt: `Which word starts with the letter "${item.letter}"?`, helperText: 'Say each word out loud and listen to the first sound.', options, correctOptionId, correctAnswerLabel: ans, explanationSteps: [`"${ans}" starts with the letter ${item.letter}.`], commonTrap: 'Listen to the very first sound of each word.', mistakeTags: ['vocabulary-confusion'], ageMin: 4, ageMax: 7 });
+      return baseQ(ctx, t, {
+        prompt: `Which word starts with the letter "${item.letter}"?`,
+        helperText: 'Say each word out loud and listen to the first sound.',
+        options, correctOptionId, correctAnswerLabel: ans,
+        explanationSteps: [
+          `Say each word slowly and listen to the very first sound.`,
+          `"${ans}" begins with the "${item.letter.toLowerCase()}" sound, which is the letter ${item.letter}.`,
+        ],
+        commonTrap: 'Listen for the very first sound — not a sound from the middle or end.',
+        mistakeTags: ['vocabulary-confusion'], ageMin: 4, ageMax: 7,
+      });
     }),
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -1009,7 +1019,17 @@ export const questionTemplates: QuestionTemplate[] = [
       ];
       const w = ctx.rng.pick(words);
       const { options, correctOptionId } = makeOptions(w.answer, w.wrong, ctx.rng);
-      return baseQ(ctx, t, { prompt: `"${w.word}" most nearly means:`, options, correctOptionId, correctAnswerLabel: w.answer, explanationSteps: [`"${w.word}" means: ${w.answer}.`], commonTrap: 'Military vocabulary often uses formal English words. Break them into recognisable roots.', mistakeTags: ['vocabulary-confusion'], ageMin: 14 });
+      return baseQ(ctx, t, {
+        prompt: `"${w.word}" most nearly means:`,
+        options, correctOptionId, correctAnswerLabel: w.answer,
+        explanationSteps: [
+          'Look for shared roots, prefixes, or suffixes between the word and the choices.',
+          `"${w.word}" most nearly means: ${w.answer}.`,
+          'Eliminate choices that only sound similar but mean something different.',
+        ],
+        commonTrap: 'Military vocabulary often uses formal English words. Break them into recognisable roots.',
+        mistakeTags: ['vocabulary-confusion'], ageMin: 14,
+      });
     }),
 
   ct({ id: 'military-electrical-basic', testIds: MIL, domain: 'mechanical-reasoning', skillId: 'mechanical-reasoning', difficulty: 3 },
