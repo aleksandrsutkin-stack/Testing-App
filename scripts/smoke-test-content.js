@@ -257,8 +257,11 @@ check('Results imports PaywallModal.', resultsFile.includes('PaywallModal'));
 check('Results imports isUnlocked from paywall service.', resultsFile.includes('isUnlocked'));
 check('Results schedules Day 7 reminder.', resultsFile.includes('scheduleDay7Reminder'));
 check('Results cancels Day 7 reminder on early retake.', resultsFile.includes('cancelDay7Reminder'));
+// v0.8: Mistakes/Plan tabs now render a TeaserOverlay when locked (blurred
+// preview + unlock CTA) instead of forcing the paywall on tab tap.
 check('Results gates Mistakes/Plan tabs behind unlock.',
-  resultsFile.includes('!unlocked') && resultsFile.includes("tab === 'mistakes' || tab === 'plan'"));
+  resultsFile.includes('TeaserOverlay') &&
+  /locked=\{!unlocked\}/.test(resultsFile));
 check('Results gates PDF export behind unlock.', resultsFile.includes('!unlocked) { setPaywallVisible(true)'));
 check('Results shows inline upsell card on Score tab when locked.', resultsFile.includes('upsellCard'));
 check('Quick Start (sampleSize) skips paywall.', resultsFile.includes('isQuickStart'));

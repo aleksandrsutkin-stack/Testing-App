@@ -56,6 +56,8 @@ export interface TestDefinition {
   domains: DomainId[];
   practiceLinks: PracticeLink[];
   disclaimer: string;
+  // v0.8: optional "Most popular" home-screen chip. Default false.
+  popular?: boolean;
 }
 
 export interface QuestionOption { id: string; label: string; score: number; feedback?: string; }

@@ -21,18 +21,20 @@
 //   └───────────────────────────────────────────────┘
 
 import { router, useLocalSearchParams } from 'expo-router';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { TrendingUp, TrendingDown, Minus, Lock } from 'lucide-react-native';
+import { TrendingUp, TrendingDown, Minus, Lock, Share2 } from 'lucide-react-native';
 import { AppButton } from '../src/components/AppButton';
 import { Card } from '../src/components/Card';
 import { MetricBar } from '../src/components/MetricBar';
 import { PaywallModal } from '../src/components/PaywallModal';
+import { ScoreCard } from '../src/components/ScoreCard';
 import { scoreAssessment } from '../src/features/assessment/scoreAssessment';
 import { createAssessmentSession } from '../src/features/assessment/assembleAssessment';
 import { AssessmentResult, ResponseMap, TestId } from '../src/features/assessment/types';
 import { makeSessionSeed } from '../src/features/generation/seededRandom';
 import { createShareAndDeletePdf } from '../src/services/pdfReportService';
+import { shareScoreCard } from '../src/services/scoreCardService';
 import {
   appendHistory, computeScoreLift, getSettings,
   ScoreLift, HistoryEntry
@@ -75,6 +77,11 @@ export default function ResultsScreen() {
 
   const [unlocked, setUnlocked] = useState<boolean>(false);
   const [paywallVisible, setPaywallVisible] = useState(false);
+
+  // v0.8: Share Score card export (image, free, even when locked).
+  const scoreCardRef = useRef<View>(null);
+  const [sharingCard, setSharingCard] = useState(false);
+  const [cardShared, setCardShared] = useState(false);
 
   const result = useMemo<AssessmentResult | null>(() => {
     try {
@@ -140,6 +147,17 @@ export default function ResultsScreen() {
     }
   }
 
+  // v0.8: Share Score card. Free, always allowed — this is the viral hook.
+  async function handleShareScore() {
+    setSharingCard(true);
+    try {
+      const result = await shareScoreCard(scoreCardRef);
+      if (result.shared) setCardShared(true);
+    } finally {
+      setSharingCard(false);
+    }
+  }
+
   async function handleRetake() {
     await cancelDay7Reminder(testId);
     const newSeed = makeSessionSeed(testId, age, grade);
@@ -150,10 +168,8 @@ export default function ResultsScreen() {
   }
 
   function handleTabPress(tab: TabKey) {
-    if ((tab === 'mistakes' || tab === 'plan') && !unlocked) {
-      setPaywallVisible(true);
-      return;
-    }
+    // v0.8: Allow free users to switch into Mistakes/Plan tabs and see a
+    // blurred teaser. The unlock CTA is shown over the blurred content.
     setActiveTab(tab);
   }
 
@@ -206,6 +222,9 @@ export default function ResultsScreen() {
           <Text style={styles.leadLabel}>{BRAND.productScoreName}  ·  1–100</Text>
           <Text style={styles.leadValue}>{result.scoreLiftScore}</Text>
           <Text style={styles.leadSub}>{result.scoreLiftScoreLabel}  ·  50 = on grade level</Text>
+          {scoreLift.hasPrevious ? (
+            <DeltaPill liftScore={scoreLift.liftScore ?? 0} />
+          ) : null}
         </View>
 
         {/* Two secondary tiles */}
@@ -288,7 +307,14 @@ export default function ResultsScreen() {
       ) : null}
 
       {/* ── MISTAKES TAB ──────────────────────────────────────────── */}
-      {activeTab === 'mistakes' && unlocked ? (
+      {activeTab === 'mistakes' ? (
+        <TeaserOverlay
+          locked={!unlocked}
+          colors={colors}
+          onUnlock={() => setPaywallVisible(true)}
+          headline="Unlock your full ScoreLift Report"
+          subhead="See every mistake explained step-by-step"
+        >
         <View>
           {result.missedQuestions.length === 0 ? (
             <Card style={[styles.noMissCard, { backgroundColor: wellAboveBand.bg, borderColor: wellAboveBand.border }]}>
@@ -352,10 +378,18 @@ export default function ResultsScreen() {
             </>
           )}
         </View>
+        </TeaserOverlay>
       ) : null}
 
       {/* ── PLAN TAB ──────────────────────────────────────────────── */}
-      {activeTab === 'plan' && unlocked ? (
+      {activeTab === 'plan' ? (
+        <TeaserOverlay
+          locked={!unlocked}
+          colors={colors}
+          onUnlock={() => setPaywallVisible(true)}
+          headline="Unlock your 7-day ScoreLift plan"
+          subhead="Step-by-step practice plan with Khan Academy links"
+        >
         <View>
           <Text style={styles.tabIntro}>{result.retakeRecommendation}</Text>
           {result.practicePlan.map((assignment, i) => (
@@ -374,24 +408,45 @@ export default function ResultsScreen() {
             </Text>
           </Card>
         </View>
+        </TeaserOverlay>
       ) : null}
 
       {/* ── ACTIONS ───────────────────────────────────────────────── */}
       <View style={styles.actionArea}>
+        {/* v0.8: Share Score is the viral hook — free, prominent, above the PDF CTA. */}
+        <AppButton
+          title={cardShared ? 'Score shared ✓' : 'Share Score'}
+          onPress={handleShareScore}
+          loading={sharingCard}
+          disabled={cardShared}
+          leftIcon={<Share2 size={16} color="#FFFFFF" strokeWidth={2.4} />}
+        />
         <AppButton
           title={
             isQuickStart ? 'Take a real 25-question test' :
             unlocked ? (exported ? 'PDF shared ✓' : 'Export ScoreLift PDF') :
-            'Unlock to export PDF'
+            'Unlock full report — $2.99'
           }
+          variant="secondary"
           onPress={isQuickStart ? () => router.replace('/select') : handleExport}
           loading={exporting}
           disabled={exported}
         />
         {!isQuickStart ? (
-          <AppButton title="Retake with new numbers" variant="secondary" onPress={handleRetake} />
+          <AppButton title="Retake with new numbers" variant="ghost" onPress={handleRetake} />
         ) : null}
         <AppButton title="Choose a different test" variant="ghost" onPress={() => router.replace('/select')} />
+      </View>
+
+      {/* v0.8: Off-screen ScoreCard — rendered for capture only. */}
+      <View pointerEvents="none" style={styles.offscreen}>
+        <ScoreCard
+          ref={scoreCardRef}
+          scoreLiftScore={result.scoreLiftScore}
+          testName={result.testTitle}
+          percentileLabel={`Estimated ${result.percentileEstimate.rangeLabel}  ·  ${benchmarkShort}`}
+          scoreLabel={result.scoreLiftScoreLabel}
+        />
       </View>
 
       {/* ── FOOTER ────────────────────────────────────────────────── */}
@@ -484,6 +539,77 @@ const styles_lift = StyleSheet.create({
   liftCompareArrow: { paddingHorizontal: 8 },
   liftArrow: { fontSize: 24, fontWeight: '700' }
 });
+
+// ── DeltaPill — v0.8 inline retake delta ────────────────────────────────────
+
+function DeltaPill({ liftScore }: { liftScore: number }) {
+  // The lead tile sits on a dark indigo background, so use light tones for
+  // contrast. Positive=success, zero=muted, negative=neutral (NOT red).
+  const tone =
+    liftScore > 0 ? { color: '#86EFAC', icon: '⬆️', text: `+${liftScore} points from last time` } :
+    liftScore < 0 ? { color: '#C7D2FE', icon: '⬇️', text: `${liftScore} points from last time` } :
+                    { color: '#C7D2FE', icon: '➡️', text: 'Same score as last time — review your Mistake Map' };
+  return (
+    <Text style={{ color: tone.color, fontSize: 12, fontWeight: '600', marginTop: 4 }}>
+      {tone.icon}  {tone.text}
+    </Text>
+  );
+}
+
+// ── TeaserOverlay — v0.8 paywall blur overlay ───────────────────────────────
+
+function TeaserOverlay({
+  locked, colors, onUnlock, headline, subhead, children
+}: {
+  locked: boolean;
+  colors: ColorPalette;
+  onUnlock: () => void;
+  headline: string;
+  subhead: string;
+  children: React.ReactNode;
+}) {
+  if (!locked) return <>{children}</>;
+  // Faux-blur via reduced opacity. expo-blur could be swapped in here later
+  // for a true frosted-glass effect; opacity keeps the build dependency-free.
+  return (
+    <View style={{ position: 'relative' }}>
+      <View pointerEvents="none" style={{ opacity: 0.18 }}>{children}</View>
+      <View style={{
+        position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+        alignItems: 'center', justifyContent: 'center', padding: 24
+      }}>
+        <View style={{
+          backgroundColor: colors.surface, borderRadius: 18, padding: 22,
+          alignItems: 'center', gap: 10, borderWidth: 1, borderColor: colors.border,
+          shadowColor: '#000', shadowOpacity: 0.12, shadowRadius: 18, shadowOffset: { width: 0, height: 6 }, elevation: 6,
+          maxWidth: 320
+        }}>
+          <View style={{
+            width: 48, height: 48, borderRadius: 14, backgroundColor: '#4F46E5',
+            alignItems: 'center', justifyContent: 'center'
+          }}>
+            <Lock size={22} color="#FFFFFF" strokeWidth={2.4} />
+          </View>
+          <Text style={{ color: colors.ink, fontSize: 17, fontWeight: '700', textAlign: 'center' }}>
+            {headline}
+          </Text>
+          <Text style={{ color: colors.inkMuted, fontSize: 13, lineHeight: 19, textAlign: 'center' }}>
+            {subhead}
+          </Text>
+          <Pressable
+            onPress={onUnlock}
+            style={({ pressed }) => [{
+              backgroundColor: '#4F46E5', borderRadius: 12, paddingHorizontal: 18, paddingVertical: 12,
+              marginTop: 4
+            }, pressed && { opacity: 0.85 }]}
+          >
+            <Text style={{ color: '#FFFFFF', fontSize: 14, fontWeight: '700' }}>Unlock — $2.99</Text>
+          </Pressable>
+        </View>
+      </View>
+    </View>
+  );
+}
 
 // ── TabButton sub-component ─────────────────────────────────────────────────
 
@@ -591,6 +717,10 @@ function makeStyles(colors: ColorPalette) {
     planUrl: { color: colors.primary, fontSize: 12 },
 
     actionArea: { gap: 10, marginTop: 14, marginBottom: 18 },
+
+    // v0.8: ScoreCard render container — positioned outside the visible
+    // viewport so we can captureRef() it without showing it on screen.
+    offscreen: { position: 'absolute', left: -10000, top: 0, opacity: 0 },
 
     footerCard: { backgroundColor: colors.surfaceMuted, borderRadius: 14, padding: 14, gap: 6, marginBottom: 8 },
     footerTitle: { color: colors.ink, fontSize: 12, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.06, marginTop: 6 },
