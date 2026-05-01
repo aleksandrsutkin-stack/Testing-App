@@ -10,8 +10,14 @@ export const BRAND = {
   scoreScaleNote: '1–100, 50 = on-grade-level expected performance',
   tagline: 'Every miss becomes a lesson.',
   shortPromise: 'Short diagnostics with percent scores, estimated percentile ranges, mistake maps, step-by-step solutions, and targeted practice links.',
-  supportEmail: 'support@example.com',
+  supportEmail: 'support@quizlift.app',
   privacyPromise: 'No account. No ads. No server-stored results. Export a PDF, then erase the session.',
+  // v0.8: App Store Connect requires a public privacy policy and a support
+  // URL. These point at static pages on the marketing site. REPLACE the host
+  // if your final domain differs.
+  privacyPolicyUrl: 'https://quizlift.app/privacy',
+  termsOfServiceUrl: 'https://quizlift.app/terms',
+  supportUrl: 'https://quizlift.app/support',
   legalName: 'Your Company LLC',
   // v0.6: now references public norm tables (NWEA MAP, ASVAB AFQT, etc.)
   percentileCaveat: 'Estimated percentile ranges are directional comparisons against published norm tables (such as NWEA MAP and ASVAB AFQT). They are not nationally normed scores for QuizLift.',
