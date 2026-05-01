@@ -1,4 +1,4 @@
-# QuizLift — v0.6
+# QuizLift — v0.8
 
 Privacy-first iOS / iPad educational test-improvement app.
 Stack: Expo + React Native + TypeScript + Expo Router.
@@ -7,13 +7,45 @@ Stack: Expo + React Native + TypeScript + Expo Router.
 
 ---
 
-## What's new in v0.6
+## What's new in v0.8
 
-This release is the largest content + UX upgrade so far. The four headline changes:
+Sharing, conversion, and infrastructure hardening.
 
-### 1. New headline metric: ScoreLift Score (1–100)
+* **Privacy trust badge row** on the home screen — three quiet badges (no account, nothing leaves your phone, no ads ever) above the Quick Start CTA. The privacy story is the differentiator; it should be visible without scrolling.
+* **Catalog subtitles + "Most popular" chip** — every test gets a parent-friendly one-line subtitle. The Aptitude Snapshot carries an `⚡ Most popular` pill on the home screen.
+* **Shareable Score Card (PNG)** — `src/components/ScoreCard.tsx` + `src/services/scoreCardService.ts`. Free even when the rest of the report is locked: it's the viral hook, not the product. Captured via `react-native-view-shot`, shared via `expo-sharing`, temp file deleted on return (same privacy pattern as the PDF). Never includes child name, age, or grade.
+* **Retake delta** — when a user retakes a test they've taken before, the lead score tile shows `⬆️ +N points from last time` / `➡️ Same score…` / `⬇️ -N points from last time`. The richer `ScoreLiftCard` then→now comparison stays.
+* **Paywall teaser overlay** — Mistakes/Plan tabs are now navigable when locked; their content renders behind a real `expo-blur` `<BlurView>` with a centred "Unlock — $2.99" CTA. The PDF stays paywalled; Share Score does not.
+* **Real StoreKit 2 / Play Billing** — `paywallService.ts` rewritten on `expo-iap`. AsyncStorage demoted to a fast local mirror; platform receipts are the source of truth. Connection lifecycle wired into `app/_layout.tsx`. The `purchaseUpdatedListener` calls `finishTransaction({ isConsumable: false })` and resolves request promises via a per-SKU map. SKUs marked `// REPLACE` until the App Store Connect record exists.
+* **CI** — `.github/workflows/ci.yml` runs `tsc --noEmit`, the smoke test, and `jest` on every push and PR.
+* **Pinned dependencies** — every dep moved from `"latest"` to its actually-resolved version. Lockfile committed.
+* **50 Jest unit tests** — `__tests__/*.test.ts` covers `computeScoreLiftScore`, `getBand`, `estimatePercentile`, seeded RNG determinism, and `createAssessmentSession` for all 9 tests.
 
-The old QuestionLiftIQ Index (a 70–130 IQ-style scale modeled on Wechsler) is **gone**. It carried unacceptable legal and positioning risk.
+---
+
+## What was new in v0.7 (content review pass)
+
+Teacher-review content fixes across templates and KG. Net: 118 → 123 templates; no template IDs renamed (existing seeds still produce valid sessions).
+
+* **Real `explanationSteps`** in 6+ templates that previously just restated the answer (life science, mechanical leverage, system diagram, force/motion, electrical basics).
+* **`dot-compare` visual** added to `SpatialVisual` and wired into `kg-compare-numbers` so KG kids see two dot groups instead of bare numerals.
+* **KG content overhaul** — body-parts items replaced with beginning-letter-sound items in `kg-vocabulary-body`; common traps rewritten for the KG voice ("Look carefully" not "Read carefully", child-action language, no test-taking meta-advice).
+* **Two new KG templates** — `kg-parent-observe-readiness-v7` (parent-observation prompts) and `kg-shape-identify-v7` (counting-sides phrasing variant).
+* **5 new reading passages** in `rc-passage-main-idea-v6` (dogs, ocean, Gutenberg printing press, coral reefs) covering easier and harder Lexile tiers, plus a non-US human-achievement passage.
+* **Two new reading templates** — `rc-passage-inference-v7` and `rc-passage-detail-v7` as additive siblings to the v6 versions, giving the assembler more pool depth.
+* **Diverse `NAME_POOL`** (16 names across ethnicities/gender) plus `randomName(rng)` helper wired into the word-problem templates. Seed determinism preserved via `rng.pick`.
+* **`reading-simile-v7`** — easier-tier figurative-language template at difficulty 2 (similes are noticeably easier than metaphor/personification).
+* Polish: `mech-pulley-v6` units softened to "kg-force" with a newtons-equivalent note; `alg-inequality-v6` explanation expanded from 2 to 4 steps.
+
+---
+
+## v0.6 — the foundation
+
+The release that introduced the metric, dark mode, illustrations, and adaptive ordering. Kept here for reference.
+
+### 1. Headline metric: ScoreLift Score (1–100)
+
+The old QuestionLiftIQ Index (a 70–130 IQ-style scale modeled on Wechsler) is gone — it carried unacceptable legal and positioning risk.
 
 In its place: the **ScoreLift Score**, a grade-anchored 1–100 scale where **50 = on-grade-level expected performance** for the chosen test, age, and grade. A 5th-grader scoring 50 on the aptitude snapshot is hitting expectations; a 5th-grader scoring 50 on the Algebra Fast-Track is also hitting expectations *for that test* — even though raw percent-correct will look very different.
 
@@ -21,9 +53,9 @@ Implemented in `src/features/scoring/scoreLiftScore.ts`. Each of the 9 tests has
 
 ### 2. Directional percentiles from public norm tables
 
-We promised parents a percentile so the score has real-world meaning. We also promise no account, no server, no third-party analytics — so we can't build our own norm distributions.
+Parents need a percentile for the score to have real-world meaning. We also promise no account, no server, no third-party analytics — so we can't build our own norm distributions.
 
-Solution: bake in publicly-published norm tables from comparable tests and interpolate. The PDF and results screen now cite which benchmark each percentile is mapped against:
+Solution: bake in publicly-published norm tables from comparable tests and interpolate. The PDF and results screen cite which benchmark each percentile is mapped against:
 
 | Test                          | Benchmark                                             |
 |-------------------------------|-------------------------------------------------------|
@@ -37,101 +69,90 @@ Solution: bake in publicly-published norm tables from comparable tests and inter
 | Kindergarten Readiness        | BRACKEN School Readiness Assessment 3rd ed.           |
 | Military Aptitude (unofficial)| ASVAB AFQT                                            |
 
-These are reference distributions. **No user data ever leaves the device.** Implemented in `src/features/scoring/externalBenchmarks.ts`.
+Reference distributions only. **No user data ever leaves the device.** Implemented in `src/features/scoring/externalBenchmarks.ts`.
 
-### 3. Full dark mode + Liftie mascot + adaptive ordering
+### 3. Dark mode + Liftie + adaptive ordering
 
-* **Dark mode** — every component and screen migrated to the `useColors() + makeStyles(colors)` factory pattern. Light and dark palettes live in `src/theme/colors.ts`. The PDF report intentionally stays light-mode only.
+* **Dark mode** — every component and screen on the `useColors() + makeStyles(colors)` factory pattern. Light and dark palettes in `src/theme/colors.ts`. The PDF report intentionally stays light-mode only.
 * **Illustrations** — `Mascot` (Liftie, 4 expressions × 3 moods), `Decoration`, `EmptyState`, `AchievementBadge` in `src/components/Illustrations.tsx`.
-* **Adaptive presentation order** — same blueprint, same set of questions, but the order tunes to last-3-question accuracy. ≥80% correct steps difficulty up, ≤40% steps down. Implemented in `src/features/assessment/adaptiveSelector.ts`. Percent-correct stays meaningful.
-
-### 4. Templates: 86 → 118
-
-32 new v0.6 templates with a `phrase()` helper for deterministic surface-wording variants:
-
-* **Reading comprehension** — 3 real-passage templates (honeybees, sequoias, Wright brothers, Maya/baking, Sam/dog, Pacific octopus, Mount Everest) with main-idea, inference, and detail variants
-* **Vocabulary in context** — 1
-* **Word problems** — 5 (two-step arithmetic, rate × distance, percent of, money + change, fractions sharing)
-* **Spatial with visuals** — 4 wired to the SpatialVisual component
-* **Science reasoning** — 4 (states of matter, life cycles, balanced forces, experimental variables)
-* **Coding logic** — 4 (loop trace, conditional, Python negative-index, off-by-one debug)
-* **Mechanical reasoning** — 3 (pulley advantage, lever balance, gear ratios)
-* **Working memory** — 3 (digit recall reverse, instruction follow, letter recall)
-* **Algebra readiness** — 3 (linear solve, expression evaluation, strict inequality)
-* **K readiness with visuals** — 2 (count-stars, letter sounds)
+* **Adaptive presentation order** — same blueprint, same set of questions, but the order tunes to last-3-question accuracy. ≥80% correct steps difficulty up; ≤40% steps down. Implemented in `src/features/assessment/adaptiveSelector.ts`. Percent-correct stays meaningful.
 
 ---
 
 ## Project layout
 
 ```
-app/                    Expo Router screens
-  _layout.tsx           Stack + scheme-aware status bar
-  index.tsx             Home (Liftie mascot + Quick Start + test catalog)
-  select.tsx            Grade + test picker
-  assessment.tsx        Question runner with adaptive ordering
-  celebration.tsx       1.7-second finish moment
-  results.tsx           ScoreLift Report (Score / Mistakes / Plan tabs)
+.github/workflows/ci.yml           Typecheck + smoke + jest on every push/PR
+__tests__/                         Jest unit tests (50 across 5 suites)
+app/                               Expo Router screens
+  _layout.tsx                      Stack + scheme-aware status bar + IAP lifecycle
+  index.tsx                        Home (Mascot + trust row + Quick Start + catalog)
+  select.tsx                       Grade + test picker
+  assessment.tsx                   Question runner with adaptive ordering
+  celebration.tsx                  1.7-second finish moment
+  results.tsx                      ScoreLift Report (Score / Mistakes / Plan tabs)
 
 src/
-  config/brand.ts                          App brand + 1–100 scale + caveat
+  config/brand.ts                  App brand, scale notes, caveats, privacy URLs
   theme/
-    colors.ts                              light + dark palettes, useColors()
-    domainColors.ts                        domain & 5 v0.6 band colors (light + dark)
+    colors.ts                      light + dark palettes, useColors()
+    domainColors.ts                domain & 5-band colors (light + dark)
     spacing.ts
   components/
     AppButton, Card, Screen, MetricBar, ProgressBar,
     QuestionOptionCard, LabeledPicker,
-    SpatialVisual,                         theme-aware SVG illustrations
+    SpatialVisual,                 theme-aware SVG illustrations
     PaywallModal,
-    Illustrations.tsx                      Mascot, Decoration, EmptyState, AchievementBadge
+    Illustrations.tsx              Mascot, Decoration, EmptyState, AchievementBadge
+    ScoreCard.tsx                  v0.8 shareable PNG card (light-mode only)
   data/
-    testCatalog, testBlueprints, practiceLibrary, questionBank,
-    questionTemplates                      118 templates total
+    testCatalog, testBlueprints, practiceLibrary,
+    questionTemplates              123 templates (118 v0.6 + 5 v0.7)
   features/
     assessment/
-      types.ts                             ScoreLift Score, 5 v0.6 bands, benchmarkSource
-      domainLabels                         5-band parent-friendly labels + thresholds
-      assembleAssessment                   blueprint → questions
-      scoreAssessment                      wires scoreLiftScore + externalBenchmarks
-      adaptiveSelector                     pickInitialQuestion / pickNextQuestion
+      types.ts                     ScoreLift Score, 5-band ScoreBand, benchmarkSource
+      domainLabels                 5-band labels + 0.85/0.70/0.50/0.30 cuts
+      assembleAssessment           blueprint → questions
+      scoreAssessment              wires scoreLiftScore + externalBenchmarks
+      adaptiveSelector             pickInitialQuestion / pickNextQuestion
     generation/
       seededRandom, questionTemplateTypes
     scoring/
-      scoreLiftScore.ts                    grade-anchored 1–100 mapping (NEW)
-      externalBenchmarks.ts                NWEA MAP / IAAT / DAT-5 / BRACKEN-3 / ASVAB AFQT (NEW)
+      scoreLiftScore.ts            grade-anchored 1–100 mapping
+      externalBenchmarks.ts        NWEA MAP / IAAT / DAT-5 / BRACKEN-3 / ASVAB AFQT
     reports/
-      buildReportHtml                      light-mode PDF, ScoreLift Score lead, benchmark cite
+      buildReportHtml              light-mode PDF, ScoreLift Score lead, benchmark cite
   services/
-    historyService                         opt-in local history, scoreLiftScore + previousScore + liftScore
-    pdfReportService                       Print → Share → Delete
-    paywallService                         $2.99 / $14.99, mock IAP (3 StoreKit 2 TODOs)
-    notificationService                    Day-7 retake reminder
+    historyService                 opt-in local history (qlft: prefix)
+    pdfReportService               Print → Share → Delete
+    paywallService                 v0.8 real expo-iap (StoreKit 2 / Play Billing)
+    scoreCardService               v0.8 ScoreCard capture + share + delete
+    notificationService            Day-7 retake reminder
     privacyWipeService
   utils/
     ageFromGrade, speakPrompt
 
 scripts/
-  smoke-test-content.js                    201 v0.6 invariant checks
+  smoke-test-content.js            content invariant checks
 ```
 
 ---
 
-## Run the smoke test
+## Running the project
 
 ```bash
-node scripts/smoke-test-content.js
+npm install
+npm run typecheck                  # tsc --noEmit
+npm run smoke:test-content         # node scripts/smoke-test-content.js
+npm test                           # jest
+npm start                          # expo start
 ```
 
-Should report:
-
-```
-ALL CHECKS PASSED — v0.6 is ready.
-```
+CI runs the first three on every push and PR.
 
 ---
 
-## Privacy promise (unchanged)
+## Privacy promise
 
 * **No account.** No sign-in, ever.
 * **No server-stored results.** Everything is computed and stored on-device.
@@ -139,23 +160,23 @@ ALL CHECKS PASSED — v0.6 is ready.
 * **No ads.**
 * **No child name required.** A grade picker is the only profile input.
 * **Local-only scoring.** Even the percentile lookup is a baked-in pure function.
-* **Opt-in history.** Default OFF. Stored as `qlq:history:v1` in AsyncStorage. Deleted with the app.
+* **Opt-in history.** Default OFF. Stored under the `qlft:` AsyncStorage prefix. Deleted with the app.
 
 The benchmark norm tables in `src/features/scoring/externalBenchmarks.ts` are reference distributions only. **No user data is ever sent anywhere.**
 
 ---
 
-## Pricing (unchanged from v0.5)
+## Pricing
 
 * **Single test** — $2.99 lifetime, unlocks Mistakes / Plan / PDF for one test.
 * **All-Access** — $14.99 lifetime, unlocks all 9 modules forever.
 * **Quick Start** — 10-question free sample, fully unlocked, no setup.
 
-StoreKit 2 is still mocked in v0.6. Three TODOs in `paywallService.ts` are the integration points.
+In v0.8 these go through real `expo-iap` (StoreKit 2 / Play Billing). The placeholder SKU prefix `com.example.quizlift.*` is marked with `// REPLACE` comments and will resolve once App Store Connect / Play Console product records exist.
 
 ---
 
-## Disclaimers (preserved)
+## Disclaimers
 
 QuizLift is an educational practice and screening tool. It is **not**:
 
@@ -165,23 +186,3 @@ QuizLift is an educational practice and screening tool. It is **not**:
 * a normed assessment with QuizLift-specific percentile ranks.
 
 ASVAB / military aptitude practice is unofficial. Percentile estimates are directional comparisons against published public norm tables for similar tests. The QuizLift trademark has not yet been formally cleared.
-
----
-
-## Migration guide (v0.5 → v0.6)
-
-If you forked v0.5, the rename map is:
-
-| v0.5                                          | v0.6                                          |
-|-----------------------------------------------|-----------------------------------------------|
-| `BRAND.productIndexName`                      | `BRAND.productScoreName`                      |
-| `result.questionLiftIndex`                    | `result.scoreLiftScore`                       |
-| `result.percentileEstimate.distributionLabel` | `result.percentileEstimate.benchmarkSource`   |
-| `HistoryEntry.questionLiftIndex`              | `HistoryEntry.scoreLiftScore`                 |
-| `ScoreLift.previousIndex`                     | `ScoreLift.previousScore`                     |
-| `ScoreLift.liftIndex`                         | `ScoreLift.liftScore`                         |
-| `'needs-practice' \| 'developing' \| 'ready-soon' \| 'ready' \| 'advanced'` | `'below' \| 'approaching' \| 'on-grade' \| 'above' \| 'well-above'` |
-| `colors` static import                        | `useColors()` hook + `makeStyles(colors)`     |
-| `bandStyle()` static helper                   | `useBandStyle()` hook                         |
-| `domainColor()` static helper                 | `useDomainColor()` hook                       |
-| `staticDistributions.ts`                      | DELETED — replaced by `externalBenchmarks.ts` |
