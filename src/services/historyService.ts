@@ -112,7 +112,8 @@ export async function eraseAllHistory(): Promise<void> {
 
 export async function eraseEverything(): Promise<void> {
   try {
-    await AsyncStorage.multiRemove([HISTORY_KEY, SETTINGS_KEY]);
+    // v0.8: AsyncStorage v2+ renamed multiRemove → removeMany.
+    await AsyncStorage.removeMany([HISTORY_KEY, SETTINGS_KEY]);
   } catch { /* Non-fatal */ }
 }
 

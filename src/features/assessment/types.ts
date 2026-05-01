@@ -27,7 +27,8 @@ export type QuestionType = 'single-choice' | 'parent-rating';
 export type MistakeTag =
   | 'concept-gap' | 'procedure-error' | 'calculation-error' | 'misread-question'
   | 'vocabulary-confusion' | 'pattern-recognition' | 'time-pressure'
-  | 'multi-step-reasoning' | 'attention-to-detail' | 'spatial-visualization';
+  | 'multi-step-reasoning' | 'attention-to-detail' | 'spatial-visualization'
+  | 'reading-comprehension' | 'spatial-reasoning' | 'science-reasoning';
 
 export interface Range { min: number; max: number; }
 
@@ -56,6 +57,8 @@ export interface TestDefinition {
   domains: DomainId[];
   practiceLinks: PracticeLink[];
   disclaimer: string;
+  // v0.8: optional "Most popular" home-screen chip. Default false.
+  popular?: boolean;
 }
 
 export interface QuestionOption { id: string; label: string; score: number; feedback?: string; }

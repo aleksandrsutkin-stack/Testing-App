@@ -27,7 +27,8 @@
     "react-native": "latest",
     "react-native-safe-area-context": "latest",
     "react-native-screens": "latest",
-    "react-native-svg": "latest"
+    "react-native-svg": "latest",
+    "react-native-view-shot": "latest"
   },
   "devDependencies": {
     "@types/react": "latest",

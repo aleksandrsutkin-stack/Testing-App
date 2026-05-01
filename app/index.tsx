@@ -93,6 +93,13 @@ export default function HomeScreen() {
         <Decoration variant="blobs" height={48} style={{ marginTop: 6, opacity: 0.85 }} />
       </View>
 
+      {/* v0.8: Trust badge row — privacy is the #1 differentiator. */}
+      <View style={styles.trustRow} accessibilityRole="summary">
+        <TrustBadge icon="🔒" label={`No account${'\n'}needed`} colors={colors} />
+        <TrustBadge icon="📵" label={`Nothing leaves${'\n'}your phone`} colors={colors} />
+        <TrustBadge icon="🚫" label={`No ads,${'\n'}ever`} colors={colors} />
+      </View>
+
       {/* Quick Start CTA — first-time-friendly, no setup */}
       <Card style={styles.quickStartCard}>
         <View style={styles.quickStartHead}>
@@ -126,8 +133,13 @@ export default function HomeScreen() {
                 <IconComp size={22} color="#FFFFFF" strokeWidth={2.2} />
               </View>
               <View style={styles.testTextBlock}>
+                {test.popular ? (
+                  <View style={styles.popularChip}>
+                    <Text style={styles.popularChipText}>⚡ Most popular</Text>
+                  </View>
+                ) : null}
                 <Text style={styles.testTitle}>{test.title}</Text>
-                <Text style={styles.testSubtitle} numberOfLines={2}>{test.subtitle}</Text>
+                <Text style={styles.testSubtitle} numberOfLines={1}>{test.subtitle}</Text>
                 <Text style={styles.testMeta}>{test.durationMinutes} min · {test.questionTarget} questions</Text>
               </View>
               <ChevronRight size={18} color={colors.inkMuted} />
@@ -168,9 +180,48 @@ export default function HomeScreen() {
   );
 }
 
+// v0.8: Inline trust badge — emoji + small two-line label. Quietly confident.
+function TrustBadge({ icon, label, colors }: { icon: string; label: string; colors: ColorPalette }) {
+  return (
+    <View style={{ flex: 1, alignItems: 'center', gap: 4 }}>
+      <Text style={{ fontSize: 20 }}>{icon}</Text>
+      <Text
+        style={{
+          color: colors.inkMuted, fontSize: 12, fontWeight: '600',
+          textAlign: 'center', lineHeight: 15
+        }}
+      >
+        {label}
+      </Text>
+    </View>
+  );
+}
+
 function makeStyles(colors: ColorPalette) {
   return StyleSheet.create({
-    hero: { gap: 6, marginBottom: 20 },
+    hero: { gap: 6, marginBottom: 14 },
+    trustRow: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      justifyContent: 'space-between',
+      gap: 12,
+      marginBottom: 18,
+      paddingHorizontal: 4
+    },
+    popularChip: {
+      alignSelf: 'flex-start',
+      backgroundColor: colors.info,
+      borderRadius: 999,
+      paddingHorizontal: 8,
+      paddingVertical: 3,
+      marginBottom: 4
+    },
+    popularChipText: {
+      color: colors.primaryDark,
+      fontSize: 10,
+      fontWeight: '700',
+      letterSpacing: 0.05
+    },
     heroRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
     heroText: { flex: 1, gap: 8 },
     kicker: { color: colors.primary, fontWeight: '600', fontSize: 13, textTransform: 'uppercase', letterSpacing: 0.6 },

@@ -4,7 +4,8 @@ export const testCatalog: TestDefinition[] = [
   {
     id: 'quizlift-aptitude-snapshot',
     title: 'QuizLift Aptitude Snapshot',
-    subtitle: 'A broad IQ-style aptitude screen with improvement steps.',
+    subtitle: 'See how your child compares across core skills',
+    popular: true,
     category: 'aptitude',
     recommendedAges: { min: 6, max: 18 },
     recommendedGrades: { min: 1, max: 12 },
@@ -24,7 +25,7 @@ export const testCatalog: TestDefinition[] = [
   {
     id: 'compacted-math-readiness',
     title: 'Compacted Math Readiness',
-    subtitle: 'Checks whether a student is ready for an accelerated math path.',
+    subtitle: 'Is your child ready for compacted math?',
     category: 'math-readiness',
     recommendedAges: { min: 7, max: 13 },
     recommendedGrades: { min: 2, max: 7 },
@@ -44,7 +45,7 @@ export const testCatalog: TestDefinition[] = [
   {
     id: 'double-compacted-algebra-readiness',
     title: 'Double-Compacted / Algebra Fast-Track',
-    subtitle: 'A sharper readiness check for aggressive acceleration.',
+    subtitle: "Find out if they're ready to skip ahead",
     category: 'math-readiness',
     recommendedAges: { min: 9, max: 15 },
     recommendedGrades: { min: 4, max: 9 },
@@ -64,7 +65,7 @@ export const testCatalog: TestDefinition[] = [
   {
     id: 'grade-math-skills-check',
     title: 'Grade-Level Math Skills Check',
-    subtitle: 'A short diagnostic for current-grade math gaps.',
+    subtitle: "Check if they're on track for their grade",
     category: 'math-readiness',
     recommendedAges: { min: 6, max: 18 },
     recommendedGrades: { min: 1, max: 12 },
@@ -83,7 +84,7 @@ export const testCatalog: TestDefinition[] = [
   {
     id: 'reading-vocabulary-snapshot',
     title: 'Reading + Vocabulary Snapshot',
-    subtitle: 'Short language screen for comprehension and word meaning.',
+    subtitle: 'Spot reading and vocabulary gaps early',
     category: 'reading',
     recommendedAges: { min: 6, max: 18 },
     recommendedGrades: { min: 1, max: 12 },
@@ -102,7 +103,7 @@ export const testCatalog: TestDefinition[] = [
   {
     id: 'stem-spatial-reasoning',
     title: 'STEM + Spatial Reasoning Sprint',
-    subtitle: 'A quick check of spatial, science, and pattern reasoning.',
+    subtitle: 'Test problem-solving and spatial thinking',
     category: 'stem',
     recommendedAges: { min: 7, max: 18 },
     recommendedGrades: { min: 2, max: 12 },
@@ -121,7 +122,7 @@ export const testCatalog: TestDefinition[] = [
   {
     id: 'coding-logic-sprint',
     title: 'Coding Logic Sprint',
-    subtitle: 'Pattern, sequencing, and algorithmic thinking without code syntax.',
+    subtitle: 'See if they think like a programmer',
     category: 'coding',
     recommendedAges: { min: 8, max: 18 },
     recommendedGrades: { min: 3, max: 12 },
@@ -140,7 +141,7 @@ export const testCatalog: TestDefinition[] = [
   {
     id: 'kindergarten-readiness',
     title: 'Kindergarten Readiness Mini Check',
-    subtitle: 'Short parent-guided screen for early school readiness.',
+    subtitle: 'A quick check before the big first day',
     category: 'school-readiness',
     recommendedAges: { min: 4, max: 6 },
     recommendedGrades: { min: -1, max: 1 },
@@ -159,7 +160,7 @@ export const testCatalog: TestDefinition[] = [
   {
     id: 'military-aptitude-practice',
     title: 'Military Aptitude Practice Sprint',
-    subtitle: 'ASVAB-style practice for teens and adults, without official exam claims.',
+    subtitle: 'Unofficial ASVAB-style practice — start here',
     category: 'career-aptitude',
     recommendedAges: { min: 15, max: 60 },
     recommendedGrades: { min: 9, max: 20 },
