@@ -7,16 +7,16 @@
 // The rest of the app calls this service through a stable interface.
 //
 // Storage:
-//   qlq:purchases:v1   PurchaseState
+//   qlft:purchases:v1   PurchaseState
 //
 // Pricing (hard-coded for v0.5 — replace with App Store Connect product IDs):
-//   single test:   $2.99    com.example.questionliftiq.single_test
-//   all-access:    $14.99   com.example.questionliftiq.all_access
+//   single test:   $2.99    com.example.quizlift.single_test
+//   all-access:    $14.99   com.example.quizlift.all_access
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { TestId } from '../features/assessment/types';
 
-const PURCHASES_KEY = 'qlq:purchases:v1';
+const PURCHASES_KEY = 'qlft:purchases:v1';
 
 export interface PurchaseState {
   allAccess: boolean;
@@ -36,14 +36,14 @@ export interface PurchaseProduct {
 export const PRODUCTS: Record<PurchaseProduct['id'], PurchaseProduct> = {
   'single-test': {
     id: 'single-test',
-    storeKitProductId: 'com.example.questionliftiq.single_test',
+    storeKitProductId: 'com.example.quizlift.single_test',
     priceLabel: '$2.99',
     title: 'Unlock this test',
     description: 'Step-by-step solutions, 7-day plan, and PDF export — for this test only. One-time payment.'
   },
   'all-access': {
     id: 'all-access',
-    storeKitProductId: 'com.example.questionliftiq.all_access',
+    storeKitProductId: 'com.example.quizlift.all_access',
     priceLabel: '$14.99',
     title: 'Unlock all 9 tests',
     description: 'Everything unlocked across every test type, forever, on this device. Best value.'

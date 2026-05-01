@@ -48,7 +48,7 @@ export const TEST_EXPECTATIONS: Record<TestId, ExpectFn> = {
   // Broad aptitude snapshot. Slightly easier in early grades since templates
   // span a wide difficulty range; the "on grade level" student should be
   // landing around 60–65%.
-  'questionliftiq-aptitude-snapshot': (grade) => clamp01(0.55 + (grade <= 0 ? 0.05 : Math.min(grade, 12)) * 0.012),
+  'quizlift-aptitude-snapshot': (grade) => clamp01(0.55 + (grade <= 0 ? 0.05 : Math.min(grade, 12)) * 0.012),
 
   // Compacted Math Readiness — designed for one grade ahead. Expected
   // performance is ~55% at the recommended grade.

@@ -1,14 +1,14 @@
 {
   "expo": {
-    "name": "QuestionLiftIQ",
-    "slug": "questionliftiq",
+    "name": "QuizLift",
+    "slug": "quizlift",
     "version": "0.3.0",
     "orientation": "portrait",
-    "scheme": "questionliftiq",
+    "scheme": "quizlift",
     "userInterfaceStyle": "automatic",
     "assetBundlePatterns": ["**/*"],
-    "ios": { "supportsTablet": true, "bundleIdentifier": "com.example.questionliftiq" },
-    "android": { "package": "com.example.questionliftiq" },
+    "ios": { "supportsTablet": true, "bundleIdentifier": "com.example.quizlift" },
+    "android": { "package": "com.example.quizlift" },
     "plugins": ["expo-router"],
     "experiments": { "typedRoutes": true }
   }

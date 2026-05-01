@@ -68,7 +68,7 @@ function ct(
 
 // ─── Test-ID groups ──────────────────────────────────────────────────────────
 
-const APT: TestId[] = ['questionliftiq-aptitude-snapshot'];
+const APT: TestId[] = ['quizlift-aptitude-snapshot'];
 const MATH: TestId[] = ['compacted-math-readiness', 'grade-math-skills-check'];
 const ALG: TestId[] = ['double-compacted-algebra-readiness'];
 const MATH_ALL: TestId[] = [...MATH, ...ALG];

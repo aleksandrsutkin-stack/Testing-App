@@ -7,14 +7,14 @@
 // Default: OFF. User toggles ON from home screen if they want score-lift tracking.
 //
 // Storage layout:
-//   qlq:settings:v1   { trackHistory: boolean }
-//   qlq:history:v1    HistoryEntry[]   (most recent first, capped at 50)
+//   qlft:settings:v1   { trackHistory: boolean }
+//   qlft:history:v1    HistoryEntry[]   (most recent first, capped at 50)
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { TestId, ScoreBand } from '../features/assessment/types';
 
-const SETTINGS_KEY = 'qlq:settings:v1';
-const HISTORY_KEY = 'qlq:history:v1';
+const SETTINGS_KEY = 'qlft:settings:v1';
+const HISTORY_KEY = 'qlft:history:v1';
 const MAX_HISTORY = 50;
 
 export interface HistoryEntry {

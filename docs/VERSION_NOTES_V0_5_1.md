@@ -1,4 +1,4 @@
-# QuestionLiftIQ v0.5.1 Version Notes
+# QuizLift v0.5.1 Version Notes
 
 This release fixes the v0.5 candidate so it is safer to upload to GitHub.
 

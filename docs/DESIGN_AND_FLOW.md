@@ -1,8 +1,8 @@
-# QuestionLiftIQ v0.2 design and user flow
+# QuizLift v0.2 design and user flow
 
 ## Product position
 
-QuestionLiftIQ is a short-test diagnostic app focused on score improvement. The app should feel useful after every attempt, because the value is not only the score; it is the explanation of what went wrong and what to practice next.
+QuizLift is a short-test diagnostic app focused on score improvement. The app should feel useful after every attempt, because the value is not only the score; it is the explanation of what went wrong and what to practice next.
 
 Core promise:
 
@@ -35,7 +35,7 @@ Core promise:
    - Percent correct.
    - Estimated percentile range.
    - Readiness band.
-   - QuestionLiftIQ Index.
+   - ScoreLift Score.
    - Domain ratings.
    - Strengths and growth areas.
    - Mistake Map preview.
@@ -68,7 +68,7 @@ Sections:
 - Percent correct.
 - Estimated percentile range.
 - Readiness band.
-- QuestionLiftIQ Index.
+- ScoreLift Score.
 - Domain ratings.
 - Strengths and growth areas.
 - Mistake Map.
@@ -84,7 +84,7 @@ V0.2 includes expert-authored static distributions in `src/features/scoring/stat
 
 Use careful language everywhere:
 
-> Estimated percentile ranges are based on QuestionLiftIQ static difficulty models. They are not nationally normed percentile ranks.
+> Estimated percentile ranges are based on QuizLift static difficulty models. They are not nationally normed percentile ranks.
 
 Later, if the product adds opt-in anonymous telemetry, static distributions can be improved with real calibration data. Until then, avoid claims like national percentile, official placement probability, or real IQ percentile.
 
@@ -125,4 +125,4 @@ Example: a ratio template can generate `3 cups for 12 muffins -> 6 cups for 24 m
 4. Add an authored explanation QA process.
 5. Add paywall/IAP around full PDF export.
 6. Draft privacy policy, App Store disclosure copy, and legal disclaimers.
-7. Conduct name clearance for QuestionLiftIQ before launch.
+7. Conduct name clearance for QuizLift before launch.
