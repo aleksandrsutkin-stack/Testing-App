@@ -3,7 +3,7 @@
 
 import { router, useLocalSearchParams } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, TextInput, View } from 'react-native';
 import { AppButton } from '../src/components/AppButton';
 import { Card } from '../src/components/Card';
 import { LabeledPicker, PickerOption } from '../src/components/LabeledPicker';
@@ -38,6 +38,10 @@ export default function SelectScreen() {
 
   const [grade, setGrade] = useState(5);
   const [selectedTestId, setSelectedTestId] = useState<TestId>(preselect);
+  // v0.9: Optional, session-only. NOT persisted; not even kept in component
+  // state across navigation — passed through as a URL param so it dies with
+  // the session. The PDF cover line is fully omitted if blank.
+  const [preparedFor, setPreparedFor] = useState('');
 
   const age = ageFromGrade(grade);
   const selectedTest = getTestDefinition(selectedTestId);
@@ -47,9 +51,13 @@ export default function SelectScreen() {
 
   function startAssessment() {
     const seed = makeSessionSeed(selectedTestId, age, grade);
+    const trimmed = preparedFor.trim();
     router.push({
       pathname: '/assessment',
-      params: { testId: selectedTestId, age: String(age), grade: String(grade), seed }
+      params: {
+        testId: selectedTestId, age: String(age), grade: String(grade), seed,
+        ...(trimmed ? { preparedFor: trimmed } : {})
+      }
     });
   }
 
@@ -75,6 +83,24 @@ export default function SelectScreen() {
           onChange={setSelectedTestId}
           helperText="Start broad with the aptitude snapshot, or choose a specific readiness/practice module."
         />
+
+        {/* v0.9: Optional, session-only. Shown on the PDF cover only. */}
+        <View style={styles.preparedForBlock}>
+          <Text style={styles.preparedForLabel}>Student first name or initials (optional)</Text>
+          <TextInput
+            value={preparedFor}
+            onChangeText={setPreparedFor}
+            placeholder="e.g. Alex"
+            placeholderTextColor={colors.inkMuted}
+            autoCapitalize="words"
+            autoCorrect={false}
+            maxLength={32}
+            style={styles.preparedForInput}
+          />
+          <Text style={styles.preparedForHelper}>
+            Shown on the PDF cover only. Stored only during this session.
+          </Text>
+        </View>
       </Card>
 
       {selectedTest ? (
@@ -123,6 +149,16 @@ function makeStyles(colors: ColorPalette) {
     disclaimer: { color: colors.inkMuted, fontSize: 12, lineHeight: 18, backgroundColor: colors.surfaceMuted, padding: 12, borderRadius: 14 },
     recommendCard: { gap: 8 },
     recommendTitle: { color: colors.ink, fontWeight: '700', fontSize: 17 },
-    recommendItem: { color: colors.inkMuted, lineHeight: 22, fontWeight: '500', fontSize: 14 }
+    recommendItem: { color: colors.inkMuted, lineHeight: 22, fontWeight: '500', fontSize: 14 },
+
+    // v0.9 — Prepared-for input.
+    preparedForBlock: { gap: 6 },
+    preparedForLabel: { color: colors.ink, fontSize: 13, fontWeight: '700' },
+    preparedForInput: {
+      backgroundColor: colors.surfaceMuted, borderRadius: 12, borderWidth: 1,
+      borderColor: colors.border, paddingHorizontal: 14, paddingVertical: 12,
+      fontSize: 15, color: colors.ink,
+    },
+    preparedForHelper: { color: colors.inkMuted, fontSize: 11, lineHeight: 16 }
   });
 }

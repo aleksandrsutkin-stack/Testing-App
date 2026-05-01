@@ -14,8 +14,11 @@
 //   Strengths & Growth → Mistake Map → 7-Day Plan → Footer
 
 import { BRAND } from '../../config/brand';
-import { AssessmentResult, MissedQuestionReview, PracticeAssignment } from '../assessment/types';
-import { scoreBandLabels } from '../assessment/domainLabels';
+import {
+  AssessmentResult, CONFIDENCE_LABELS, DomainScore, MissedQuestionReview,
+  PracticeAssignment, PriorityFix, ScoreBand
+} from '../assessment/types';
+import { BAND_HEADLINES, scoreBandLabels } from '../assessment/domainLabels';
 import { DOMAIN_COLORS, BAND_COLORS } from '../../theme/domainColors';
 
 function esc(v: string): string {
@@ -71,27 +74,169 @@ export interface PdfScoreLift {
   liftScore?: number;
 }
 
+// ─── v0.9: ScoreLift Score band gradient bar ─────────────────────────────────
+// Horizontal 5-segment bar from amber/red → green with a triangle pointer
+// marking where this student's score sits. Single most legible "where am I?"
+// visual on the page.
+
+function scoreBandBar(score: number, band: ScoreBand): string {
+  const segments: { label: string; color: string; band: ScoreBand }[] = [
+    { label: 'Below',       color: '#F87171', band: 'below' },
+    { label: 'Approaching', color: '#FB923C', band: 'approaching' },
+    { label: 'On Track',    color: '#FCD34D', band: 'on-grade' },
+    { label: 'Above',       color: '#86EFAC', band: 'above' },
+    { label: 'Well Above',  color: '#34D399', band: 'well-above' },
+  ];
+  const clamped = Math.max(1, Math.min(100, score));
+  const pointerPct = ((clamped - 1) / 99) * 100;
+  const bars = segments.map(s => {
+    const isCurrent = s.band === band;
+    return `<div style="flex:1;height:${isCurrent ? 18 : 14}px;background:${s.color};border-right:1px solid #FFFFFF;"></div>`;
+  }).join('');
+  const labels = segments.map(s => `<div style="flex:1;text-align:center;font-size:10px;font-weight:600;color:#6B7280;">${esc(s.label)}</div>`).join('');
+  return `
+    <div style="margin-top:14px;">
+      <div style="position:relative;display:flex;border-radius:6px;overflow:hidden;border:1px solid #E5E7EB;">
+        ${bars}
+        <div style="position:absolute;left:calc(${pointerPct.toFixed(2)}% - 6px);top:-4px;width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-top:8px solid #111827;"></div>
+      </div>
+      <div style="display:flex;margin-top:6px;">${labels}</div>
+    </div>`;
+}
+
+// ─── v0.9: Domain radar (pentagon/hexagon SVG) ───────────────────────────────
+// Pure inline SVG so it survives PDF print. Each axis is a domain at 0–100%.
+
+function domainRadar(scores: DomainScore[]): string {
+  if (scores.length < 3) return '';
+  const cx = 140, cy = 140, R = 100;
+  const n = scores.length;
+  const points: string[] = [];
+  const labels: string[] = [];
+  const gridLevels = [0.25, 0.5, 0.75, 1.0];
+  const grid: string[] = [];
+
+  // Axes + labels
+  for (let i = 0; i < n; i++) {
+    const angle = -Math.PI / 2 + (i * 2 * Math.PI) / n;
+    const ax = cx + R * Math.cos(angle);
+    const ay = cy + R * Math.sin(angle);
+    grid.push(`<line x1="${cx}" y1="${cy}" x2="${ax.toFixed(1)}" y2="${ay.toFixed(1)}" stroke="#E5E7EB" stroke-width="1"/>`);
+    const lx = cx + (R + 14) * Math.cos(angle);
+    const ly = cy + (R + 14) * Math.sin(angle) + 3;
+    const anchor = lx < cx - 5 ? 'end' : lx > cx + 5 ? 'start' : 'middle';
+    labels.push(`<text x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" font-size="9" font-weight="600" fill="#374151" text-anchor="${anchor}">${esc(scores[i].label)}</text>`);
+  }
+  // Concentric grid polygons
+  for (const lvl of gridLevels) {
+    const pts: string[] = [];
+    for (let i = 0; i < n; i++) {
+      const angle = -Math.PI / 2 + (i * 2 * Math.PI) / n;
+      pts.push(`${(cx + R * lvl * Math.cos(angle)).toFixed(1)},${(cy + R * lvl * Math.sin(angle)).toFixed(1)}`);
+    }
+    grid.push(`<polygon points="${pts.join(' ')}" fill="none" stroke="#E5E7EB" stroke-width="1"/>`);
+  }
+  // 50% reference (on-grade) ring
+  const onGradePts: string[] = [];
+  for (let i = 0; i < n; i++) {
+    const angle = -Math.PI / 2 + (i * 2 * Math.PI) / n;
+    onGradePts.push(`${(cx + R * 0.5 * Math.cos(angle)).toFixed(1)},${(cy + R * 0.5 * Math.sin(angle)).toFixed(1)}`);
+  }
+
+  // Data polygon
+  for (let i = 0; i < n; i++) {
+    const angle = -Math.PI / 2 + (i * 2 * Math.PI) / n;
+    const r = R * Math.max(0, Math.min(1, scores[i].percent));
+    points.push(`${(cx + r * Math.cos(angle)).toFixed(1)},${(cy + r * Math.sin(angle)).toFixed(1)}`);
+  }
+
+  return `
+    <svg viewBox="0 0 280 280" width="100%" style="max-width:280px;display:block;">
+      ${grid.join('')}
+      <polygon points="${onGradePts.join(' ')}" fill="none" stroke="#9CA3AF" stroke-width="1" stroke-dasharray="3,3"/>
+      <polygon points="${points.join(' ')}" fill="rgba(79,70,229,0.18)" stroke="#4F46E5" stroke-width="2" stroke-linejoin="round"/>
+      ${labels.join('')}
+    </svg>`;
+}
+
+// ─── v0.9: Parent summary card ───────────────────────────────────────────────
+
+function parentSummaryCard(summary: string): string {
+  return `
+    <div style="background:#F8FAFC;border:1px solid #E5E7EB;border-radius:14px;padding:18px 22px;margin-bottom:24px;">
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#4F46E5;margin-bottom:8px;">Parent summary</div>
+      <p style="margin:0;font-size:15px;line-height:1.65;color:#1F2937;font-weight:500;">${esc(summary)}</p>
+    </div>`;
+}
+
+// ─── v0.9: Top 3 priority fixes ──────────────────────────────────────────────
+
+function priorityFixesCard(fixes: PriorityFix[]): string {
+  if (fixes.length === 0) {
+    return `
+      <div class="section">
+        <h2>Top to fix first</h2>
+        <div style="background:#F0FDF4;border:1px solid #86EFAC;border-radius:14px;padding:18px 22px;">
+          <p style="margin:0;color:#166534;font-size:14px;font-weight:600;">No priority fixes — strong run on every skill.</p>
+          <p style="margin:6px 0 0;color:#166534;font-size:13px;">Use the 7-day plan below to keep skills sharp.</p>
+        </div>
+      </div>`;
+  }
+  const items = fixes.map((f, i) => `
+    <li style="display:flex;gap:14px;align-items:flex-start;padding:14px 16px;border-radius:12px;background:#FFFFFF;border:1px solid #E5E7EB;border-left:4px solid #4F46E5;margin-bottom:10px;">
+      <div style="flex:0 0 28px;height:28px;border-radius:50%;background:#4F46E5;color:#FFFFFF;font-weight:700;font-size:14px;display:flex;align-items:center;justify-content:center;">${i + 1}</div>
+      <div style="flex:1;">
+        <div style="font-size:14px;font-weight:700;color:#111827;">${esc(f.skillLabel)}</div>
+        <div style="font-size:11px;color:#6B7280;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;margin-top:2px;">${esc(f.domainLabel)} &nbsp;·&nbsp; ${f.missedCount} missed</div>
+        <p style="margin:8px 0 0;font-size:13px;color:#374151;line-height:1.5;">${esc(f.rationale)}</p>
+        ${f.practiceLink ? `<a href="${esc(f.practiceLink.url)}" style="display:inline-block;margin-top:10px;font-size:12px;font-weight:600;color:#4F46E5;">Practice on ${esc(f.practiceLink.provider)} →</a>` : ''}
+      </div>
+    </li>`).join('');
+  return `
+    <div class="section">
+      <h2>Top ${fixes.length === 1 ? '' : `${fixes.length} `}to fix first</h2>
+      <p class="muted" style="font-size:13px;margin-bottom:12px;">Ranked by impact: more misses + harder difficulty = higher priority.</p>
+      <ol style="list-style:none;margin:0;padding:0;">${items}</ol>
+    </div>`;
+}
+
+// ─── v0.9: Confidence pill ───────────────────────────────────────────────────
+
+function confidencePill(confidence: AssessmentResult['screeningConfidence']): string {
+  const labels = CONFIDENCE_LABELS[confidence];
+  return `
+    <div style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;background:#F1F5F9;border:1px solid #CBD5E1;font-size:11px;font-weight:600;color:#475569;">
+      <span style="font-size:12px;">ⓘ</span>
+      ${esc(labels.short)}
+    </div>
+    <p style="margin:6px 0 0;font-size:11px;color:#6B7280;line-height:1.5;">${esc(labels.long)}</p>`;
+}
+
 // ─── Domain rows ─────────────────────────────────────────────────────────────
 
 function domainRows(result: AssessmentResult): string {
+  // v0.9: Taller bar (14px), domain color filled portion, "On grade" reference
+  // line at 50%, percentage on the right edge of the bar.
   return result.domainScores.map(score => {
     const pct = Math.round(score.percent * 100);
     const color = domainColor(score.domain);
     const bs = bandStyle(score.band);
     return `
       <tr>
-        <td style="vertical-align:middle;padding:10px 12px;">
+        <td style="vertical-align:middle;padding:14px 12px;">
           <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${color};margin-right:6px;vertical-align:middle;"></span>
           <strong style="font-size:13px;">${esc(score.label)}</strong>
         </td>
-        <td style="vertical-align:middle;padding:10px 8px;text-align:center;font-size:13px;color:#374151;">${score.rawScore}/${score.maxScore}</td>
-        <td style="vertical-align:middle;padding:10px 12px;width:40%;">
-          <div style="height:10px;border-radius:999px;background:#E5E7EB;overflow:hidden;">
+        <td style="vertical-align:middle;padding:14px 8px;text-align:center;font-size:13px;color:#374151;">${score.rawScore}/${score.maxScore}</td>
+        <td style="vertical-align:middle;padding:14px 12px;width:42%;">
+          <div style="position:relative;height:14px;border-radius:999px;background:#E5E7EB;overflow:hidden;">
             <div style="width:${pct}%;height:100%;background:${color};border-radius:999px;"></div>
+            <!-- 50% on-grade reference line -->
+            <div style="position:absolute;top:-2px;bottom:-2px;left:50%;width:0;border-left:1px dashed #6B7280;"></div>
           </div>
         </td>
-        <td style="vertical-align:middle;padding:10px 8px;text-align:center;font-size:14px;font-weight:600;color:${color};">${pct}%</td>
-        <td style="vertical-align:middle;padding:10px 8px;">
+        <td style="vertical-align:middle;padding:14px 8px;text-align:center;font-size:14px;font-weight:700;color:${color};">${pct}%</td>
+        <td style="vertical-align:middle;padding:14px 8px;">
           <span style="display:inline-block;font-size:11px;font-weight:600;padding:3px 10px;border-radius:999px;background:${bs.bg};color:${bs.text};border:1px solid ${bs.border};">${esc(scoreBandLabels[score.band])}</span>
         </td>
       </tr>`;
@@ -222,6 +367,7 @@ export function buildReportHtml(result: AssessmentResult, lift?: PdfScoreLift): 
   const pct = Math.round(result.percent * 100);
   const bs = bandStyle(result.readinessBand);
   const benchShort = benchmarkShortName(result.percentileEstimate.benchmarkSource);
+  const headline = BAND_HEADLINES[result.readinessBand];
 
   const missedSection = result.missedQuestions.length === 0
     ? `<div style="background:#F0FDF4;border:1px solid #86EFAC;border-radius:12px;padding:16px 20px;text-align:center;">
@@ -254,74 +400,98 @@ export function buildReportHtml(result: AssessmentResult, lift?: PdfScoreLift): 
 </head>
 <body>
 
-<!-- ── COVER ────────────────────────────────────────────────────────────── -->
-<div style="background:linear-gradient(135deg,#1E1B4B 0%,#312E81 60%,#4338CA 100%);border-radius:20px;padding:32px;margin-bottom:28px;color:#fff;">
-  <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:16px;">
-    <div>
-      <div style="font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#A5B4FC;margin-bottom:6px;">
-        ${esc(BRAND.appName)} &nbsp;·&nbsp; ${esc(BRAND.scoreReportName)}
-      </div>
-      <div style="font-size:26px;font-weight:700;line-height:1.2;margin-bottom:6px;">${esc(result.testTitle)}</div>
-      <div style="font-size:13px;color:#C7D2FE;">Age ${result.age} &nbsp;·&nbsp; ${esc(gradeLabel(result.grade))} &nbsp;·&nbsp; ${esc(formatDate(result.completedAtIso))}</div>
-    </div>
-    <div style="text-align:right;">
-      <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.07em;color:#A5B4FC;margin-bottom:4px;">${esc(BRAND.productScoreName)}</div>
-      <div style="font-size:52px;font-weight:700;line-height:1;color:#fff;">${result.scoreLiftScore}</div>
-      <div style="font-size:11px;color:#C7D2FE;margin-top:2px;">${esc(result.scoreLiftScoreLabel)} &nbsp;·&nbsp; 1–100, 50 = on grade</div>
-    </div>
+<!-- ── COVER (v0.9 — band headline leads, score is supporting) ───────────── -->
+<div style="background:linear-gradient(135deg,#1E1B4B 0%,#312E81 60%,#4338CA 100%);border-radius:20px;padding:36px 32px 32px;margin-bottom:28px;color:#fff;">
+  <div style="font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#A5B4FC;margin-bottom:18px;">
+    ${esc(BRAND.appName)} &nbsp;·&nbsp; ${esc(BRAND.scoreReportName)}
   </div>
 
+  <!-- Band headline as the visual lead -->
+  <div style="font-size:48px;font-weight:700;line-height:1.05;margin:0 0 10px;letter-spacing:-0.01em;">
+    ${esc(headline.headline)} <span style="font-size:42px;">${headline.icon}</span>
+  </div>
+
+  <!-- Supporting line: score / 100 + test/grade/date -->
+  <div style="font-size:18px;color:#E0E7FF;font-weight:600;margin-bottom:6px;">
+    ${esc(BRAND.productScoreName)}: ${result.scoreLiftScore} / 100
+  </div>
+  <div style="font-size:13px;color:#C7D2FE;">
+    ${esc(result.testTitle)} &nbsp;·&nbsp; ${esc(gradeLabel(result.grade))} &nbsp;·&nbsp; ${esc(formatDate(result.completedAtIso))}
+  </div>
+  ${result.preparedFor ? `<div style="font-size:12px;color:#C7D2FE;margin-top:6px;">Prepared for: <strong style="color:#E0E7FF;">${esc(result.preparedFor)}</strong></div>` : ''}
+
+  <!-- ScoreLift Score band gradient bar -->
+  ${scoreBandBar(result.scoreLiftScore, result.readinessBand)
+      .replace(/color:#6B7280/g, 'color:#A5B4FC')
+      .replace(/border:1px solid #E5E7EB/g, 'border:1px solid rgba(255,255,255,0.25)')
+      .replace(/border-top:8px solid #111827/g, 'border-top:8px solid #FFFFFF')}
+
+  <!-- Three small supporting tiles -->
   <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:24px;">
-    <div style="background:rgba(255,255,255,0.12);border-radius:14px;padding:14px;">
+    <div style="background:rgba(255,255,255,0.12);border-radius:12px;padding:12px;">
       <div style="font-size:10px;font-weight:600;letter-spacing:0.07em;text-transform:uppercase;color:#A5B4FC;margin-bottom:6px;">Percent correct</div>
-      <div style="font-size:32px;font-weight:700;color:#fff;">${pct}%</div>
-      <div style="font-size:12px;color:#C7D2FE;">${result.rawScore}/${result.maxScore} questions</div>
+      <div style="font-size:24px;font-weight:700;color:#fff;">${pct}%</div>
+      <div style="font-size:11px;color:#C7D2FE;">${result.rawScore}/${result.maxScore} questions</div>
     </div>
-    <div style="background:rgba(255,255,255,0.12);border-radius:14px;padding:14px;">
-      <div style="font-size:10px;font-weight:600;letter-spacing:0.07em;text-transform:uppercase;color:#A5B4FC;margin-bottom:6px;">Estimated percentile</div>
-      <div style="font-size:32px;font-weight:700;color:#fff;">${esc(result.percentileEstimate.rangeLabel)}</div>
-      <div style="font-size:12px;color:#C7D2FE;">vs. ${esc(benchShort)}</div>
+    <div style="background:rgba(255,255,255,0.12);border-radius:12px;padding:12px;">
+      <div style="font-size:10px;font-weight:600;letter-spacing:0.07em;text-transform:uppercase;color:#A5B4FC;margin-bottom:6px;">Benchmark range</div>
+      <div style="font-size:22px;font-weight:700;color:#fff;">${esc(result.percentileEstimate.rangeLabel)}</div>
+      <div style="font-size:11px;color:#C7D2FE;">vs. ${esc(benchShort)}</div>
     </div>
-    <div style="background:rgba(255,255,255,0.12);border-radius:14px;padding:14px;">
+    <div style="background:rgba(255,255,255,0.12);border-radius:12px;padding:12px;">
       <div style="font-size:10px;font-weight:600;letter-spacing:0.07em;text-transform:uppercase;color:#A5B4FC;margin-bottom:6px;">Readiness band</div>
-      <div style="font-size:22px;font-weight:700;color:#fff;margin-top:4px;">${esc(result.readinessLabel)}</div>
-      <div style="font-size:12px;color:#C7D2FE;">See domain detail below</div>
+      <div style="font-size:18px;font-weight:700;color:#fff;margin-top:4px;">${esc(result.readinessLabel)}</div>
+      <div style="font-size:11px;color:#C7D2FE;">See domain detail below</div>
     </div>
   </div>
 </div>
+
+<!-- ── PARENT SUMMARY (v0.9 — first thing a parent reads) ────────────────── -->
+${parentSummaryCard(result.parentSummary)}
 
 ${scoreLiftSection(lift, result.percent, result.scoreLiftScore)}
 
-<!-- ── SCORE SUMMARY ─────────────────────────────────────────────────────── -->
+<!-- ── TOP 3 PRIORITY FIXES (v0.9 — most actionable section) ─────────────── -->
+${priorityFixesCard(result.topPriorityFixes)}
+
+<!-- ── BENCHMARK + CONFIDENCE (v0.9 — directional language) ──────────────── -->
 <div class="section">
-  <h2>Score summary</h2>
+  <h2>Benchmark range</h2>
   <div style="background:${bs.bg};border:1px solid ${bs.border};border-radius:12px;padding:16px 20px;margin-bottom:12px;">
     <p style="margin:0;font-size:14px;color:${bs.text};">${esc(result.summary)}</p>
   </div>
-  <div style="background:#F8FAFC;border:1px solid #E5E7EB;border-radius:10px;padding:12px 14px;margin-bottom:8px;">
-    <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:#6B7280;margin-bottom:4px;">Percentile benchmark</div>
-    <p style="margin:0;font-size:12px;color:#374151;line-height:1.55;">
-      Compared against: <strong>${esc(result.percentileEstimate.benchmarkSource ?? 'Public norm table')}</strong>.
-    </p>
+  <div style="background:#F8FAFC;border:1px solid #E5E7EB;border-radius:10px;padding:12px 14px;margin-bottom:10px;">
+    <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:#6B7280;margin-bottom:4px;">Compared against</div>
+    <p style="margin:0;font-size:13px;color:#374151;line-height:1.55;font-weight:600;">${esc(result.percentileEstimate.benchmarkSource ?? 'Public norm table')}</p>
   </div>
+  <div style="margin-bottom:8px;">${confidencePill(result.screeningConfidence)}</div>
   <p style="font-size:12px;color:#9CA3AF;margin:0;">${esc(result.percentileEstimate.caveat)}</p>
 </div>
 
-<!-- ── DOMAIN RATINGS ────────────────────────────────────────────────────── -->
+<!-- ── DOMAIN RATINGS (v0.9 — radar + improved bars) ─────────────────────── -->
 <div class="section">
   <h2>Domain ratings</h2>
-  <table style="border:1px solid #E5E7EB;border-radius:12px;overflow:hidden;">
-    <thead>
-      <tr style="background:#F9FAFB;">
-        <th style="padding:10px 12px;font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:#6B7280;">Domain</th>
-        <th style="padding:10px 8px;font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:#6B7280;text-align:center;">Score</th>
-        <th style="padding:10px 12px;font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:#6B7280;">Progress</th>
-        <th style="padding:10px 8px;font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:#6B7280;text-align:center;">%</th>
-        <th style="padding:10px 8px;font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:#6B7280;">Rating</th>
-      </tr>
-    </thead>
-    <tbody>${domainRows(result)}</tbody>
-  </table>
+  <div style="display:flex;gap:24px;flex-wrap:wrap;align-items:flex-start;">
+    <div style="flex:1;min-width:320px;">
+      <table style="border:1px solid #E5E7EB;border-radius:12px;overflow:hidden;">
+        <thead>
+          <tr style="background:#F9FAFB;">
+            <th style="padding:10px 12px;font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:#6B7280;">Domain</th>
+            <th style="padding:10px 8px;font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:#6B7280;text-align:center;">Score</th>
+            <th style="padding:10px 12px;font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:#6B7280;">Progress (dotted = on grade)</th>
+            <th style="padding:10px 8px;font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:#6B7280;text-align:center;">%</th>
+            <th style="padding:10px 8px;font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:#6B7280;">Rating</th>
+          </tr>
+        </thead>
+        <tbody>${domainRows(result)}</tbody>
+      </table>
+    </div>
+    <div style="flex:0 0 280px;text-align:center;">
+      <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:#6B7280;margin-bottom:8px;">Domain shape</div>
+      ${domainRadar(result.domainScores)}
+      <div style="font-size:11px;color:#9CA3AF;margin-top:6px;">Dashed ring = on-grade-level (50%).</div>
+    </div>
+  </div>
 </div>
 
 <!-- ── STRENGTHS AND GROWTH ──────────────────────────────────────────────── -->
@@ -378,6 +548,22 @@ ${scoreLiftSection(lift, result.percent, result.scoreLiftScore)}
   </table>
 </div>
 
+<!-- ── HOW TO READ THIS REPORT (v0.9) ────────────────────────────────────── -->
+<div class="section" style="page-break-inside:avoid;break-inside:avoid;">
+  <h2>How to read this report</h2>
+  <div style="background:#F8FAFC;border:1px solid #E5E7EB;border-radius:12px;padding:18px 22px;">
+    <p style="margin:0 0 12px;font-size:13px;color:#374151;line-height:1.6;">
+      <strong style="color:#111827;">${esc(BRAND.productScoreName)} (1–100):</strong> a grade-anchored score where 50 means on-grade-level expected performance for the chosen test, age, and grade. It is ${esc(BRAND.appName)}'s own internal scale — not a percentile and not an IQ.
+    </p>
+    <p style="margin:0 0 12px;font-size:13px;color:#374151;line-height:1.6;">
+      <strong style="color:#111827;">Benchmark range:</strong> a directional comparison against a public norm-style table for a similar published test (${esc(result.percentileEstimate.benchmarkSource ?? 'public norm table')}). Not an official score from that publisher and not nationally normed for ${esc(BRAND.appName)}.
+    </p>
+    <p style="margin:0;font-size:13px;color:#374151;line-height:1.6;">
+      <strong style="color:#111827;">Confidence:</strong> based on the number of questions answered. Short tests give directional signal; longer tests give a stronger picture.
+    </p>
+  </div>
+</div>
+
 <!-- ── FOOTER ─────────────────────────────────────────────────────────────── -->
 <div style="margin-top:28px;padding-top:16px;border-top:1px solid #E5E7EB;">
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
@@ -390,7 +576,10 @@ ${scoreLiftSection(lift, result.percent, result.scoreLiftScore)}
       <p style="font-size:12px;color:#78350F;margin:0;line-height:1.6;">${esc(result.disclaimer)}</p>
     </div>
   </div>
-  <p style="text-align:center;font-size:11px;color:#D1D5DB;margin-top:14px;">${esc(BRAND.appName)} &nbsp;·&nbsp; ${esc(BRAND.scoreReportName)} &nbsp;·&nbsp; Generated on-device &nbsp;·&nbsp; Not a clinical assessment</p>
+  <p style="text-align:center;font-size:11px;color:#9CA3AF;margin-top:14px;font-weight:600;">
+    Generated locally by ${esc(BRAND.appName)} &nbsp;·&nbsp; No data was sent anywhere.
+  </p>
+  <p style="text-align:center;font-size:10px;color:#D1D5DB;margin-top:4px;">${esc(BRAND.scoreReportName)} &nbsp;·&nbsp; Not a clinical assessment</p>
 </div>
 
 </body>

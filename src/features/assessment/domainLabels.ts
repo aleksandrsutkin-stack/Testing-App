@@ -34,6 +34,24 @@ export const scoreBandLabels: Record<ScoreBand, string> = {
 };
 
 /**
+ * v0.9 — Cover headlines paired with a unicode icon. Lead the cover with the
+ * headline, not the score number, so a parent who glances at the report
+ * immediately reads the answer to "how did my kid do?" rather than mistaking
+ * a score of 50 (on grade level) for an F.
+ *
+ * Icons are unicode so they render in PDF and on every device without a
+ * font dependency. "Building Foundations" replaces "Below grade" — same
+ * information, encouraging frame, doesn't lie about the result.
+ */
+export const BAND_HEADLINES: Record<ScoreBand, { headline: string; icon: string }> = {
+  'well-above':  { headline: 'Well Above Grade',     icon: '⭐' },
+  'above':       { headline: 'Above Grade',          icon: '↑'  },
+  'on-grade':    { headline: 'On Track',             icon: '✓'  },
+  'approaching': { headline: 'Approaching Grade',    icon: '→'  },
+  'below':       { headline: 'Building Foundations', icon: '◐'  },
+};
+
+/**
  * v0.6 band thresholds. Tied to the ScoreLift Score model where 50 = on-grade.
  * Cuts at the percent-correct level:
  *   ≥0.85 → well-above

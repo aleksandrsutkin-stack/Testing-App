@@ -1,6 +1,6 @@
 {
   "name": "quizlift-mobile-app",
-  "version": "0.6.0",
+  "version": "0.9.0",
   "private": true,
   "main": "expo-router/entry",
   "scripts": {
@@ -31,7 +31,8 @@
     "react-native-safe-area-context": "5.7.0",
     "react-native-screens": "4.24.0",
     "react-native-svg": "15.15.4",
-    "react-native-view-shot": "5.0.0"
+    "react-native-view-shot": "5.0.0",
+    "react-native-webview": "13.16.1"
   },
   "devDependencies": {
     "@types/jest": "30.0.0",

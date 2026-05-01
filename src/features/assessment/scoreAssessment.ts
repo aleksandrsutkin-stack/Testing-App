@@ -16,7 +16,8 @@ import { computeScoreLiftScore, scoreLiftScoreLabel } from '../scoring/scoreLift
 import { estimatePercentile } from '../scoring/externalBenchmarks';
 import {
   AssessmentQuestion, AssessmentResult, DomainId, DomainScore,
-  LearnerProfile, MissedQuestionReview, PracticeAssignment, ResponseMap, ScoreBand
+  LearnerProfile, MissedQuestionReview, PracticeAssignment, PracticeLink,
+  PriorityFix, ResponseMap, ScoreBand, ScreeningConfidence, MistakeTag
 } from './types';
 import { domainLabels, getBand, getMistakeTypeLabel, scoreBandLabels } from './domainLabels';
 
@@ -101,6 +102,127 @@ function buildRetake(percent: number, missedCount: number): string {
   return 'Work through the step-by-step solutions and practice links for 5–7 days before retaking.';
 }
 
+// ─── v0.9: Plain-English parent summary ──────────────────────────────────────
+// Reads first on both the PDF and the Score tab. Neutral, encouraging voice.
+// Avoids "low," "weak," "struggling," "failed."
+
+function gradeLabelShort(g: number): string {
+  if (g < 0) return 'Pre-K';
+  if (g === 0) return 'Kindergarten';
+  if (g <= 12) return `${g}${['th','st','nd','rd'][((g % 100 - 20) % 10 < 0 || (g % 100 - 20) % 10 > 3) ? 0 : (g % 100 - 20) % 10] ?? 'th'} grade`;
+  return 'adult';
+}
+
+function buildParentSummary(args: {
+  band: ScoreBand;
+  testTitle: string;
+  grade: number;
+  topDomain: string;
+  bottomDomain: string;
+}): string {
+  const { band, testTitle, grade, topDomain, bottomDomain } = args;
+  const gradeStr = gradeLabelShort(grade);
+  const sameTop = topDomain === bottomDomain;
+  switch (band) {
+    case 'well-above':
+      return `Strong performance — well above what we'd expect for a ${gradeStr} student on this ${testTitle}. Strongest in ${topDomain}${sameTop ? '' : `; consider stretching with harder material in ${bottomDomain} too`}.`;
+    case 'above':
+      return `Above grade-level performance. Strongest in ${topDomain}.${sameTop ? ' Use the Mistake Map to lock in the few items missed.' : ` The biggest opportunity for growth is in ${bottomDomain} — see the Mistake Map for specifics.`}`;
+    case 'on-grade':
+      return `On track for a ${gradeStr} student. Strongest in ${topDomain}.${sameTop ? ' The Mistake Map shows where to focus practice next.' : ` The clearest place to focus practice is ${bottomDomain} — the Mistake Map shows exactly where.`}`;
+    case 'approaching':
+      return `Approaching grade-level expectations. Encouraging signs in ${topDomain}.${sameTop ? ' The Mistake Map and 7-day plan focus on what to fix first.' : ` The Mistake Map highlights the steps in ${bottomDomain} that need the most attention right now.`}`;
+    case 'below':
+    default:
+      return `Foundations are still building. Brightest area is ${topDomain}.${sameTop ? ' The Mistake Map and 7-day plan focus on the most important fixes first — small wins build confidence.' : ` The Mistake Map and 7-day plan focus on the most important fixes in ${bottomDomain} first — small wins build confidence.`}`;
+  }
+}
+
+// ─── v0.9: Top 3 priority fixes ──────────────────────────────────────────────
+// Group missed questions by skill. Score each skill by impact (misses + difficulty).
+// Map the dominant mistake tag to a plain-English cause.
+
+const MISTAKE_RATIONALES: Record<MistakeTag, string> = {
+  'concept-gap':            'this skill needs concept review',
+  'procedure-error':        'the procedure is partly known but applied incorrectly',
+  'calculation-error':      'the approach is right; arithmetic accuracy needs work',
+  'multi-step-reasoning':   'the issue is keeping track across multiple steps',
+  'attention-to-detail':    'the question was misread or a detail was skipped',
+  'vocabulary-confusion':   'a key word was misunderstood',
+  'pattern-recognition':    'the underlying pattern wasn\'t spotted',
+  'spatial-visualization':  'mental rotation/visualization needs practice',
+  'misread-question':       'the question was misinterpreted',
+  'time-pressure':          'speed is fine; accuracy under pause is the goal',
+  'reading-comprehension':  'the passage needs a closer second read',
+  'spatial-reasoning':      'the geometric/spatial setup needs more practice',
+  'science-reasoning':      'the underlying science concept needs review',
+};
+
+function dominantMistakeTag(tags: MistakeTag[][]): MistakeTag | null {
+  const counts = new Map<MistakeTag, number>();
+  for (const list of tags) for (const t of list) counts.set(t, (counts.get(t) ?? 0) + 1);
+  let best: MistakeTag | null = null; let bestCount = 0;
+  for (const [t, c] of counts) if (c > bestCount) { best = t; bestCount = c; }
+  return best;
+}
+
+function skillLabelFromMissed(missed: MissedQuestionReview[]): string {
+  // Use the practice link label if available, else fall back to the skillId
+  // formatted as title case.
+  const first = missed[0];
+  const link = first?.practiceLinks?.[0];
+  if (link) return link.label;
+  return first.skillId
+    .split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+}
+
+function computePriorityFixes(missed: MissedQuestionReview[], questions: AssessmentQuestion[]): PriorityFix[] {
+  if (missed.length === 0) return [];
+  const bySkill = new Map<string, { missed: MissedQuestionReview[]; difficulties: number[] }>();
+  for (const m of missed) {
+    const cur = bySkill.get(m.skillId) ?? { missed: [], difficulties: [] };
+    cur.missed.push(m);
+    const q = questions.find(qq => qq.id === m.questionId);
+    if (q) cur.difficulties.push(q.difficulty);
+    bySkill.set(m.skillId, cur);
+  }
+
+  type Scored = { skillId: string; impact: number; data: { missed: MissedQuestionReview[]; difficulties: number[] } };
+  const scored: Scored[] = [];
+  for (const [skillId, data] of bySkill) {
+    const avgDiff = data.difficulties.length
+      ? data.difficulties.reduce((a, b) => a + b, 0) / data.difficulties.length
+      : 3;
+    const impact = data.missed.length * 2 + avgDiff;
+    scored.push({ skillId, impact, data });
+  }
+  scored.sort((a, b) => b.impact - a.impact);
+
+  return scored.slice(0, 3).map(({ skillId, data }) => {
+    const dominant = dominantMistakeTag(data.missed.map(m => m.mistakeTags));
+    const rationale = dominant
+      ? `${data.missed.length} missed in this skill — ${MISTAKE_RATIONALES[dominant]}.`
+      : `${data.missed.length} missed in this skill.`;
+    const practiceLink: PracticeLink | undefined = data.missed[0].practiceLinks[0];
+    return {
+      skillId,
+      skillLabel: skillLabelFromMissed(data.missed),
+      domainLabel: data.missed[0].domainLabel,
+      rationale,
+      practiceLink,
+      missedCount: data.missed.length,
+    };
+  });
+}
+
+// ─── v0.9: Screening confidence ──────────────────────────────────────────────
+
+function computeConfidence(totalQuestions: number): ScreeningConfidence {
+  if (totalQuestions < 15) return 'low';
+  if (totalQuestions < 30) return 'moderate';
+  return 'stronger';
+}
+
 function readinessFromPercent(percent: number): { band: ScoreBand; label: string } {
   const band = getBand(percent);
   return { band, label: scoreBandLabels[band] };
@@ -132,12 +254,15 @@ export function scoreAssessment(params: {
   const scoreLiftScoreLbl = scoreLiftScoreLabel(scoreLiftScore);
   const benchmark = estimatePercentile(percent, params.profile.testId);
 
+  // v0.9: Unified, directional caveat. Replaces the per-test caveat text so
+  // every report reads the same credibility-honest line.
+  const v9Caveat = `Directional comparison using public benchmark-style tables (${benchmark.source}). Not an official score from NWEA, IAAT, ASVAB, or any QuizLift-specific norming.`;
   const percentileEstimate = {
     percentile: benchmark.percentile,
     rangeLabel: benchmark.rangeLabel,
     distributionLabel: benchmark.source,        // legacy field; same value
     benchmarkSource: benchmark.source,           // v0.6: new explicit field
-    caveat: benchmark.caveat,
+    caveat: v9Caveat,
   };
 
   const domainScores = Array.from(accumulators.values()).map<DomainScore>(s => {
@@ -149,6 +274,22 @@ export function scoreAssessment(params: {
   const growthAreas = buildGrowthAreas(domainScores);
   const missedQuestions = buildMissedQuestions(params.questions, params.responses);
   const practicePlan = buildPracticePlan(missedQuestions, growthAreas);
+
+  // v0.9: parent summary uses strongest + weakest domain labels.
+  const ranked = [...domainScores].sort((a, b) => b.percent - a.percent);
+  const topDomain = ranked[0]?.label ?? 'this skill area';
+  const bottomDomain = ranked[ranked.length - 1]?.label ?? topDomain;
+  const parentSummary = buildParentSummary({
+    band: readiness.band,
+    testTitle: definition.title,
+    grade: params.profile.grade,
+    topDomain,
+    bottomDomain,
+  });
+
+  // v0.9: top 3 priority fixes + screening confidence.
+  const topPriorityFixes = computePriorityFixes(missedQuestions, params.questions);
+  const screeningConfidence = computeConfidence(params.questions.length);
 
   return {
     testId: params.profile.testId, testTitle: definition.title,
@@ -163,6 +304,15 @@ export function scoreAssessment(params: {
     strengths, growthAreas, domainScores, missedQuestions, practicePlan,
     retakeRecommendation: buildRetake(percent, missedQuestions.length),
     completedAtIso: new Date().toISOString(),
-    disclaimer: `${definition.disclaimer} ${percentileEstimate.caveat}`
+    // v0.9: Unified credibility paragraph appended to every test's
+    // disclaimer. Test-specific copy stays canonical; the v0.9 paragraph
+    // reads the same on every report so the credibility statement is
+    // consistent regardless of which test the parent took.
+    disclaimer: `${definition.disclaimer} QuizLift gives a directional benchmark range using public norm-style reference tables (${benchmark.source}). It is not an official score from those publishers, and is not a clinical IQ test, gifted-program admission decision, or school placement instrument. Confidence in the result depends on test length — see the screening confidence label.`,
+    // v0.9
+    parentSummary,
+    topPriorityFixes,
+    screeningConfidence,
+    preparedFor: params.profile.preparedFor,
   };
 }

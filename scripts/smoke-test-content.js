@@ -354,7 +354,7 @@ check('Typography pass complete: no fontWeight 800/900 anywhere.',
 
 // ── Package version ─────────────────────────────────────────────────────────
 const pkg = JSON.parse(fs.readFileSync(path.join(ROOT, 'package.json'), 'utf8'));
-check('package.json version is 0.6.0.', pkg.version === '0.6.0', pkg.version);
+check('package.json version is 0.9.0.', pkg.version === '0.9.0', pkg.version);
 check('package.json includes expo-notifications.', !!pkg.dependencies['expo-notifications']);
 check('package.json includes react-native-svg.', !!pkg.dependencies['react-native-svg']);
 check('package.json includes async-storage.', !!pkg.dependencies['@react-native-async-storage/async-storage']);
@@ -377,10 +377,79 @@ check('kg-compare-numbers uses dot-compare visual.',
 check('kg-vocabulary-body now teaches beginning letter sounds.',
   /id:\s*'kg-vocabulary-body'[\s\S]{0,800}Which letter does the word/.test(templatesFile));
 
+// ── v0.9: Premium report + scoring credibility checks ──────────────────────
+// New types
+check('parentSummary field exists on AssessmentResult.', typesFile.includes('parentSummary'));
+check('topPriorityFixes field exists on AssessmentResult.', typesFile.includes('topPriorityFixes'));
+check('PriorityFix type exists.', typesFile.includes('export interface PriorityFix'));
+check('screeningConfidence field exists.', typesFile.includes('screeningConfidence'));
+check('ScreeningConfidence type exists.', typesFile.includes('export type ScreeningConfidence'));
+check('CONFIDENCE_LABELS export exists.', typesFile.includes('CONFIDENCE_LABELS'));
+check('preparedFor field exists on LearnerProfile.', typesFile.includes('preparedFor'));
+check('BAND_HEADLINES export exists in domainLabels.', domainLabelsFile.includes('BAND_HEADLINES'));
+
+// New files
+check('SampleReportPreview component exists.', fs.existsSync(path.join(ROOT, 'src/components/SampleReportPreview.tsx')));
+check('Sample report screen exists.', fs.existsSync(path.join(ROOT, 'app/sample-report.tsx')));
+check('Sample report data file exists.', fs.existsSync(path.join(ROOT, 'src/data/sampleReport.ts')));
+
+// Label rename: "Estimated percentile" must not appear as a UI label.
+// Type names like PercentileEstimate / percentileEstimate are allowed.
+const v9UiFiles = [resultsFile, reportFile];
+v9UiFiles.forEach((src, i) => {
+  check(`UI file ${i} no longer uses "Estimated percentile" as a label.`,
+    !/Estimated percentile/.test(src));
+});
+check('"Benchmark range" label is used in the UI.',
+  v9UiFiles.some(src => /Benchmark range/.test(src)));
+
+// Cover restructure
+check('Results cover leads with band headline (BAND_HEADLINES).',
+  resultsFile.includes('BAND_HEADLINES[result.readinessBand]'));
+check('PDF cover leads with band headline.',
+  reportFile.includes('BAND_HEADLINES'));
+check('PDF has scoreBandBar gradient pointer.',
+  reportFile.includes('scoreBandBar'));
+check('PDF has domainRadar SVG.',
+  reportFile.includes('domainRadar'));
+check('PDF has parent summary card.',
+  reportFile.includes('parentSummaryCard'));
+check('PDF has priority fixes card.',
+  reportFile.includes('priorityFixesCard'));
+check('PDF has How-to-read this report callout.',
+  reportFile.includes('How to read this report'));
+check('PDF footer reads "Generated locally by QuizLift".',
+  reportFile.includes('Generated locally by'));
+check('PDF supports optional Prepared-for line on cover.',
+  reportFile.includes('Prepared for'));
+
+// Send-to-tutor
+check('Results screen exposes "Send to tutor" copy.',
+  /Send to tutor/.test(resultsFile));
+// (pdfServiceFile already read earlier in the file.)
+check('PDF share dialog title now says "Send".',
+  /Send your ScoreLift Report/.test(pdfServiceFile));
+
+// Confidence + caveat
+check('Results screen renders confidence pill.',
+  /CONFIDENCE_LABELS\[result\.screeningConfidence\]/.test(resultsFile));
+check('Caveat now uses the v0.9 directional language.',
+  /Directional comparison using public benchmark-style tables/.test(
+    fs.readFileSync(path.join(ROOT, 'src/features/assessment/scoreAssessment.ts'), 'utf8')
+  ));
+
+// Sample report data shape (lightweight integrity check)
+check('Sample report has all v0.9 fields populated.', (() => {
+  const f = fs.readFileSync(path.join(ROOT, 'src/data/sampleReport.ts'), 'utf8');
+  return /parentSummary:/.test(f) && /topPriorityFixes:/.test(f) && /screeningConfidence:/.test(f);
+})());
+
+// (version-bump check is handled in the package-version block above)
+
 // ── Summary ─────────────────────────────────────────────────────────────────
 console.log('\n' + '─'.repeat(50));
 if (allPassed) {
-  console.log('\x1b[32m\nALL CHECKS PASSED — v0.7 content pass is ready.\x1b[0m\n');
+  console.log('\x1b[32m\nALL CHECKS PASSED — v0.9 premium report + credibility pass is ready.\x1b[0m\n');
 } else {
   console.log('\x1b[31m\nSOME CHECKS FAILED — fix errors above before shipping.\x1b[0m\n');
   process.exit(1);

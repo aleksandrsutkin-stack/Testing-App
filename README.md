@@ -1,9 +1,41 @@
-# QuizLift — v0.8
+# QuizLift — v0.9
 
 Privacy-first iOS / iPad educational test-improvement app.
 Stack: Expo + React Native + TypeScript + Expo Router.
 
 > **Tagline:** Every miss becomes a lesson.
+
+---
+
+## What's new in v0.9
+
+Two themes: make the **ScoreLift Report feel like a $50 deliverable**, and rework scoring labels so the product reads as professional and trustworthy.
+
+### Premium ScoreLift Report
+
+* **Parent summary** — every report now opens with a 2–3 sentence plain-English summary in parent voice, computed from the band, strongest domain, and weakest domain. Read first on both the PDF and the Score tab.
+* **Top 3 to fix first** — the most actionable section on the page. Skills are grouped by impact (`misses × 2 + avg difficulty`) and ranked. Each fix maps the dominant mistake tag to a plain-English cause ("the issue is keeping track across multiple steps") and a Khan Academy link.
+* **Cover restructure** — leads with the band headline ("On Track ✓") at 36–48px, with the score number as a supporting line. A parent who sees "50" no longer reads it as an F.
+* **Score-band gradient bar** — single horizontal bar from amber → green with 5 segments and a triangle pointer. The most legible "where am I?" visual on the page.
+* **Domain radar** — pure inline SVG (PDF-safe) showing all domains at once with a dashed 50% on-grade reference ring. Sits next to the existing domain bars.
+* **Better domain bars** — taller (14px), domain-colored fill, percentage on the right, dotted "On grade" reference line at 50%.
+* **Sample report preview** — a screenshot-style card on the home screen ("What you get with the ScoreLift Report") tappable into a full-screen `WebView` of the actual `buildReportHtml()` output for a hardcoded sample (Alex, 4th grade Compacted Math). Converts uncertainty into "I want this for my kid" before payment.
+* **"Send to tutor" framing** — after a successful PDF export, the action sheet now leads with "Send to tutor or teacher ›" instead of a generic share button. Reframes the value prop from "find out about my kid" to "I have a deliverable for the professional I'm paying."
+* **Optional "Prepared for" name on the cover** — text input on the test setup screen ("Student first name or initials"). Session-only, never persisted, omitted entirely if blank.
+* **PDF footer** now reads "Generated locally by QuizLift · No data was sent anywhere." — the single most important trust signal a tutor will see.
+* **"How to read this report" callout** — three short paragraphs (`ScoreLift Score`, `Benchmark range`, `Confidence`) right before the legal footer. Does more for credibility than any individual relabel.
+
+### Scoring credibility labels
+
+* **"Estimated percentile" → "Benchmark range"** in every UI label and PDF section. Internal type names (`PercentileEstimate`, `percentileEstimate`) are unchanged. The new phrasing reads as a directional comparison rather than a measured claim.
+* **Confidence badge** — every result now carries a `screeningConfidence` of `low` / `moderate` / `stronger` based on test length. Rendered as a neutral pill next to the benchmark range with a one-line explanation. A 10-question Quick Start no longer carries the same weight signal as a 30-question full assessment.
+* **"On Track ✓" headlines** — `BAND_HEADLINES` map provides a parent-friendly headline per band (`Well Above Grade ⭐`, `Above Grade ↑`, `On Track ✓`, `Approaching Grade →`, `Building Foundations ◐`). "Building Foundations" replaces "Below grade" — same information, encouraging frame.
+* **Unified directional caveat** — every percentile section now reads "Directional comparison using public benchmark-style tables ({benchmarkSource}). Not an official score from NWEA, IAAT, ASVAB, or any QuizLift-specific norming." Same line on every report regardless of which test was taken.
+* **Disclaimer block** — every test's existing disclaimer is preserved; a unified credibility paragraph is appended automatically in `scoreAssessment.ts`.
+
+### Templates / scoring math / blueprints
+
+**Unchanged.** v0.9 is a UI + report + labels pass. The underlying score, percentile, blueprint, and adaptive-ordering logic are exactly as in v0.7 / v0.8.
 
 ---
 

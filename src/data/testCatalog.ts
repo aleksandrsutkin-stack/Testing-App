@@ -14,7 +14,7 @@ export const testCatalog: TestDefinition[] = [
     icon: 'sparkles',
     parentBenefit: 'A quick picture of reasoning, verbal, spatial, memory, and quantitative strengths without clinical IQ claims.',
     studentBenefit: 'A puzzle sprint that turns missed questions into next-step practice.',
-    reportPromise: 'Percent correct, estimated percentile range, ScoreLift Score, Mistake Map, Step Solutions, and practice links.',
+    reportPromise: 'Percent correct, benchmark range, ScoreLift Score, Mistake Map, Step Solutions, and practice links.',
     domains: ['fluid-reasoning', 'visual-spatial', 'verbal', 'quantitative', 'working-memory'],
     practiceLinks: [
       { provider: 'Khan Academy', label: 'Khan Academy math practice', url: 'https://www.khanacademy.org/math', reason: 'General quantitative practice by grade.' },
@@ -34,7 +34,7 @@ export const testCatalog: TestDefinition[] = [
     icon: 'calculator',
     parentBenefit: 'Helps parents decide whether math acceleration is exciting, risky, or needs targeted support first.',
     studentBenefit: 'Shows which math skills are already strong and which ones need practice.',
-    reportPromise: 'Percent correct, estimated percentile range, readiness band, gap list, step solutions, and Khan Academy practice links.',
+    reportPromise: 'Percent correct, benchmark range, readiness band, gap list, step solutions, and Khan Academy practice links.',
     domains: ['number-sense', 'fractions-ratios', 'quantitative', 'geometry', 'data-reasoning'],
     practiceLinks: [
       { provider: 'Khan Academy', label: 'Arithmetic practice', url: 'https://www.khanacademy.org/math/arithmetic', reason: 'Core number sense and operations.' },
@@ -54,7 +54,7 @@ export const testCatalog: TestDefinition[] = [
     icon: 'rocket',
     parentBenefit: 'Flags whether the student is ready for compressed pre-algebra or early algebra expectations.',
     studentBenefit: 'Highlights equation, fraction, pattern, and word-problem skills.',
-    reportPromise: 'Algebra-readiness profile, estimated percentile range, acceleration cautions, missed-question solutions, and practice sequence.',
+    reportPromise: 'Algebra-readiness profile, benchmark range, acceleration cautions, missed-question solutions, and practice sequence.',
     domains: ['fractions-ratios', 'algebra-readiness', 'quantitative', 'data-reasoning', 'fluid-reasoning'],
     practiceLinks: [
       { provider: 'Khan Academy', label: 'Pre-algebra practice', url: 'https://www.khanacademy.org/math/pre-algebra', reason: 'Bridge skills before a full algebra track.' },
@@ -74,7 +74,7 @@ export const testCatalog: TestDefinition[] = [
     icon: 'ruler',
     parentBenefit: 'Useful before tutoring, summer practice, or a school-year reset.',
     studentBenefit: 'Finds a small set of skills to fix first.',
-    reportPromise: 'Percent correct, estimated percentile range, domain ratings, missed-question solutions, and a 7-day practice plan.',
+    reportPromise: 'Percent correct, benchmark range, domain ratings, missed-question solutions, and a 7-day practice plan.',
     domains: ['number-sense', 'fractions-ratios', 'quantitative', 'geometry', 'data-reasoning'],
     practiceLinks: [
       { provider: 'Khan Academy', label: 'Khan Academy math by grade', url: 'https://www.khanacademy.org/math', reason: 'Grade-level math lessons and practice.' }
@@ -93,7 +93,7 @@ export const testCatalog: TestDefinition[] = [
     icon: 'book-open',
     parentBenefit: 'Useful for tutoring intake and reading practice planning.',
     studentBenefit: 'Shows which word and passage skills are getting stronger.',
-    reportPromise: 'Vocabulary score, comprehension score, estimated percentile range, missed-question explanations, and suggested reading practice.',
+    reportPromise: 'Vocabulary score, comprehension score, benchmark range, missed-question explanations, and suggested reading practice.',
     domains: ['vocabulary', 'reading-comprehension', 'verbal'],
     practiceLinks: [
       { provider: 'Khan Academy', label: 'Reading and language arts practice', url: 'https://www.khanacademy.org/ela', reason: 'Vocabulary, comprehension, grammar, and close reading.' }

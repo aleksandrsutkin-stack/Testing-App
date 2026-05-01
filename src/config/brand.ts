@@ -9,7 +9,7 @@ export const BRAND = {
   productScoreName: 'ScoreLift Score',
   scoreScaleNote: '1–100, 50 = on-grade-level expected performance',
   tagline: 'Every miss becomes a lesson.',
-  shortPromise: 'Short diagnostics with percent scores, estimated percentile ranges, mistake maps, step-by-step solutions, and targeted practice links.',
+  shortPromise: 'Short diagnostics with percent scores, directional benchmark ranges, mistake maps, step-by-step solutions, and targeted practice links.',
   supportEmail: 'support@quizlift.app',
   privacyPromise: 'No account. No ads. No server-stored results. Export a PDF, then erase the session.',
   // v0.8: App Store Connect requires a public privacy policy and a support
@@ -20,7 +20,9 @@ export const BRAND = {
   supportUrl: 'https://quizlift.app/support',
   legalName: 'Your Company LLC',
   // v0.6: now references public norm tables (NWEA MAP, ASVAB AFQT, etc.)
-  percentileCaveat: 'Estimated percentile ranges are directional comparisons against published norm tables (such as NWEA MAP and ASVAB AFQT). They are not nationally normed scores for QuizLift.',
+  // v0.9: kept as a fallback. The live caveat is composed in scoreAssessment.ts
+  // and includes the per-test benchmark source name for full transparency.
+  percentileCaveat: 'Directional comparisons against published norm tables (such as NWEA MAP and ASVAB AFQT). Not nationally normed scores for QuizLift.',
   // v0.6: 5-band labels (parent-friendly, no "Needs Practice" stigma).
   scoreBandCopy: {
     'well-above': 'Well above grade',

@@ -89,7 +89,14 @@ export interface AssessmentQuestion {
   visualParams?: Record<string, string | number>;
 }
 
-export interface LearnerProfile { testId: TestId; age: number; grade: number; }
+export interface LearnerProfile {
+  testId: TestId;
+  age: number;
+  grade: number;
+  /** v0.9 — optional session-only first name / initials shown on the PDF cover.
+   *  Not persisted. Wiped with the rest of session data on retake / privacy wipe. */
+  preparedFor?: string;
+}
 
 export interface AssessmentSession {
   testId: TestId; age: number; grade: number;
@@ -142,6 +149,46 @@ export interface PracticeAssignment {
   provider: PracticeLink['provider']; url: string; sourceQuestionIds: string[];
 }
 
+// ─── v0.9: Top 3 priority fixes ──────────────────────────────────────────────
+// A short, ranked list of the most impactful skills to fix first. Computed from
+// the missed-question set: more misses + higher difficulty = more impactful.
+
+export interface PriorityFix {
+  skillId: string;
+  /** Human-readable skill name, e.g. "Multi-step word problems". */
+  skillLabel: string;
+  /** The domain the skill belongs to, for visual grouping. */
+  domainLabel: string;
+  /** Plain-English cause, derived from the dominant mistake tag. */
+  rationale: string;
+  /** Top-recommended Khan/Internal practice link for this skill, if any. */
+  practiceLink?: PracticeLink;
+  missedCount: number;
+}
+
+// ─── v0.9: Screening confidence ──────────────────────────────────────────────
+// Honest signal of how much weight to put on a single result. A 10-question
+// Quick Start sample is a directional snapshot; a 30-question full test is a
+// stronger picture. Always shown next to the benchmark range so parents
+// understand what they're looking at.
+
+export type ScreeningConfidence = 'low' | 'moderate' | 'stronger';
+
+export const CONFIDENCE_LABELS: Record<ScreeningConfidence, { short: string; long: string }> = {
+  low: {
+    short: 'Low confidence',
+    long: 'Short sample — directional signal only. Take a full test for a clearer picture.',
+  },
+  moderate: {
+    short: 'Moderate confidence',
+    long: 'Standard screening length. Good directional signal across the chosen domains.',
+  },
+  stronger: {
+    short: 'Stronger screening confidence',
+    long: 'Long-form screening. Strongest signal QuizLift offers, though still not a formal norm.',
+  },
+};
+
 export interface AssessmentResult {
   testId: TestId; testTitle: string; age: number; grade: number; seed: string;
   rawScore: number; maxScore: number; percent: number; percentCorrectLabel: string;
@@ -156,4 +203,16 @@ export interface AssessmentResult {
   strengths: string[]; growthAreas: string[]; domainScores: DomainScore[];
   missedQuestions: MissedQuestionReview[]; practicePlan: PracticeAssignment[];
   retakeRecommendation: string; completedAtIso: string; disclaimer: string;
+
+  // ─── v0.9: Premium report fields ─────────────────────────────────────────
+  /** Plain-English 2–3 sentence summary in parent voice. Read first on the
+   *  report and the Score tab. Computed from band + strongest domain +
+   *  weakest domain. */
+  parentSummary: string;
+  /** Up to 3 most impactful skills to fix first. Empty if no missed questions. */
+  topPriorityFixes: PriorityFix[];
+  /** Honest signal of screening confidence based on total question count. */
+  screeningConfidence: ScreeningConfidence;
+  /** Optional session-only first name / initials shown on the PDF cover. */
+  preparedFor?: string;
 }

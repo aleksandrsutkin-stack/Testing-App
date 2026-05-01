@@ -43,6 +43,9 @@ export default function AssessmentScreen() {
   const age = Number(firstParam(params.age, '10'));
   const grade = Number(firstParam(params.grade, '5'));
   const seed = firstParam(params.seed, makeSessionSeed(testId, age, grade));
+  // v0.9: Optional session-only "Prepared for" name. Threaded through URL
+  // params so it survives celebration → results without persisting anywhere.
+  const preparedFor = firstParam(params.preparedFor, '');
 
   const definition = getTestDefinition(testId);
   const fullSession = useMemo(() => createAssessmentSession({ testId, age, grade, seed }), [testId, age, grade, seed]);
@@ -142,7 +145,8 @@ export default function AssessmentScreen() {
         params: {
           testId, age: String(age), grade: String(grade), seed,
           responses: JSON.stringify(responses),
-          ...(sampleSize ? { sampleSize: String(sampleSize) } : {})
+          ...(sampleSize ? { sampleSize: String(sampleSize) } : {}),
+          ...(preparedFor ? { preparedFor } : {})
         }
       });
       return;
@@ -158,7 +162,8 @@ export default function AssessmentScreen() {
         params: {
           testId, age: String(age), grade: String(grade), seed,
           responses: JSON.stringify(responses),
-          ...(sampleSize ? { sampleSize: String(sampleSize) } : {})
+          ...(sampleSize ? { sampleSize: String(sampleSize) } : {}),
+          ...(preparedFor ? { preparedFor } : {})
         }
       });
       return;

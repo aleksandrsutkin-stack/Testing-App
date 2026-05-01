@@ -14,6 +14,7 @@ import { AppButton } from '../src/components/AppButton';
 import { Card } from '../src/components/Card';
 import { Screen } from '../src/components/Screen';
 import { Mascot, Decoration } from '../src/components/Illustrations';
+import { SampleReportPreview } from '../src/components/SampleReportPreview';
 import { BRAND } from '../src/config/brand';
 import { testCatalog } from '../src/data/testCatalog';
 import { TestId } from '../src/features/assessment/types';
@@ -99,6 +100,9 @@ export default function HomeScreen() {
         <TrustBadge icon="📵" label={`Nothing leaves${'\n'}your phone`} colors={colors} />
         <TrustBadge icon="🚫" label={`No ads,${'\n'}ever`} colors={colors} />
       </View>
+
+      {/* v0.9: Sample report preview — show parents what they're paying for. */}
+      <SampleReportPreview />
 
       {/* Quick Start CTA — first-time-friendly, no setup */}
       <Card style={styles.quickStartCard}>

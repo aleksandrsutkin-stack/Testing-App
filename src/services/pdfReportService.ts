@@ -45,7 +45,10 @@ export async function createShareAndDeletePdf(result: AssessmentResult): Promise
     await Sharing.shareAsync(uri, {
       UTI: '.pdf',
       mimeType: 'application/pdf',
-      dialogTitle: 'Share ScoreLift Report'
+      // v0.9: framing the action as "Send" turns the abstract artifact into a
+      // concrete deliverable (the parent typically forwards this to a tutor
+      // or teacher). "Send" reads as more action-oriented than "Share."
+      dialogTitle: 'Send your ScoreLift Report'
     });
   } finally {
     await FileSystem.deleteAsync(uri, { idempotent: true });

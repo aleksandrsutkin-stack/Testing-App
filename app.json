@@ -2,7 +2,7 @@
   "expo": {
     "name": "QuizLift",
     "slug": "quizlift",
-    "version": "0.3.0",
+    "version": "0.9.0",
     "orientation": "portrait",
     "scheme": "quizlift",
     "userInterfaceStyle": "automatic",

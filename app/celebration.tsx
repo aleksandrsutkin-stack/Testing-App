@@ -25,6 +25,8 @@ export default function CelebrationScreen() {
   const seed = firstParam(params.seed, '');
   const responsesJson = firstParam(params.responses, '{}');
   const sampleSize = firstParam(params.sampleSize, '');
+  // v0.9: Optional session-only "Prepared for" name passes through.
+  const preparedFor = firstParam(params.preparedFor, '');
 
   // Score quickly so we have a real percent to count up to
   const finalPercent = useMemo(() => {
@@ -78,7 +80,8 @@ export default function CelebrationScreen() {
         params: {
           testId, age: String(age), grade: String(grade), seed,
           responses: responsesJson,
-          ...(sampleSize ? { sampleSize } : {})
+          ...(sampleSize ? { sampleSize } : {}),
+          ...(preparedFor ? { preparedFor } : {})
         }
       });
     }, 1700);
@@ -87,7 +90,7 @@ export default function CelebrationScreen() {
       clearInterval(interval);
       clearTimeout(forwardTimer);
     };
-  }, [finalPercent, testId, age, grade, seed, responsesJson, sampleSize, cardOpacity, checkOpacity, checkScale]);
+  }, [finalPercent, testId, age, grade, seed, responsesJson, sampleSize, preparedFor, cardOpacity, checkOpacity, checkScale]);
 
   return (
     <View style={styles.root}>

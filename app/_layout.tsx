@@ -46,6 +46,8 @@ export default function RootLayout() {
         <Stack.Screen name="assessment" options={{ title: 'Test sprint' }} />
         <Stack.Screen name="celebration" options={{ headerShown: false, gestureEnabled: false }} />
         <Stack.Screen name="results" options={{ title: 'ScoreLift Report' }} />
+        {/* v0.9: full-screen sample report so parents can see the artifact pre-purchase. */}
+        <Stack.Screen name="sample-report" options={{ title: 'Sample report' }} />
       </Stack>
     </>
   );
